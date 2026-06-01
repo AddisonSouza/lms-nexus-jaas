@@ -1,0 +1,19 @@
+repo: AddisonSouza/lms-nexus-jaas
+project: 1
+projectNodeId: PVT_kwHOCPxf0c4BZV7-
+statusFieldId: PVTSSF_lAHOCPxf0c4BZV7-zhUVOIs
+gh: /mnt/c/Program Files/GitHub CLI/gh.exe
+
+statuses:
+  backlog:     4ac59e87
+  proposed:    c1d44098
+  accepted:    f65b4f80
+  in_progress: d1ebe438
+  in_review:   1391b1fb
+  done:        5b6287f3
+  archived:    23f4ed95
+
+# Issue number detection: extracted from change name matching rf-NN or issue-NN
+# Override with explicit mappings below if needed.
+# links:
+#   my-change-name: 42

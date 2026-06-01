@@ -1,0 +1,9 @@
+FROM quarkus/quarkus-devtools-ubi-quarkus-native-image:3.12.3-java21 AS dev
+
+WORKDIR /workspace
+COPY pom.xml .
+RUN mvn dependency:resolve -q
+COPY src ./src
+
+EXPOSE 8080 5005
+CMD ["mvn", "quarkus:dev", "-Ddebug=5005"]
