@@ -159,7 +159,7 @@ Archive a completed change.
    "<gh>" pr create \
      --repo "<repo>" \
      --head "<branch-name>" \
-     --base "master" \
+     --base "main" \
      --title "feat(<module>): <human-readable change title in Portuguese>" \
      --body "$(cat <<'PRBODY'
    ## Resumo
