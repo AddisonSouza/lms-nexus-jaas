@@ -1,0 +1,42 @@
+# ── Environment ──────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ── Java / Quarkus ───────────────────────────────────────────
+apps/api/target/
+apps/api/.quarkus/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+
+# ── Maven ────────────────────────────────────────────────────
+apps/api/.mvn/wrapper/maven-wrapper.jar
+
+# ── Node / React ─────────────────────────────────────────────
+apps/web/node_modules/
+apps/web/dist/
+apps/web/.vite/
+packages/shared-types/node_modules/
+packages/shared-types/dist/
+node_modules/
+
+# ── IDEs ─────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.DS_Store
+Thumbs.db
+
+# ── Docker volumes / uploads ─────────────────────────────────
+infra/data/
+data/uploads/
+
+# ── Logs ─────────────────────────────────────────────────────
+*.log
+logs/
