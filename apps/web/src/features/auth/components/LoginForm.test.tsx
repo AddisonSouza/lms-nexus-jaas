@@ -24,15 +24,15 @@ beforeEach(() => vi.clearAllMocks())
 describe('LoginForm', () => {
   it('renders email and password fields', () => {
     render(<LoginForm />, { wrapper })
-    expect(screen.getByLabelText(/e-mail/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/senha/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/e-mail/i)).toBeTruthy()
+    expect(screen.getByLabelText(/senha/i)).toBeTruthy()
   })
 
   it('shows validation errors for empty submit', async () => {
     render(<LoginForm />, { wrapper })
     await userEvent.click(screen.getByRole('button', { name: /entrar/i }))
     await waitFor(() => {
-      expect(screen.getByText(/e-mail é obrigatório/i)).toBeInTheDocument()
+      expect(screen.getByText(/e-mail é obrigatório/i)).toBeTruthy()
     })
   })
 
@@ -43,7 +43,7 @@ describe('LoginForm', () => {
     await userEvent.type(screen.getByLabelText(/senha/i), 'wrongpass')
     await userEvent.click(screen.getByRole('button', { name: /entrar/i }))
     await waitFor(() => {
-      expect(screen.getByText(/e-mail ou senha inválidos/i)).toBeInTheDocument()
+      expect(screen.getByText(/e-mail ou senha inválidos/i)).toBeTruthy()
     })
   })
 })
