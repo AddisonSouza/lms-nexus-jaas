@@ -13,7 +13,10 @@ statuses:
   done:        5b6287f3
   archived:    23f4ed95
 
-# Issue number detection: extracted from change name matching rf-NN or issue-NN
+# Issue number detection: pattern "<issuePattern>-NN" extracted from change name.
+# "rf" matches "rf-01-cadastro-usuario" → issue #1
+issuePattern: rf
+
 # Override with explicit mappings below if needed.
 # links:
 #   my-change-name: 42
