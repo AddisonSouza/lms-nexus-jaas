@@ -1,8 +1,11 @@
 ---
-name: "PS: Apply"
-description: Implement tasks from a Pscode change
-category: Workflow
-tags: [workflow, apply, implementation]
+name: pscode-apply-change
+description: Implement tasks from an Pscode change. Use when the user wants to start implementing, continue implementation, or work through tasks.
+compatibility: Requires pscode CLI.
+metadata:
+  author: pscode
+  version: "1.0"
+  generatedBy: "2.16.0"
 ---
 
 ## Asking the user
