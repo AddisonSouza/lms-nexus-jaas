@@ -10,7 +10,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "cdi")
 public interface UserMapper {
 
-    @Mapping(target = "id", expression = "java(entity.getId())")
+    @Mapping(target = "id", expression = "java(br.edu.lms.module.identity.domain.model.UserId.of(entity.getId()))")
     @Mapping(target = "email", expression = "java(new br.edu.lms.module.identity.domain.model.Email(entity.getEmail()))")
     @Mapping(target = "fullName", expression = "java(new br.edu.lms.module.identity.domain.model.FullName(entity.getFullName()))")
     @Mapping(target = "passwordHash", source = "passwordHash")

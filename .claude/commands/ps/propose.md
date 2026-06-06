@@ -27,7 +27,7 @@ I'll create a change with artifacts:
 - design.md (how)
 - tasks.md (implementation steps)
 
-After artifacts are created, a **refinement validation loop** runs: the GitHub Issue is updated with the refined plan, the user reviews it, gives feedback, and when satisfied the GitHub Projects status is moved to accepted.
+After artifacts are created, a **refinement validation loop** runs: the tracker item is updated with the refined plan, the user reviews it, gives feedback, and when satisfied the item is moved to the accepted/ready stage.
 
 When ready to implement, run /ps:apply
 
@@ -80,16 +80,29 @@ When ready to implement, run /ps:apply
    5. Push and set upstream: `git push -u origin <branch>`.
    6. Open the PR in **DRAFT**, deriving the title from `pr.title.template` and the body from `pr.description.template` (substitute `{change-name}`/`{type}`/`{ticket}`).
 
-      **Referência da task no corpo (GitHub Issue):** if `pr.taskLinkInDescription` is not `false` (default ON when the field is absent) **and** a `ghItemId` is available (resolved in Step 3), prefix the resolved body with a `Task: https://github.com/<repo>/issues/<issueNumber>` line followed by a blank line, before the `pr.description.template` content. **Skip gracefully** when `pr.taskLinkInDescription: false` or there is no `ghItemId` — open the PR normally without the line, never block. If `ghItemId` is only resolved after this step, the line can be added by editing the PR body right after Step 3.
+      **Referência da task no corpo (tracker):**
+      - If `pr.taskLinkInDescription` is not `false` (default ON when absent):
+        - **Trello:** if a `cardId` is available (resolved in Step 3), prefix the body with `Task: <cardShortUrl>` followed by a blank line. Skip gracefully when no `cardId`.
+        - **GitHub Projects:** if an `issueNumber` is available (resolved in Step 3), prefix the body with `Task: https://github.com/<repo>/issues/<issueNumber>` followed by a blank line. Skip gracefully when no `issueNumber`.
+      - Set `pr.taskLinkInDescription: false` in `pscode/config.yaml` to disable this prefix entirely.
+      - If the tracker item is only resolved after this step, edit the PR body right after Step 3.
 
       `gh pr create --draft --title "<resolved title>" --body "<resolved body>"`.
    7. Capture the PR URL from the `gh` output, save it as `prUrl`, and set `PR_OPENED = true`.
 
-   **Comentário do link no tracker:** after the PR is opened, if `pr.comments.linkInTask: true` and `issueNumber` is not null, comment the PR link on the GitHub Issue:
-   ```bash
-   "<ghConfig.gh>" issue comment <issueNumber> --repo <ghConfig.repo> --body "🔀 Pull Request (DRAFT) aberto: <prUrl>"
-   ```
-   The `ghItemId` is resolved in Step 3 — if not yet available, post this comment right after Step 3 instead.
+   **Comentário do link no tracker:** after the PR is opened, if `pr.comments.linkInTask: true`:
+   - **Trello:** if a `cardId` exists, comment the PR link on the card:
+     ```tool
+     mcp__claude_ai_Trello_Custom__add_comment
+       card_id: "<cardId>"
+       text: |
+         🔀 Pull Request (DRAFT) aberto: <prUrl>
+     ```
+   - **GitHub Projects:** if `issueNumber` is not null:
+     ```bash
+     "<ghConfig.gh>" issue comment <issueNumber> --repo <ghConfig.repo> --body "🔀 Pull Request (DRAFT) aberto: <prUrl>"
+     ```
+   The tracker item is resolved in Step 3 — if not yet available, post this comment right after Step 3 instead.
 
    **Tratamento de falha (não-bloqueante):** if `gh` or `git` fails — `gh` not installed, not authenticated, or no GitHub remote — **do NOT block**:
    - Clearly state what failed and how to fix it (e.g., "instale o `gh` CLI", "rode `gh auth login`", "configure um remote GitHub").
@@ -104,30 +117,109 @@ When ready to implement, run /ps:apply
 
    **If you already created the change scaffold in Step 1c** (PR accepted), skip this step — the change directory already exists.
 
-3. **GitHub Projects Integration (optional)**
+3. **Tracker Integration (optional)**
 
-   Use the **Read tool** (NOT a shell command) to read `pscode/github.yaml` from the current working directory.
-   If the Read tool returns an error (file not found), skip all GitHub Projects steps and continue to Step 4.
+   **Detect active tracker:**
 
-   Otherwise, parse the YAML and extract:
-   - `repo` → e.g. `AddisonSouza/lms-nexus-jaas` (owner = first component before `/`)
+   Use the **Read tool** to check configs in order:
+   1. Read `pscode/trello.yaml`. If found and `configured: true` → `tracker = "trello"`. Extract `boardId`, `lists.*`, `labels`.
+   2. Else read `pscode/github.yaml`. If found → `tracker = "github"`. Extract all fields (see below).
+   3. Else → `tracker = none`, skip to Step 4.
+
+   ---
+
+   **If tracker = "trello":**
+
+   **3a-trello. Detect label (if labels enabled)**
+
+   If `labels.enabled = true` and `labels.items` is present, determine which label to apply based on the change description.
+   Use these classification rules:
+
+   | Label           | Quando usar                                                                  |
+   |-----------------|------------------------------------------------------------------------------|
+   | 🐛 BUG          | Menciona erro, falha, bug, quebrado, não funciona, comportamento incorreto    |
+   | ⚙️ IMPLEMENTAÇÃO | Nova feature, adicionar, criar, implementar algo que não existe ainda         |
+   | ✨ MELHORIA      | Melhorar, otimizar, refinar, aprimorar, performance de algo que já existe    |
+   | 💳 DÉBITO TÉCNICO | Refatorar, limpar, reorganizar, remover código legado, dívida técnica        |
+
+   - If the change clearly matches one label (>80% confidence) → use it silently, without asking.
+   - If ambiguous → use **AskUserQuestion**:
+     > "Que tipo de change é essa?"
+     > - 🐛 BUG — Erro ou comportamento incorreto
+     > - ⚙️ IMPLEMENTAÇÃO — Nova funcionalidade
+     > - ✨ MELHORIA — Aperfeiçoamento de algo existente
+     > - 💳 DÉBITO TÉCNICO — Refatoração e limpeza de código
+     > - Sem label — Não categorizar
+   - Save as `chosenLabel` (or `null`). Only use label keys present in `labels.items`.
+
+   **3b-trello. Sync Trello card:**
+
+   a. If `lists.backlog` is configured, search for an existing card by name (case-insensitive, partial match):
+      ```tool
+      mcp__claude_ai_Trello_Custom__get_cards  { list_id: "<lists.backlog.id>" }
+      ```
+
+   b. **If card found in backlog AND `lists.refining` is configured:**
+      Move it to the refining list:
+      ```tool
+      mcp__claude_ai_Trello_Custom__update_card  { card_id: "<id>", list_id: "<lists.refining.id>" }
+      ```
+      Save `cardId`.
+
+   c. **If card found but no refining list configured:** keep card in backlog, save `cardId`.
+
+   d. **If no card found AND `lists.refining` is configured:**
+      Create a new card directly in the refining list:
+      ```tool
+      mcp__claude_ai_Trello_Custom__create_card
+        list_id: "<lists.refining.id>"
+        name: "<human-readable change name in Portuguese>"
+        desc: "Change iniciada via /ps:propose"
+      ```
+      Save `cardId`.
+
+   e. **If no card found and no refining list:** create in backlog. Save `cardId`.
+
+   f. **Apply label (if resolved):**
+      If `chosenLabel` is not null and `cardId` is saved:
+      ```tool
+      mcp__claude_ai_Trello_Custom__add_label_to_card
+        card_id: "<cardId>"
+        label_id: "<chosenLabel.id>"
+      ```
+
+   g. **Assign the current user:**
+      ```tool
+      mcp__claude_ai_Trello_Custom__get_me
+      mcp__claude_ai_Trello_Custom__add_card_member  { card_id: "<cardId>", member_id: "<me.id>" }
+      ```
+
+   If any Trello call fails, log the error and continue — Trello is auxiliary, never blocking.
+
+   ---
+
+   **If tracker = "github":**
+
+   Parse `pscode/github.yaml` and extract:
+   - `repo` → e.g. `owner/project-name` (owner = component before `/`)
    - `project` → project number (integer)
    - `projectNodeId` → GitHub Projects GraphQL node ID
    - `statusFieldId` → Status field ID
-   - `statuses.proposed` → status option ID
+   - `statuses.proposed` → status option ID (may be absent if not configured)
    - `statuses.accepted` → status option ID
    - `gh` → path to gh CLI (default: `gh` if field absent)
+   - `issuePattern` → prefix for issue detection (default: `issue` if field absent)
 
-   Save all fields as `ghConfig`. Set `ghItemId = null`.
+   Save all fields as `ghConfig`. Set `ghItemId = null`, `issueNumber = null`.
 
-   **3a. Extract issue number from change name**
+   **3a-github. Extract issue number from change name**
 
-   Apply to the change name (e.g. `rf-01-cadastro-usuario`):
-   - Pattern `rf-NN` or `rf-NNN` → extract N as integer (e.g. `rf-01` → `1`)
-   - Pattern `issue-NN` → extract N as integer
-   - If no pattern matches → `issueNumber = null`
+   Apply to the change name (e.g. `issue-42-user-auth`):
+   - First check `links:` map in `pscode/github.yaml` for exact change name → use that issue number.
+   - Then match pattern `<issuePattern>-NN` (e.g. `issue-42`, `task-7`) → extract N as integer.
+   - If no pattern matches → `issueNumber = null`.
 
-   **3b. Find the GitHub Projects item (if issueNumber is not null)**
+   **3b-github. Find the GitHub Projects item (if issueNumber is not null)**
 
    ```bash
    "<ghConfig.gh>" project item-list <ghConfig.project> --owner "<owner>" --format json
@@ -138,7 +230,7 @@ When ready to implement, run /ps:apply
 
    If no item found or the command fails → `ghItemId = null`, log and continue (non-blocking).
 
-   **3c. Update status to "proposed" (if ghItemId is not null)**
+   **3c-github. Update status to "proposed" (if ghItemId is not null and statuses.proposed is configured)**
 
    ```bash
    "<ghConfig.gh>" project item-edit --id <ghItemId> --field-id <ghConfig.statusFieldId> --project-id <ghConfig.projectNodeId> --single-select-option-id <ghConfig.statuses.proposed>
@@ -235,12 +327,60 @@ Para iniciar a implementação quando aprovado:
 
 ---
 
-### Step R1b — Update GitHub Projects item (before asking for approval)
+### Step R1b — Update tracker item (before asking for approval)
 
-Update the GitHub Issue with the refinement content **before** asking for approval,
-so the user can use the issue as a visual reference when deciding.
+Update the tracker item with the refinement content **before** asking for approval,
+so the user can use it as a visual reference when deciding.
 
-1. **Add a refinement comment to the GitHub Issue** (if `ghItemId` is not null and `issueNumber` is not null):
+**If tracker = "trello":**
+
+1. **Update Trello card description** (if `cardId` exists):
+   Build the description from the artifacts already read in Step R1:
+   ```tool
+   mcp__claude_ai_Trello_Custom__update_card
+     card_id: "<cardId>"
+     desc: |
+       **Objetivo:** <summary from proposal.md>
+
+       **O que será implementado:**
+       <bullet list from design.md / tasks.md>
+
+       **Decisões técnicas:**
+       <key decisions from design.md>
+
+       **Artefatos:** pscode/changes/<name>/
+   ```
+
+2. **Add a refinement comment** in Portuguese (if `cardId` exists):
+   **IMPORTANT**: Replace `<card title>` below with the actual card title — the command **must always** include the quoted title argument, never post `/ps:apply` by itself.
+   ```tool
+   mcp__claude_ai_Trello_Custom__add_comment
+     card_id: "<cardId>"
+     text: |
+       ## Proposta refinada ✓
+
+       **Change:** `<name>`
+       **Artefatos gerados:** proposal.md · design.md · tasks.md
+
+       ### Resumo
+       <2-3 line summary of what will be built>
+
+       ## Próximo passo
+
+       Para implementar as tasks da change, rode:
+
+       ```
+       /ps:apply "<card title>"
+       ```
+
+       _Aguardando aprovação para mover para Ready to Dev._
+   ```
+
+   If any Trello call fails, continue — Trello is auxiliary, never blocking.
+
+**If tracker = "github":**
+
+1. **Add a refinement comment to the GitHub Issue** (if `issueNumber` is not null):
    Build the comment from the artifacts already read in Step R1:
    ```bash
    "<ghConfig.gh>" issue comment <issueNumber> --repo <ghConfig.repo> --body "## Proposta refinada ✓
@@ -259,10 +399,10 @@ so the user can use the issue as a visual reference when deciding.
 
    **Artefatos:** pscode/changes/<name>/
 
-   _Aguardando aprovação para mover para accepted._"
+   _Aguardando aprovação._"
    ```
 
-If the gh call fails, continue — GitHub Projects is auxiliary, never blocking.
+   If the gh call fails, continue — GitHub Projects is auxiliary, never blocking.
 
 ---
 
@@ -277,17 +417,47 @@ Options:
 - 🔄 Não, quero ajustar o plano
 - ❌ Cancelar (manter em refinamento)
 
-At this point the GitHub Issue already reflects the current refinement (Step R1b),
+At this point the tracker item already reflects the current refinement (Step R1b),
 so the user can review it before deciding.
 
 ---
 
 ### Step R2a — If APPROVED (Sim, está refinada)
 
-The refinement comment was already added to the GitHub Issue in Step R1b.
-Now update the GitHub Projects status to "accepted" and register the approval.
+The refinement content was already added to the tracker in Step R1b.
+Now register the explicit approval in the tracker.
 
-1. **Update GitHub Projects status to "accepted"** (if `ghItemId` is not null):
+**If tracker = "trello":**
+
+1. **Move the Trello card to the ready list** (if `lists.ready` is configured and `cardId` exists):
+   ```tool
+   mcp__claude_ai_Trello_Custom__update_card
+     card_id: "<cardId>"
+     list_id: "<lists.ready.id>"
+   ```
+
+2. **Add a final Trello comment** (if `cardId` exists):
+   **IMPORTANT**: Replace `<card title>` below with the actual card title — the command **must always** include the quoted title argument, never post `/ps:apply` by itself.
+   ```tool
+   mcp__claude_ai_Trello_Custom__add_comment
+     card_id: "<cardId>"
+     text: |
+       ## ✅ Aprovado para Ready to Dev
+
+       O planejamento foi revisado e aprovado.
+
+       ## Próximo passo
+
+       Para implementar as tasks da change, rode:
+
+       ```
+       /ps:apply "<card title>"
+       ```
+   ```
+
+**If tracker = "github":**
+
+1. **Update GitHub Projects status to "accepted"** (if `ghItemId` is not null and `statuses.accepted` is configured):
    ```bash
    "<ghConfig.gh>" project item-edit --id <ghItemId> --field-id <ghConfig.statusFieldId> --project-id <ghConfig.projectNodeId> --single-select-option-id <ghConfig.statuses.accepted>
    ```
@@ -300,19 +470,19 @@ Now update the GitHub Projects status to "accepted" and register the approval.
 
    ## Próximo passo
 
-   Para implementar as tasks da change, rode:
-
    \`\`\`
    /ps:apply \"<name>\"
    \`\`\`"
    ```
 
-3. **Show success message:**
+   If any gh call fails, continue — GitHub Projects is auxiliary, never blocking.
+
+**Show success message (all trackers):**
    ```markdown
    ## ✅ Pronto para desenvolvimento!
 
    **Change:** <name>
-   **GitHub Projects:** Status atualizado para accepted
+   **Tracker:** <"Card movido para <lists.ready.name>" / "Status atualizado para accepted" / "sem tracker">
 
    Quando quiser iniciar a implementação:
    ```
@@ -340,7 +510,7 @@ Now update the GitHub Projects status to "accepted" and register the approval.
    If `PR_OPENED = false`, skip. Failures here are non-blocking (same handling as Step 1c).
 
 4. **Go back to Step R1** and show the updated refinement summary, then **re-run Step R1b**
-   so the GitHub Issue comment reflects the adjusted plan before asking again.
+   so the tracker item reflects the adjusted plan before asking again.
    Keep looping until the user approves or cancels.
 
 ---
@@ -351,11 +521,11 @@ Show:
 ```markdown
 ## ⏸ Refinamento pausado
 
-O status no GitHub Projects permanece em **proposed**.
+O item permanece no estágio atual no tracker.
 Retome o refinamento quando quiser com `/ps:explore <name>`.
 ```
 
-Do NOT move the card. Stop the loop.
+Do NOT change the tracker status. Stop the loop.
 
 ---
 
@@ -372,8 +542,8 @@ Do NOT move the card. Stop the loop.
 - If context is critically unclear, ask the user — but prefer reasonable decisions to keep momentum
 - If a change with that name already exists, ask if user wants to continue it or create a new one
 - Verify each artifact file exists after writing before proceeding to next
-- If gh CLI calls fail, continue normally — GitHub Projects is auxiliary, not blocking
-- All content written to GitHub Issues must be in Portuguese
-- **The refinement loop is mandatory** — never skip it even if GitHub Projects is not configured; the approval question must always be asked
-- **Preserve the loop** — do not exit until the user explicitly approves (moves to Ready to Dev) or cancels
+- If tracker tools fail (Trello MCP or gh CLI), continue normally — tracker integration is auxiliary, not blocking
+- All content written to the tracker must be in Portuguese
+- **The refinement loop is mandatory** — never skip it even if no tracker is configured; the approval question must always be asked
+- **Preserve the loop** — do not exit until the user explicitly approves or cancels
 
