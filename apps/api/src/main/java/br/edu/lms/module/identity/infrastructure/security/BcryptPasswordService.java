@@ -7,7 +7,9 @@ import org.wildfly.security.password.PasswordFactory;
 import org.wildfly.security.password.interfaces.BCryptPassword;
 import org.wildfly.security.password.spec.EncryptablePasswordSpec;
 import org.wildfly.security.password.spec.IteratedSaltedPasswordAlgorithmSpec;
+import org.wildfly.security.password.util.ModularCrypt;
 
+import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -27,9 +29,8 @@ public class BcryptPasswordService {
                     rawPassword.toCharArray(),
                     new IteratedSaltedPasswordAlgorithmSpec(cost, salt));
             Password password = factory.generatePassword(spec);
-            return new String(factory.getKeySpec(password,
-                    org.wildfly.security.password.spec.HashPasswordSpec.class).getHashedPassword());
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            return new String(ModularCrypt.encode(password));
+        } catch (GeneralSecurityException e) {
             throw new IllegalStateException("BCrypt hash failed", e);
         }
     }

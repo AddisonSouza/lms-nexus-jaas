@@ -1,6 +1,8 @@
 package br.edu.lms.shared.exception;
 
 import br.edu.lms.module.identity.domain.exception.EmailAlreadyInUseException;
+import br.edu.lms.module.identity.domain.exception.InvalidCredentialsException;
+import br.edu.lms.module.identity.domain.exception.TokenNotFoundException;
 import br.edu.lms.shared.domain.DomainException;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.ws.rs.core.Response;
@@ -15,6 +17,12 @@ public class GlobalExceptionMapper implements ExceptionMapper<Exception> {
 
     @Override
     public Response toResponse(Exception exception) {
+        if (exception instanceof InvalidCredentialsException || exception instanceof TokenNotFoundException) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(Map.of("error", "Unauthorized"))
+                    .build();
+        }
+
         if (exception instanceof EmailAlreadyInUseException e) {
             return Response.status(Response.Status.CONFLICT)
                     .entity(Map.of("error", e.getMessage()))
