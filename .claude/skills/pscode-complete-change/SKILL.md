@@ -1,8 +1,11 @@
 ---
-name: "PS: Complete"
-description: Complete a change
-category: Workflow
-tags: [workflow, complete]
+name: pscode-complete-change
+description: Complete a completed change. Use when the user wants to finalize and complete a change after implementation is complete.
+compatibility: Requires pscode CLI.
+metadata:
+  author: pscode
+  version: "1.0"
+  generatedBy: "2.16.0"
 ---
 
 ## Asking the user
