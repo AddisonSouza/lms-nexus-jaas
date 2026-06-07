@@ -17,22 +17,34 @@ public class QuarkusMailAdapter implements EmailPort {
     private final Mailer mailer;
 
     @ConfigProperty(name = "lms.auth.confirmation-token.ttl-hours", defaultValue = "24")
-    int tokenTtlHours;
+    int confirmationTtlHours;
+
+    @ConfigProperty(name = "lms.auth.password-reset.url", defaultValue = "http://localhost:5173/reset-password")
+    String passwordResetBaseUrl;
 
     @Override
     public void sendConfirmationEmail(Email to, String token) {
         var confirmationUrl = "http://localhost:5173/confirm-email?token=" + token;
-
         mailer.send(Mail.withHtml(
                 to.getValue(),
                 "Confirme seu e-mail — LMS Nexus",
-                buildEmailBody(confirmationUrl, tokenTtlHours)
+                buildConfirmationEmailBody(confirmationUrl, confirmationTtlHours)
         ));
-
         log.debug("Confirmation email sent to {}", to.getValue());
     }
 
-    private String buildEmailBody(String confirmationUrl, int ttlHours) {
+    @Override
+    public void sendPasswordResetEmail(Email to, String token) {
+        var resetUrl = passwordResetBaseUrl + "?token=" + token;
+        mailer.send(Mail.withHtml(
+                to.getValue(),
+                "Redefinição de senha — LMS Nexus",
+                buildPasswordResetEmailBody(resetUrl)
+        ));
+        log.debug("Password reset email sent to {}", to.getValue());
+    }
+
+    private String buildConfirmationEmailBody(String url, int ttlHours) {
         return """
                 <html>
                 <body>
@@ -42,6 +54,19 @@ public class QuarkusMailAdapter implements EmailPort {
                   <p>Se você não criou uma conta, ignore este e-mail.</p>
                 </body>
                 </html>
-                """.formatted(ttlHours, confirmationUrl);
+                """.formatted(ttlHours, url);
+    }
+
+    private String buildPasswordResetEmailBody(String url) {
+        return """
+                <html>
+                <body>
+                  <h2>Redefinição de senha — LMS Nexus</h2>
+                  <p>Clique no link abaixo para redefinir sua senha. O link expira em 1 hora.</p>
+                  <a href="%s">Redefinir senha</a>
+                  <p>Se você não solicitou a redefinição, ignore este e-mail.</p>
+                </body>
+                </html>
+                """.formatted(url);
     }
 }

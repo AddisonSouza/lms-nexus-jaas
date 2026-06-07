@@ -2,6 +2,8 @@ import { createBrowserRouter } from 'react-router-dom'
 import RegisterForm from '@features/auth/components/RegisterForm'
 import EmailConfirmationPage from '@features/auth/components/EmailConfirmationPage'
 import LoginPage from '@features/auth/components/LoginPage'
+import ForgotPasswordPage from '@features/auth/components/ForgotPasswordPage'
+import ResetPasswordPage from '@features/auth/components/ResetPasswordPage'
 import PublicRoute from '@components/shared/PublicRoute'
 
 export const router = createBrowserRouter([
@@ -20,5 +22,13 @@ export const router = createBrowserRouter([
   {
     path: '/confirm-email',
     element: <EmailConfirmationPage />,
+  },
+  {
+    path: '/forgot-password',
+    element: <ForgotPasswordPage />,
+  },
+  {
+    path: '/reset-password',
+    element: <ResetPasswordPage />,
   },
 ])

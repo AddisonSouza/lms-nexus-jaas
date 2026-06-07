@@ -1,5 +1,6 @@
 package br.edu.lms.module.identity.infrastructure.security;
 
+import br.edu.lms.module.identity.domain.port.out.PasswordHasher;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.wildfly.security.password.Password;
@@ -10,12 +11,10 @@ import org.wildfly.security.password.spec.IteratedSaltedPasswordAlgorithmSpec;
 import org.wildfly.security.password.util.ModularCrypt;
 
 import java.security.GeneralSecurityException;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
 
 @ApplicationScoped
-public class BcryptPasswordService {
+public class BcryptPasswordService implements PasswordHasher {
 
     @ConfigProperty(name = "lms.security.bcrypt.cost", defaultValue = "12")
     int cost;
