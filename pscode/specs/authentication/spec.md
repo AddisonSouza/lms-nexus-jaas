@@ -18,3 +18,14 @@ O sistema deve exibir formulário de login acessível em `/login`. Usuário aute
 
 ### REQ-AUTH-07 — Frontend: persistência de sessão
 O Access Token deve ser persistido no `authStore` (Zustand). Ao recarregar a página, o sistema deve tentar renovar a sessão via `/auth/refresh` antes de redirecionar para login.
+
+### REQ-AUTH-08 — Invalidação de Refresh Tokens ao resetar senha
+Extensão do comportamento de `RefreshTokenRepository`: ao concluir o reset de senha, todos os Refresh Tokens ativos do usuário são invalidados (SEC-03).
+
+#### Scenario: Reset concluído com sessões ativas
+- **WHEN** `ResetPasswordService.execute()` conclui com sucesso
+- **THEN** `RefreshTokenRepository.deleteAllByUserId(userId)` invocado — todas as entradas `rt:{token}` do usuário removidas do Redis
+
+#### Scenario: Usuário sem sessões ativas
+- **WHEN** reset concluído e usuário não possui Refresh Tokens ativos
+- **THEN** `deleteAllByUserId` executa sem erro (no-op)
