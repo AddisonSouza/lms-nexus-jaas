@@ -2,6 +2,7 @@ package br.edu.lms.shared.exception;
 
 import br.edu.lms.module.identity.domain.exception.EmailAlreadyInUseException;
 import br.edu.lms.module.identity.domain.exception.InvalidCredentialsException;
+import br.edu.lms.module.identity.domain.exception.PasswordResetTokenInvalidException;
 import br.edu.lms.module.identity.domain.exception.TokenNotFoundException;
 import br.edu.lms.shared.domain.DomainException;
 import jakarta.validation.ConstraintViolationException;
@@ -20,6 +21,12 @@ public class GlobalExceptionMapper implements ExceptionMapper<Exception> {
         if (exception instanceof InvalidCredentialsException || exception instanceof TokenNotFoundException) {
             return Response.status(Response.Status.UNAUTHORIZED)
                     .entity(Map.of("error", "Unauthorized"))
+                    .build();
+        }
+
+        if (exception instanceof PasswordResetTokenInvalidException) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(Map.of("error", "Token inválido, expirado ou já utilizado"))
                     .build();
         }
 

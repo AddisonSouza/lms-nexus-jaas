@@ -2,6 +2,7 @@ package br.edu.lms.module.identity.infrastructure.persistence;
 
 import br.edu.lms.module.identity.domain.model.Email;
 import br.edu.lms.module.identity.domain.model.User;
+import br.edu.lms.module.identity.domain.model.UserId;
 import br.edu.lms.module.identity.domain.port.out.UserRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
@@ -21,7 +22,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Transactional
     public User save(User user) {
         var entity = mapper.toEntity(user);
-        em.persist(entity);
+        em.merge(entity);
         return user;
     }
 
@@ -33,6 +34,13 @@ public class UserRepositoryImpl implements UserRepository {
                 .setParameter("email", email.getValue())
                 .getResultStream()
                 .findFirst()
+                .map(mapper::toDomain);
+    }
+
+    @Override
+    public Optional<User> findById(UserId id) {
+        return Optional.ofNullable(em.find(UserJpaEntity.class, id.getValue()))
+                .filter(e -> e.getDeletedAt() == null)
                 .map(mapper::toDomain);
     }
 }

@@ -3,14 +3,20 @@ package br.edu.lms.module.identity.interfaces.rest;
 import br.edu.lms.module.identity.application.dto.AuthenticateCommand;
 import br.edu.lms.module.identity.application.dto.RefreshCommand;
 import br.edu.lms.module.identity.application.dto.RegisterUserCommand;
+import br.edu.lms.module.identity.application.dto.RequestPasswordResetCommand;
+import br.edu.lms.module.identity.application.dto.ResetPasswordCommand;
 import br.edu.lms.module.identity.domain.port.in.AuthenticateUseCase;
 import br.edu.lms.module.identity.domain.port.in.LogoutUseCase;
 import br.edu.lms.module.identity.domain.port.in.RefreshTokenUseCase;
 import br.edu.lms.module.identity.domain.port.in.RegisterUserUseCase;
+import br.edu.lms.module.identity.domain.port.in.RequestPasswordResetUseCase;
+import br.edu.lms.module.identity.domain.port.in.ResetPasswordUseCase;
+import br.edu.lms.module.identity.interfaces.rest.dto.ForgotPasswordRequest;
 import br.edu.lms.module.identity.interfaces.rest.dto.LoginRequest;
 import br.edu.lms.module.identity.interfaces.rest.dto.LoginResponse;
 import br.edu.lms.module.identity.interfaces.rest.dto.RegisterRequest;
 import br.edu.lms.module.identity.interfaces.rest.dto.RegisterResponse;
+import br.edu.lms.module.identity.interfaces.rest.dto.ResetPasswordRequest;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
@@ -35,6 +41,8 @@ public class AuthResource {
     private final AuthenticateUseCase authenticateUseCase;
     private final LogoutUseCase logoutUseCase;
     private final RefreshTokenUseCase refreshTokenUseCase;
+    private final RequestPasswordResetUseCase requestPasswordResetUseCase;
+    private final ResetPasswordUseCase resetPasswordUseCase;
 
     @POST
     @Path("/register")
@@ -116,5 +124,31 @@ public class AuthResource {
                 .build();
 
         return Response.ok(new LoginResponse(result.accessToken())).cookie(cookie).build();
+    }
+
+    @POST
+    @Path("/forgot-password")
+    @Operation(summary = "Solicitar redefinição de senha")
+    @APIResponse(responseCode = "204", description = "Solicitação processada")
+    public Response forgotPassword(@Valid ForgotPasswordRequest request) {
+        requestPasswordResetUseCase.execute(
+                RequestPasswordResetCommand.builder()
+                        .email(request.email())
+                        .build());
+        return Response.noContent().build();
+    }
+
+    @POST
+    @Path("/reset-password")
+    @Operation(summary = "Confirmar redefinição de senha")
+    @APIResponse(responseCode = "204", description = "Senha redefinida com sucesso")
+    @APIResponse(responseCode = "400", description = "Token inválido, expirado ou já utilizado")
+    public Response resetPassword(@Valid ResetPasswordRequest request) {
+        resetPasswordUseCase.execute(
+                ResetPasswordCommand.builder()
+                        .token(request.token())
+                        .newPassword(request.newPassword())
+                        .build());
+        return Response.noContent().build();
     }
 }

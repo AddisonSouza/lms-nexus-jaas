@@ -1,6 +1,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { loginSchema, type LoginFormData } from '../schemas/loginSchema'
 import { useLogin } from '../hooks/useLogin'
 
@@ -70,6 +71,12 @@ function LoginForm() {
           {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
           Entrar
         </button>
+
+        <p className="text-center text-sm text-muted-foreground">
+          <Link to="/forgot-password" className="underline underline-offset-4 hover:text-primary">
+            Esqueci minha senha
+          </Link>
+        </p>
       </form>
     </div>
   )
