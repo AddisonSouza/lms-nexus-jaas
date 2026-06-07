@@ -1,5 +1,24 @@
 schema: spec-driven
 
+pr:
+  enabled: true
+  branch:
+    pattern: "feat/{change-name}"
+  title:
+    template: "feat: {change-name}"
+  description:
+    template: |
+      ## Resumo
+
+      <!-- Preenchido pelo /ps:apply com base nos artefatos da change -->
+
+      ## Referências
+
+      - Change: `pscode/changes/{change-name}/`
+  comments:
+    linkInTask: true
+  taskLinkInDescription: true
+
 context: |
   Project: LMS Nexus — plataforma de gestão de aprendizado (LMS) multi-tenant (TCC)
   Repo: AddisonSouza/lms-nexus-jaas | GitHub Project: "LMS — Open Spec"
