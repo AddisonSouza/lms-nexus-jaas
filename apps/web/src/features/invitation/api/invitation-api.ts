@@ -4,7 +4,7 @@ export interface InvitationInfo {
   organizationId: string
   organizationName: string
   email: string
-  role: 'ADMIN_ORG' | 'MEMBER' | 'PROFESSOR' | 'ALUNO'
+  role: 'ADMIN_ORG' | 'GESTOR' | 'PROFESSOR' | 'ALUNO'
   expiresAt: string
 }
 

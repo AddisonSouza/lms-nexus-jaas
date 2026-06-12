@@ -32,7 +32,7 @@ class InviteMemberServiceTest {
         return InviteMemberCommand.builder()
                 .organizationId("org-1")
                 .email("user@test.com")
-                .role(MemberRole.MEMBER)
+                .role(MemberRole.PROFESSOR)
                 .invitedBy("admin-1")
                 .build();
     }
@@ -49,7 +49,7 @@ class InviteMemberServiceTest {
         var saved = invCaptor.getValue();
         assertThat(saved.getEmail()).isEqualTo("user@test.com");
         assertThat(saved.getOrganizationId()).isEqualTo("org-1");
-        assertThat(saved.getRole()).isEqualTo(MemberRole.MEMBER);
+        assertThat(saved.getRole()).isEqualTo(MemberRole.PROFESSOR);
         assertThat(saved.getStatus().name()).isEqualTo("PENDING");
         assertThat(saved.getToken()).isNotBlank();
 

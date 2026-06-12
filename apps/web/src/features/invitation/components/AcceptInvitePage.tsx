@@ -8,7 +8,7 @@ import { useAcceptInvitation } from '../hooks/useAcceptInvitation'
 
 const roleLabels: Record<string, string> = {
   ADMIN_ORG: 'Administrador',
-  MEMBER: 'Membro',
+  GESTOR: 'Gestor',
   PROFESSOR: 'Professor',
   ALUNO: 'Aluno',
 }

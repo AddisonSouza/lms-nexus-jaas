@@ -37,7 +37,7 @@ class RemoveMemberServiceTest {
                 .id("member-1")
                 .organizationId("org-1")
                 .userId(userId)
-                .role(MemberRole.MEMBER)
+                .role(MemberRole.PROFESSOR)
                 .build();
     }
 
