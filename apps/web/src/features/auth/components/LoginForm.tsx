@@ -1,11 +1,14 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2 } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { CheckCircle, Loader2 } from 'lucide-react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { loginSchema, type LoginFormData } from '../schemas/loginSchema'
 import { useLogin } from '../hooks/useLogin'
 
 function LoginForm() {
+  const [searchParams] = useSearchParams()
+  const justConfirmed = searchParams.get('confirmed') === 'true'
+
   const {
     register,
     handleSubmit,
@@ -33,14 +36,22 @@ function LoginForm() {
       >
         <h1 className="text-2xl font-semibold">Entrar</h1>
 
+        {justConfirmed && (
+          <div className="flex items-center gap-2 rounded border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
+            <CheckCircle className="h-4 w-4 shrink-0" />
+            E-mail confirmado com sucesso! Faça login para continuar.
+          </div>
+        )}
+
         {errorMessage && (
           <p className="text-sm text-destructive">{errorMessage}</p>
         )}
 
         <div className="space-y-1">
-          <label className="text-sm font-medium">E-mail</label>
+          <label htmlFor="email" className="text-sm font-medium">E-mail</label>
           <input
             {...register('email')}
+            id="email"
             type="email"
             autoComplete="email"
             className="w-full rounded border px-3 py-2 text-sm"
@@ -51,9 +62,10 @@ function LoginForm() {
         </div>
 
         <div className="space-y-1">
-          <label className="text-sm font-medium">Senha</label>
+          <label htmlFor="password" className="text-sm font-medium">Senha</label>
           <input
             {...register('password')}
+            id="password"
             type="password"
             autoComplete="current-password"
             className="w-full rounded border px-3 py-2 text-sm"

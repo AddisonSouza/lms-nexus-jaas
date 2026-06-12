@@ -1,6 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom'
 import RegisterForm from '@features/auth/components/RegisterForm'
-import EmailConfirmationPage from '@features/auth/components/EmailConfirmationPage'
+import ConfirmEmailCallbackPage from '@features/auth/components/ConfirmEmailCallbackPage'
 import LoginPage from '@features/auth/components/LoginPage'
 import ForgotPasswordPage from '@features/auth/components/ForgotPasswordPage'
 import ResetPasswordPage from '@features/auth/components/ResetPasswordPage'
@@ -21,7 +21,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '/confirm-email',
-    element: <EmailConfirmationPage />,
+    element: <ConfirmEmailCallbackPage />,
   },
   {
     path: '/forgot-password',

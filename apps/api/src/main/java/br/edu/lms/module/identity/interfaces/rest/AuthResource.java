@@ -4,18 +4,22 @@ import br.edu.lms.module.identity.application.dto.AuthenticateCommand;
 import br.edu.lms.module.identity.application.dto.RefreshCommand;
 import br.edu.lms.module.identity.application.dto.RegisterUserCommand;
 import br.edu.lms.module.identity.application.dto.RequestPasswordResetCommand;
+import br.edu.lms.module.identity.application.dto.ResendConfirmationCommand;
 import br.edu.lms.module.identity.application.dto.ResetPasswordCommand;
 import br.edu.lms.module.identity.domain.port.in.AuthenticateUseCase;
+import br.edu.lms.module.identity.domain.port.in.ConfirmEmailUseCase;
 import br.edu.lms.module.identity.domain.port.in.LogoutUseCase;
 import br.edu.lms.module.identity.domain.port.in.RefreshTokenUseCase;
 import br.edu.lms.module.identity.domain.port.in.RegisterUserUseCase;
 import br.edu.lms.module.identity.domain.port.in.RequestPasswordResetUseCase;
+import br.edu.lms.module.identity.domain.port.in.ResendConfirmationUseCase;
 import br.edu.lms.module.identity.domain.port.in.ResetPasswordUseCase;
 import br.edu.lms.module.identity.interfaces.rest.dto.ForgotPasswordRequest;
 import br.edu.lms.module.identity.interfaces.rest.dto.LoginRequest;
 import br.edu.lms.module.identity.interfaces.rest.dto.LoginResponse;
 import br.edu.lms.module.identity.interfaces.rest.dto.RegisterRequest;
 import br.edu.lms.module.identity.interfaces.rest.dto.RegisterResponse;
+import br.edu.lms.module.identity.interfaces.rest.dto.ResendConfirmationRequest;
 import br.edu.lms.module.identity.interfaces.rest.dto.ResetPasswordRequest;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
@@ -43,6 +47,8 @@ public class AuthResource {
     private final RefreshTokenUseCase refreshTokenUseCase;
     private final RequestPasswordResetUseCase requestPasswordResetUseCase;
     private final ResetPasswordUseCase resetPasswordUseCase;
+    private final ConfirmEmailUseCase confirmEmailUseCase;
+    private final ResendConfirmationUseCase resendConfirmationUseCase;
 
     @POST
     @Path("/register")
@@ -148,6 +154,35 @@ public class AuthResource {
                 ResetPasswordCommand.builder()
                         .token(request.token())
                         .newPassword(request.newPassword())
+                        .build());
+        return Response.noContent().build();
+    }
+
+    @GET
+    @Path("/confirm-email")
+    @Operation(summary = "Confirmar e-mail via token")
+    @APIResponse(responseCode = "204", description = "E-mail confirmado com sucesso")
+    @APIResponse(responseCode = "400", description = "Token inválido ou expirado")
+    @APIResponse(responseCode = "409", description = "E-mail já confirmado")
+    public Response confirmEmail(@QueryParam("token") String token) {
+        if (token == null || token.isBlank()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(java.util.Map.of("error", "INVALID_CONFIRMATION_TOKEN"))
+                    .build();
+        }
+        confirmEmailUseCase.execute(token);
+        return Response.noContent().build();
+    }
+
+    @POST
+    @Path("/resend-confirmation")
+    @Operation(summary = "Reenviar e-mail de confirmação")
+    @APIResponse(responseCode = "204", description = "E-mail enviado")
+    @APIResponse(responseCode = "429", description = "Rate limit excedido")
+    public Response resendConfirmation(@Valid ResendConfirmationRequest request) {
+        resendConfirmationUseCase.execute(
+                ResendConfirmationCommand.builder()
+                        .email(request.email())
                         .build());
         return Response.noContent().build();
     }

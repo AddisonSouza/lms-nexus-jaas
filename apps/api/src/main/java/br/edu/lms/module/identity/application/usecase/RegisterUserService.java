@@ -6,6 +6,7 @@ import br.edu.lms.module.identity.domain.event.UserRegisteredEvent;
 import br.edu.lms.module.identity.domain.exception.EmailAlreadyInUseException;
 import br.edu.lms.module.identity.domain.model.*;
 import br.edu.lms.module.identity.domain.port.in.RegisterUserUseCase;
+import br.edu.lms.module.identity.domain.port.out.EmailConfirmationTokenRepository;
 import br.edu.lms.module.identity.domain.port.out.EmailPort;
 import br.edu.lms.module.identity.domain.port.out.UserRepository;
 import br.edu.lms.module.identity.infrastructure.security.BcryptPasswordService;
@@ -14,6 +15,7 @@ import jakarta.enterprise.event.Event;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Duration;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -21,9 +23,12 @@ import java.util.UUID;
 @Slf4j
 public class RegisterUserService implements RegisterUserUseCase {
 
+    private static final Duration CONFIRMATION_TOKEN_TTL = Duration.ofHours(24);
+
     private final UserRepository userRepository;
     private final EmailPort emailPort;
     private final BcryptPasswordService passwordService;
+    private final EmailConfirmationTokenRepository confirmationTokenRepository;
     private final Event<UserRegisteredEvent> domainEvents;
 
     @Override
@@ -45,6 +50,7 @@ public class RegisterUserService implements RegisterUserUseCase {
         userRepository.save(user);
 
         var token = UUID.randomUUID().toString();
+        confirmationTokenRepository.save(token, user.getId().getValue(), CONFIRMATION_TOKEN_TTL);
         emailPort.sendConfirmationEmail(email, token);
 
         domainEvents.fireAsync(new UserRegisteredEvent(user.getId(), email));
