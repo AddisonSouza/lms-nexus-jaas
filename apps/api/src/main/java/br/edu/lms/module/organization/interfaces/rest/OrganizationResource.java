@@ -3,8 +3,8 @@ package br.edu.lms.module.organization.interfaces.rest;
 import br.edu.lms.module.organization.application.dto.CreateOrganizationCommand;
 import br.edu.lms.module.organization.application.dto.OrganizationResponse;
 import br.edu.lms.module.organization.domain.port.in.CreateOrganizationUseCase;
+import br.edu.lms.module.organization.domain.port.in.RemoveMemberUseCase;
 import br.edu.lms.module.organization.interfaces.rest.dto.CreateOrganizationRequest;
-import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
@@ -24,6 +24,7 @@ import java.net.URI;
 public class OrganizationResource {
 
     private final CreateOrganizationUseCase createOrganizationUseCase;
+    private final RemoveMemberUseCase removeMemberUseCase;
     private final JsonWebToken jwt;
 
     @POST
@@ -41,5 +42,22 @@ public class OrganizationResource {
         return Response.created(URI.create("/organizations/" + result.getId()))
                 .entity(result)
                 .build();
+    }
+
+    @DELETE
+    @Path("/{id}/members/{userId}")
+    @Operation(summary = "Remover membro da organização")
+    @APIResponse(responseCode = "204", description = "Membro removido")
+    @APIResponse(responseCode = "403", description = "Sem permissão ou tentativa de remover o owner")
+    @APIResponse(responseCode = "404", description = "Membro não encontrado")
+    public Response removeMember(@PathParam("id") String organizationId,
+                                 @PathParam("userId") String userId) {
+        var orgClaim = (String) jwt.getClaim("org");
+        var groups = jwt.getGroups();
+        if (orgClaim == null || !orgClaim.equals(organizationId) || groups == null || !groups.contains("ADMIN_ORG")) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
+        removeMemberUseCase.execute(organizationId, userId);
+        return Response.noContent().build();
     }
 }

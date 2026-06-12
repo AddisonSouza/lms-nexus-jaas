@@ -40,4 +40,58 @@ public class OrganizationMemberRepositoryImpl implements OrganizationMemberRepos
                 .getResultStream()
                 .findFirst();
     }
+
+    @Override
+    public boolean existsActiveMemberByEmail(String organizationId, String email) {
+        return em.createNativeQuery(
+                        "SELECT COUNT(*) FROM organization_members om " +
+                        "JOIN users u ON u.id = om.user_id " +
+                        "WHERE om.organization_id = :orgId AND LOWER(u.email) = LOWER(:email) " +
+                        "AND om.deleted_at IS NULL")
+                .setParameter("orgId", organizationId)
+                .setParameter("email", email)
+                .getResultStream()
+                .findFirst()
+                .map(r -> ((Number) r).longValue() > 0)
+                .orElse(false);
+    }
+
+    @Override
+    public boolean existsActiveByOrgAndUser(String organizationId, String userId) {
+        return em.createQuery(
+                        "SELECT COUNT(m) FROM OrganizationMemberJpaEntity m " +
+                        "WHERE m.organizationId = :orgId AND m.userId = :userId AND m.deletedAt IS NULL",
+                        Long.class)
+                .setParameter("orgId", organizationId)
+                .setParameter("userId", userId)
+                .getSingleResult() > 0;
+    }
+
+    @Override
+    public Optional<OrganizationMember> findActiveByOrgAndUser(String organizationId, String userId) {
+        return em.createQuery(
+                        "SELECT m FROM OrganizationMemberJpaEntity m " +
+                        "WHERE m.organizationId = :orgId AND m.userId = :userId AND m.deletedAt IS NULL",
+                        OrganizationMemberJpaEntity.class)
+                .setParameter("orgId", organizationId)
+                .setParameter("userId", userId)
+                .getResultStream()
+                .findFirst()
+                .map(e -> OrganizationMember.builder()
+                        .id(e.getId())
+                        .organizationId(e.getOrganizationId())
+                        .userId(e.getUserId())
+                        .role(MemberRole.valueOf(e.getRole()))
+                        .build());
+    }
+
+    @Override
+    @Transactional
+    public void softDelete(String memberId) {
+        em.createQuery(
+                        "UPDATE OrganizationMemberJpaEntity m SET m.deletedAt = :now WHERE m.id = :id")
+                .setParameter("now", java.time.LocalDateTime.now())
+                .setParameter("id", memberId)
+                .executeUpdate();
+    }
 }
