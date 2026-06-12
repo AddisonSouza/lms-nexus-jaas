@@ -1,9 +1,9 @@
 ### REQ-ORG-01 — Criar organização
-Usuário autenticado com e-mail confirmado (`status=ACTIVE`) pode criar uma organização informando `name` (obrigatório, único por usuário) e `description` (opcional). O sistema persiste em `organizations` e cria vínculo em `organization_members` com `role=ADMIN_ORG`.
+Usuário autenticado com e-mail confirmado (`status=ACTIVE`) pode criar uma organização informando `name` (obrigatório, único por usuário) e `description` (opcional). O sistema persiste em `organizations` e cria vínculo em `organization_members` com `role=ADMIN_ORG`. O `owner_id` da organização é o userId do criador e é usado para impedir sua remoção como membro (REQ-INV-03).
 
 #### Scenario: Criação bem-sucedida
 - **WHEN** `POST /organizations` com JWT válido (`sub=userId`), body `{name, description?}`
-- **THEN** 201 com `{id, name, description, createdAt}`; `organizations` contém novo registro; `organization_members` contém `(userId, orgId, ADMIN_ORG)`; `OrganizationCreatedEvent` publicado via CDI
+- **THEN** 201 com `{id, name, description, createdAt}`; `organizations` contém novo registro com `owner_id=userId`; `organization_members` contém `(userId, orgId, ADMIN_ORG)`; `OrganizationCreatedEvent` publicado via CDI
 
 #### Scenario: Nome duplicado para o mesmo usuário
 - **WHEN** usuário cria org com nome idêntico a uma org ativa que ele já possui
