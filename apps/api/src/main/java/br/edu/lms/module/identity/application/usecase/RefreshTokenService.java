@@ -4,6 +4,7 @@ import br.edu.lms.module.identity.application.dto.AuthResult;
 import br.edu.lms.module.identity.application.dto.RefreshCommand;
 import br.edu.lms.module.identity.domain.exception.TokenNotFoundException;
 import br.edu.lms.module.identity.domain.port.in.RefreshTokenUseCase;
+import br.edu.lms.module.identity.domain.port.out.OrganizationMemberLookupPort;
 import br.edu.lms.module.identity.domain.port.out.RefreshTokenRepository;
 import br.edu.lms.module.identity.infrastructure.security.JwtTokenService;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -12,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.util.UUID;
+
+import br.edu.lms.module.organization.domain.exception.NotAnOrganizationMemberException;
 
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -22,16 +25,25 @@ public class RefreshTokenService implements RefreshTokenUseCase {
 
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtTokenService jwtTokenService;
+    private final OrganizationMemberLookupPort organizationMemberLookupPort;
 
     @Override
     public AuthResult execute(RefreshCommand command) {
         var userId = refreshTokenRepository.findUserId(command.refreshToken())
                 .orElseThrow(TokenNotFoundException::new);
 
-        // rotation: delete old, issue new
         refreshTokenRepository.delete(command.refreshToken());
 
-        var newAccessToken = jwtTokenService.generateAccessToken(userId);
+        String newAccessToken;
+        if (command.organizationId() != null && !command.organizationId().isBlank()) {
+            var role = organizationMemberLookupPort
+                    .findRoleByUserAndOrg(userId, command.organizationId())
+                    .orElseThrow(NotAnOrganizationMemberException::new);
+            newAccessToken = jwtTokenService.generateAccessToken(userId, command.organizationId(), role);
+        } else {
+            newAccessToken = jwtTokenService.generateAccessToken(userId);
+        }
+
         var newRefreshToken = UUID.randomUUID().toString();
         refreshTokenRepository.save(newRefreshToken, userId, REFRESH_TOKEN_TTL);
 
