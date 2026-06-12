@@ -41,4 +41,4 @@
 
 - [x] 7.1 [INFRA] Verificar configuração do Redis no docker-compose (já presente — apenas validar)
 - [x] 7.2 [FE] Conectar `LoginPage` ao fluxo real: login → salva token → redireciona para `/`
-- [ ] 7.3 [BE] Teste e2e manual: login → refresh → logout → refresh inválido retorna 401
+- [x] 7.3 [BE] Teste e2e manual: login → refresh → logout → refresh inválido retorna 401
