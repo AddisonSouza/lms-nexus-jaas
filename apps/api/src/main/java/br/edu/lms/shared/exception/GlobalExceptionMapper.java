@@ -1,5 +1,9 @@
 package br.edu.lms.shared.exception;
 
+import br.edu.lms.module.classroom.domain.exception.ClassroomArchivedException;
+import br.edu.lms.module.classroom.domain.exception.ClassroomMemberNotFoundException;
+import br.edu.lms.module.classroom.domain.exception.ClassroomNotFoundException;
+import br.edu.lms.module.classroom.domain.exception.MemberNotInOrganizationException;
 import br.edu.lms.module.identity.domain.exception.EmailAlreadyConfirmedException;
 import br.edu.lms.module.identity.domain.exception.EmailAlreadyInUseException;
 import br.edu.lms.module.identity.domain.exception.InvalidConfirmationTokenException;
@@ -105,6 +109,30 @@ public class GlobalExceptionMapper implements ExceptionMapper<Exception> {
         if (exception instanceof OrganizationNameAlreadyExistsException) {
             return Response.status(Response.Status.CONFLICT)
                     .entity(Map.of("error", "ORGANIZATION_NAME_ALREADY_EXISTS"))
+                    .build();
+        }
+
+        if (exception instanceof ClassroomNotFoundException) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("error", "CLASSROOM_NOT_FOUND"))
+                    .build();
+        }
+
+        if (exception instanceof ClassroomMemberNotFoundException) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("error", "CLASSROOM_MEMBER_NOT_FOUND"))
+                    .build();
+        }
+
+        if (exception instanceof MemberNotInOrganizationException) {
+            return Response.status(422)
+                    .entity(Map.of("error", "MEMBER_NOT_IN_ORGANIZATION"))
+                    .build();
+        }
+
+        if (exception instanceof ClassroomArchivedException) {
+            return Response.status(422)
+                    .entity(Map.of("error", "CLASSROOM_ARCHIVED"))
                     .build();
         }
 
