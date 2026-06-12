@@ -5,4 +5,5 @@ export const authKeys = {
   login: () => [...authKeys.all, 'login'] as const,
   confirmEmail: () => [...authKeys.all, 'confirmEmail'] as const,
   resendConfirmation: () => [...authKeys.all, 'resendConfirmation'] as const,
+  refreshWithOrg: (orgId: string) => [...authKeys.all, 'refreshWithOrg', orgId] as const,
 }

@@ -17,6 +17,7 @@ import br.edu.lms.module.identity.domain.port.in.ResetPasswordUseCase;
 import br.edu.lms.module.identity.interfaces.rest.dto.ForgotPasswordRequest;
 import br.edu.lms.module.identity.interfaces.rest.dto.LoginRequest;
 import br.edu.lms.module.identity.interfaces.rest.dto.LoginResponse;
+import br.edu.lms.module.identity.interfaces.rest.dto.RefreshRequest;
 import br.edu.lms.module.identity.interfaces.rest.dto.RegisterRequest;
 import br.edu.lms.module.identity.interfaces.rest.dto.RegisterResponse;
 import br.edu.lms.module.identity.interfaces.rest.dto.ResendConfirmationRequest;
@@ -114,11 +115,13 @@ public class AuthResource {
     @Operation(summary = "Renova o par de tokens")
     @APIResponse(responseCode = "200", description = "Tokens renovados")
     @APIResponse(responseCode = "401", description = "Refresh token inválido ou expirado")
-    public Response refresh(@CookieParam(REFRESH_COOKIE) String refreshToken) {
+    @APIResponse(responseCode = "403", description = "Usuário não é membro da organização informada")
+    public Response refresh(@CookieParam(REFRESH_COOKIE) String refreshToken, RefreshRequest body) {
         if (refreshToken == null || refreshToken.isBlank()) {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
-        var result = refreshTokenUseCase.execute(new RefreshCommand(refreshToken));
+        var orgId = body != null ? body.organizationId() : null;
+        var result = refreshTokenUseCase.execute(new RefreshCommand(refreshToken, orgId));
 
         var cookie = new NewCookie.Builder(REFRESH_COOKIE)
                 .value(result.refreshToken())

@@ -7,6 +7,8 @@ import br.edu.lms.module.identity.domain.exception.InvalidCredentialsException;
 import br.edu.lms.module.identity.domain.exception.PasswordResetTokenInvalidException;
 import br.edu.lms.module.identity.domain.exception.ResendRateLimitExceededException;
 import br.edu.lms.module.identity.domain.exception.TokenNotFoundException;
+import br.edu.lms.module.organization.domain.exception.NotAnOrganizationMemberException;
+import br.edu.lms.module.organization.domain.exception.OrganizationNameAlreadyExistsException;
 import br.edu.lms.shared.domain.DomainException;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.ws.rs.core.Response;
@@ -49,6 +51,18 @@ public class GlobalExceptionMapper implements ExceptionMapper<Exception> {
             return Response.status(429)
                     .header("Retry-After", "3600")
                     .entity(Map.of("error", "RESEND_RATE_LIMIT_EXCEEDED"))
+                    .build();
+        }
+
+        if (exception instanceof NotAnOrganizationMemberException) {
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity(Map.of("error", "NOT_AN_ORGANIZATION_MEMBER"))
+                    .build();
+        }
+
+        if (exception instanceof OrganizationNameAlreadyExistsException) {
+            return Response.status(Response.Status.CONFLICT)
+                    .entity(Map.of("error", "ORGANIZATION_NAME_ALREADY_EXISTS"))
                     .build();
         }
 
