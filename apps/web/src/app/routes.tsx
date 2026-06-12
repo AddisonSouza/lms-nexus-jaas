@@ -9,6 +9,8 @@ import ProtectedRoute from '@components/shared/ProtectedRoute'
 import CreateOrganizationPage from '@features/organization/components/CreateOrganizationPage'
 import OrganizationDashboardPage from '@features/organization/components/OrganizationDashboardPage'
 import AcceptInvitePage from '@features/invitation/components/AcceptInvitePage'
+import ClassroomListPage from '@features/classroom/components/ClassroomListPage'
+import ClassroomDetailPage from '@features/classroom/components/ClassroomDetailPage'
 
 export const router = createBrowserRouter([
   {
@@ -54,5 +56,21 @@ export const router = createBrowserRouter([
   {
     path: '/invitations/:token/accept',
     element: <AcceptInvitePage />,
+  },
+  {
+    path: '/classrooms',
+    element: (
+      <ProtectedRoute>
+        <ClassroomListPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/classrooms/:id',
+    element: (
+      <ProtectedRoute>
+        <ClassroomDetailPage />
+      </ProtectedRoute>
+    ),
   },
 ])
