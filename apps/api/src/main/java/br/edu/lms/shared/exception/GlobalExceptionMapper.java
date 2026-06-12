@@ -7,6 +7,12 @@ import br.edu.lms.module.identity.domain.exception.InvalidCredentialsException;
 import br.edu.lms.module.identity.domain.exception.PasswordResetTokenInvalidException;
 import br.edu.lms.module.identity.domain.exception.ResendRateLimitExceededException;
 import br.edu.lms.module.identity.domain.exception.TokenNotFoundException;
+import br.edu.lms.module.organization.domain.exception.AlreadyAMemberException;
+import br.edu.lms.module.organization.domain.exception.CannotRemoveOwnerException;
+import br.edu.lms.module.organization.domain.exception.InvitationAlreadyUsedException;
+import br.edu.lms.module.organization.domain.exception.InvitationExpiredException;
+import br.edu.lms.module.organization.domain.exception.InvitationNotFoundException;
+import br.edu.lms.module.organization.domain.exception.MemberNotFoundException;
 import br.edu.lms.module.organization.domain.exception.NotAnOrganizationMemberException;
 import br.edu.lms.module.organization.domain.exception.OrganizationNameAlreadyExistsException;
 import br.edu.lms.shared.domain.DomainException;
@@ -51,6 +57,42 @@ public class GlobalExceptionMapper implements ExceptionMapper<Exception> {
             return Response.status(429)
                     .header("Retry-After", "3600")
                     .entity(Map.of("error", "RESEND_RATE_LIMIT_EXCEEDED"))
+                    .build();
+        }
+
+        if (exception instanceof InvitationNotFoundException) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("error", "INVITATION_NOT_FOUND"))
+                    .build();
+        }
+
+        if (exception instanceof InvitationExpiredException) {
+            return Response.status(410)
+                    .entity(Map.of("error", "INVITATION_EXPIRED"))
+                    .build();
+        }
+
+        if (exception instanceof InvitationAlreadyUsedException) {
+            return Response.status(Response.Status.CONFLICT)
+                    .entity(Map.of("error", "INVITATION_ALREADY_USED"))
+                    .build();
+        }
+
+        if (exception instanceof AlreadyAMemberException) {
+            return Response.status(Response.Status.CONFLICT)
+                    .entity(Map.of("error", "ALREADY_A_MEMBER"))
+                    .build();
+        }
+
+        if (exception instanceof CannotRemoveOwnerException) {
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity(Map.of("error", "CANNOT_REMOVE_OWNER"))
+                    .build();
+        }
+
+        if (exception instanceof MemberNotFoundException) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("error", "MEMBER_NOT_FOUND"))
                     .build();
         }
 
