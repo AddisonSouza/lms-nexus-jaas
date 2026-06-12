@@ -10,7 +10,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.UUID;
 
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -25,7 +24,7 @@ public class ConfirmEmailService implements ConfirmEmailUseCase {
         var userId = confirmationTokenRepository.findUserId(token)
                 .orElseThrow(InvalidConfirmationTokenException::new);
 
-        var user = userRepository.findById(new UserId(UUID.fromString(userId)))
+        var user = userRepository.findById(UserId.of(userId))
                 .orElseThrow(InvalidConfirmationTokenException::new);
 
         if (!user.isPendingConfirmation()) {
