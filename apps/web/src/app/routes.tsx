@@ -8,6 +8,7 @@ import PublicRoute from '@components/shared/PublicRoute'
 import ProtectedRoute from '@components/shared/ProtectedRoute'
 import CreateOrganizationPage from '@features/organization/components/CreateOrganizationPage'
 import OrganizationDashboardPage from '@features/organization/components/OrganizationDashboardPage'
+import AcceptInvitePage from '@features/invitation/components/AcceptInvitePage'
 
 export const router = createBrowserRouter([
   {
@@ -49,5 +50,9 @@ export const router = createBrowserRouter([
         <OrganizationDashboardPage />
       </ProtectedRoute>
     ),
+  },
+  {
+    path: '/invitations/:token/accept',
+    element: <AcceptInvitePage />,
   },
 ])
