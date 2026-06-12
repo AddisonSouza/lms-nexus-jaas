@@ -24,4 +24,14 @@ public class JwtTokenService {
                 .expiresIn(ACCESS_TOKEN_TTL)
                 .sign();
     }
+
+    public String generateAccessToken(String userId, String orgId, String role) {
+        return Jwt.issuer(issuer)
+                .subject(userId)
+                .groups(Set.of(role))
+                .claim("org", orgId)
+                .issuedAt(Instant.now())
+                .expiresIn(ACCESS_TOKEN_TTL)
+                .sign();
+    }
 }
