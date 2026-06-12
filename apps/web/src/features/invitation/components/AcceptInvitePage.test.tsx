@@ -26,7 +26,7 @@ const mockInfo: invitationApi.InvitationInfo = {
   organizationId: 'org-1',
   organizationName: 'Escola Teste',
   email: 'user@test.com',
-  role: 'MEMBER',
+  role: 'PROFESSOR',
   expiresAt: new Date(Date.now() + 7 * 86400000).toISOString(),
 }
 
@@ -60,7 +60,7 @@ describe('AcceptInvitePage', () => {
 
       await waitFor(() => {
         expect(screen.getByText(/escola teste/i)).toBeTruthy()
-        expect(screen.getByText(/membro/i)).toBeTruthy()
+        expect(screen.getByText(/professor/i)).toBeTruthy()
         expect(screen.getByRole('button', { name: /aceitar convite/i })).toBeTruthy()
       })
     })

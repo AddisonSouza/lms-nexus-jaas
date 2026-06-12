@@ -61,7 +61,7 @@ class InvitationResourceIT {
         given()
                 .contentType(ContentType.JSON)
                 .body("""
-                        {"email":"new@test.com","role":"MEMBER"}
+                        {"email":"new@test.com","role":"PROFESSOR"}
                         """)
                 .when().post("/organizations/{id}/invitations", ORG_ID)
                 .then().statusCode(401);
@@ -74,7 +74,7 @@ class InvitationResourceIT {
         given()
                 .contentType(ContentType.JSON)
                 .body("""
-                        {"email":"new@test.com","role":"MEMBER"}
+                        {"email":"new@test.com","role":"PROFESSOR"}
                         """)
                 .when().post("/organizations/{id}/invitations", ORG_ID)
                 .then().statusCode(403);
@@ -87,7 +87,7 @@ class InvitationResourceIT {
         given()
                 .contentType(ContentType.JSON)
                 .body("""
-                        {"email":"new@test.com","role":"MEMBER"}
+                        {"email":"new@test.com","role":"PROFESSOR"}
                         """)
                 .when().post("/organizations/{id}/invitations", ORG_ID)
                 .then().statusCode(403);
@@ -100,7 +100,7 @@ class InvitationResourceIT {
         given()
                 .contentType(ContentType.JSON)
                 .body("""
-                        {"email":"invited@test.com","role":"MEMBER"}
+                        {"email":"invited@test.com","role":"PROFESSOR"}
                         """)
                 .when().post("/organizations/{id}/invitations", ORG_ID)
                 .then().statusCode(201);
@@ -125,14 +125,14 @@ class InvitationResourceIT {
                 .setParameter(1, memberId)
                 .setParameter(2, ORG_ID)
                 .setParameter(3, membUserId)
-                .setParameter(4, "MEMBER")
+                .setParameter(4, "PROFESSOR")
                 .executeUpdate();
         tx.commit();
 
         given()
                 .contentType(ContentType.JSON)
                 .body("""
-                        {"email":"already-member@test.com","role":"MEMBER"}
+                        {"email":"already-member@test.com","role":"PROFESSOR"}
                         """)
                 .when().post("/organizations/{id}/invitations", ORG_ID)
                 .then()
@@ -168,7 +168,7 @@ class InvitationResourceIT {
         tx.begin();
         em.createNativeQuery("""
                 INSERT INTO invitations (id, organization_id, email, role, token, status, invited_by, expires_at, created_at)
-                VALUES (UUID(), ?, 'exp@test.com', 'MEMBER', ?, 'PENDING', ?, DATE_SUB(NOW(6), INTERVAL 1 DAY), NOW(6))
+                VALUES (UUID(), ?, 'exp@test.com', 'PROFESSOR', ?, 'PENDING', ?, DATE_SUB(NOW(6), INTERVAL 1 DAY), NOW(6))
                 """)
                 .setParameter(1, ORG_ID)
                 .setParameter(2, expiredToken)
@@ -191,7 +191,7 @@ class InvitationResourceIT {
         tx.begin();
         em.createNativeQuery("""
                 INSERT INTO invitations (id, organization_id, email, role, token, status, invited_by, expires_at, created_at)
-                VALUES (UUID(), ?, 'used@test.com', 'MEMBER', ?, 'USED', ?, DATE_ADD(NOW(6), INTERVAL 7 DAY), NOW(6))
+                VALUES (UUID(), ?, 'used@test.com', 'PROFESSOR', ?, 'USED', ?, DATE_ADD(NOW(6), INTERVAL 7 DAY), NOW(6))
                 """)
                 .setParameter(1, ORG_ID)
                 .setParameter(2, usedToken)
@@ -222,7 +222,7 @@ class InvitationResourceIT {
                 .executeUpdate();
         em.createNativeQuery("""
                 INSERT INTO invitations (id, organization_id, email, role, token, status, invited_by, expires_at, created_at)
-                VALUES (UUID(), ?, 'acceptee@test.com', 'MEMBER', ?, 'PENDING', ?, DATE_ADD(NOW(6), INTERVAL 7 DAY), NOW(6))
+                VALUES (UUID(), ?, 'acceptee@test.com', 'PROFESSOR', ?, 'PENDING', ?, DATE_ADD(NOW(6), INTERVAL 7 DAY), NOW(6))
                 """)
                 .setParameter(1, ORG_ID)
                 .setParameter(2, acceptToken)

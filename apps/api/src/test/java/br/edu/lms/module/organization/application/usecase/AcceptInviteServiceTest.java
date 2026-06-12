@@ -36,7 +36,7 @@ class AcceptInviteServiceTest {
                 .id(InvitationId.generate())
                 .organizationId("org-1")
                 .email("user@test.com")
-                .role(MemberRole.MEMBER)
+                .role(MemberRole.PROFESSOR)
                 .token("test-token")
                 .status(InvitationStatus.PENDING)
                 .invitedBy("admin-1")
@@ -60,7 +60,7 @@ class AcceptInviteServiceTest {
         verify(memberRepository).save(memberCaptor.capture());
         assertThat(memberCaptor.getValue().getUserId()).isEqualTo("user-1");
         assertThat(memberCaptor.getValue().getOrganizationId()).isEqualTo("org-1");
-        assertThat(memberCaptor.getValue().getRole()).isEqualTo(MemberRole.MEMBER);
+        assertThat(memberCaptor.getValue().getRole()).isEqualTo(MemberRole.PROFESSOR);
 
         var invCaptor = ArgumentCaptor.forClass(Invitation.class);
         verify(invitationRepository).save(invCaptor.capture());
