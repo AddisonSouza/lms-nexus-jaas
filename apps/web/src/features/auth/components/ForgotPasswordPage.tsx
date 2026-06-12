@@ -42,9 +42,10 @@ function ForgotPasswordPage() {
         </p>
 
         <div className="space-y-1">
-          <label className="text-sm font-medium">E-mail</label>
+          <label htmlFor="email" className="text-sm font-medium">E-mail</label>
           <input
             {...register('email')}
+            id="email"
             type="email"
             autoComplete="email"
             className="w-full rounded border px-3 py-2 text-sm"

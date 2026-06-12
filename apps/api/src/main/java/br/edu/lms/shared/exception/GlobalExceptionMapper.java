@@ -1,8 +1,11 @@
 package br.edu.lms.shared.exception;
 
+import br.edu.lms.module.identity.domain.exception.EmailAlreadyConfirmedException;
 import br.edu.lms.module.identity.domain.exception.EmailAlreadyInUseException;
+import br.edu.lms.module.identity.domain.exception.InvalidConfirmationTokenException;
 import br.edu.lms.module.identity.domain.exception.InvalidCredentialsException;
 import br.edu.lms.module.identity.domain.exception.PasswordResetTokenInvalidException;
+import br.edu.lms.module.identity.domain.exception.ResendRateLimitExceededException;
 import br.edu.lms.module.identity.domain.exception.TokenNotFoundException;
 import br.edu.lms.shared.domain.DomainException;
 import jakarta.validation.ConstraintViolationException;
@@ -27,6 +30,25 @@ public class GlobalExceptionMapper implements ExceptionMapper<Exception> {
         if (exception instanceof PasswordResetTokenInvalidException) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(Map.of("error", "Token inválido, expirado ou já utilizado"))
+                    .build();
+        }
+
+        if (exception instanceof InvalidConfirmationTokenException) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(Map.of("error", "INVALID_CONFIRMATION_TOKEN"))
+                    .build();
+        }
+
+        if (exception instanceof EmailAlreadyConfirmedException) {
+            return Response.status(Response.Status.CONFLICT)
+                    .entity(Map.of("error", "EMAIL_ALREADY_CONFIRMED"))
+                    .build();
+        }
+
+        if (exception instanceof ResendRateLimitExceededException) {
+            return Response.status(429)
+                    .header("Retry-After", "3600")
+                    .entity(Map.of("error", "RESEND_RATE_LIMIT_EXCEEDED"))
                     .build();
         }
 
