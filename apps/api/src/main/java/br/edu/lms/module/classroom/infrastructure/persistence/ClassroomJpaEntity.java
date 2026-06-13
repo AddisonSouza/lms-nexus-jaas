@@ -1,4 +1,4 @@
-package br.edu.lms.module.organization.infrastructure.persistence;
+package br.edu.lms.module.classroom.infrastructure.persistence;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -8,14 +8,17 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name = "organizations")
+@Table(name = "classrooms")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class OrganizationJpaEntity {
+public class ClassroomJpaEntity {
 
     @Id
-    @Column(name = "id", nullable = false, columnDefinition = "CHAR(36)")
+    @Column(name = "id", nullable = false, length = 36)
     @EqualsAndHashCode.Include
     private String id;
+
+    @Column(name = "organization_id", nullable = false, length = 36)
+    private String organizationId;
 
     @Column(name = "name", nullable = false, length = 255)
     private String name;
@@ -23,8 +26,14 @@ public class OrganizationJpaEntity {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "owner_id", nullable = false, columnDefinition = "CHAR(36)")
-    private String ownerId;
+    @Column(name = "academic_period", nullable = false, length = 100)
+    private String academicPeriod;
+
+    @Column(name = "status", nullable = false, columnDefinition = "ENUM('ACTIVE','ARCHIVED')")
+    private String status;
+
+    @Column(name = "invite_code", nullable = false, length = 6)
+    private String inviteCode;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
