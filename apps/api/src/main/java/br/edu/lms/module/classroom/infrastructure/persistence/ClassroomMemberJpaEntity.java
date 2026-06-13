@@ -1,4 +1,4 @@
-package br.edu.lms.module.organization.infrastructure.persistence;
+package br.edu.lms.module.classroom.infrastructure.persistence;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -8,22 +8,25 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name = "organization_members")
+@Table(name = "classroom_members")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class OrganizationMemberJpaEntity {
+public class ClassroomMemberJpaEntity {
 
     @Id
-    @Column(name = "id", nullable = false, columnDefinition = "CHAR(36)")
+    @Column(name = "id", nullable = false, length = 36)
     @EqualsAndHashCode.Include
     private String id;
 
-    @Column(name = "organization_id", nullable = false, columnDefinition = "CHAR(36)")
-    private String organizationId;
+    @Column(name = "classroom_id", nullable = false, length = 36)
+    private String classroomId;
 
-    @Column(name = "user_id", nullable = false, columnDefinition = "CHAR(36)")
+    @Column(name = "user_id", nullable = false, length = 36)
     private String userId;
 
-    @Column(name = "role", nullable = false, length = 50)
+    @Column(name = "organization_id", nullable = false, length = 36)
+    private String organizationId;
+
+    @Column(name = "role", nullable = false, columnDefinition = "ENUM('PROFESSOR','ALUNO')")
     private String role;
 
     @Column(name = "joined_at", nullable = false, updatable = false)
