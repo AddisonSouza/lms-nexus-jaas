@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, BookOpen } from 'lucide-react'
+import { Plus, BookOpen, LogIn } from 'lucide-react'
 import { useClassrooms } from '../hooks/useClassrooms'
 import { useCreateClassroom } from '../hooks/useCreateClassroom'
 import { useAuthStore } from '@features/auth/store/authStore'
 import ClassroomFormDialog from './ClassroomFormDialog'
+import JoinClassroomForm from './JoinClassroomForm'
 import type { ClassroomFormData } from '../schemas/classroomSchema'
 
 function ClassroomListPage() {
   const [showCreate, setShowCreate] = useState(false)
+  const [showJoin, setShowJoin] = useState(false)
   const { data: classrooms, isLoading } = useClassrooms()
   const createClassroom = useCreateClassroom()
 
@@ -27,15 +29,29 @@ function ClassroomListPage() {
           <BookOpen className="h-6 w-6" />
           <h1 className="text-2xl font-semibold">Turmas</h1>
         </div>
-        {canManage && (
+        <div className="flex gap-2">
           <button
-            onClick={() => setShowCreate(true)}
-            className="flex items-center gap-2 rounded bg-primary px-4 py-2 text-sm text-primary-foreground"
+            onClick={() => setShowJoin((v) => !v)}
+            className="flex items-center gap-2 rounded border px-4 py-2 text-sm hover:bg-muted"
           >
-            <Plus className="h-4 w-4" /> Nova Turma
+            <LogIn className="h-4 w-4" /> Entrar via código
           </button>
-        )}
+          {canManage && (
+            <button
+              onClick={() => setShowCreate(true)}
+              className="flex items-center gap-2 rounded bg-primary px-4 py-2 text-sm text-primary-foreground"
+            >
+              <Plus className="h-4 w-4" /> Nova Turma
+            </button>
+          )}
+        </div>
       </div>
+
+      {showJoin && (
+        <div className="rounded-lg border p-4">
+          <JoinClassroomForm />
+        </div>
+      )}
 
       {isLoading ? (
         <p className="text-muted-foreground">Carregando turmas...</p>

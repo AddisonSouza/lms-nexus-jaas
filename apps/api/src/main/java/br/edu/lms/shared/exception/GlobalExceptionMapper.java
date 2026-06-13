@@ -3,6 +3,7 @@ package br.edu.lms.shared.exception;
 import br.edu.lms.module.classroom.domain.exception.ClassroomArchivedException;
 import br.edu.lms.module.classroom.domain.exception.ClassroomMemberNotFoundException;
 import br.edu.lms.module.classroom.domain.exception.ClassroomNotFoundException;
+import br.edu.lms.module.classroom.domain.exception.InvalidInviteCodeException;
 import br.edu.lms.module.classroom.domain.exception.MemberNotInOrganizationException;
 import br.edu.lms.module.identity.domain.exception.EmailAlreadyConfirmedException;
 import br.edu.lms.module.identity.domain.exception.EmailAlreadyInUseException;
@@ -109,6 +110,12 @@ public class GlobalExceptionMapper implements ExceptionMapper<Exception> {
         if (exception instanceof OrganizationNameAlreadyExistsException) {
             return Response.status(Response.Status.CONFLICT)
                     .entity(Map.of("error", "ORGANIZATION_NAME_ALREADY_EXISTS"))
+                    .build();
+        }
+
+        if (exception instanceof InvalidInviteCodeException) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("error", "INVALID_INVITE_CODE"))
                     .build();
         }
 
