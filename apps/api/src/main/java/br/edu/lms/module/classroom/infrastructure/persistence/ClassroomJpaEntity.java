@@ -29,7 +29,7 @@ public class ClassroomJpaEntity {
     @Column(name = "academic_period", nullable = false, length = 100)
     private String academicPeriod;
 
-    @Column(name = "status", nullable = false, length = 20)
+    @Column(name = "status", nullable = false, columnDefinition = "ENUM('ACTIVE','ARCHIVED')")
     private String status;
 
     @Column(name = "invite_code", nullable = false, length = 6)

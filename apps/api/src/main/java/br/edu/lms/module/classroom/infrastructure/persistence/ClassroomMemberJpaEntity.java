@@ -26,7 +26,7 @@ public class ClassroomMemberJpaEntity {
     @Column(name = "organization_id", nullable = false, length = 36)
     private String organizationId;
 
-    @Column(name = "role", nullable = false, length = 20)
+    @Column(name = "role", nullable = false, columnDefinition = "ENUM('PROFESSOR','ALUNO')")
     private String role;
 
     @Column(name = "joined_at", nullable = false, updatable = false)

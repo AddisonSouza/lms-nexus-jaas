@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public class OrganizationJpaEntity {
 
     @Id
-    @Column(name = "id", nullable = false, length = 36)
+    @Column(name = "id", nullable = false, columnDefinition = "CHAR(36)")
     @EqualsAndHashCode.Include
     private String id;
 
@@ -23,7 +23,7 @@ public class OrganizationJpaEntity {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "owner_id", nullable = false, length = 36)
+    @Column(name = "owner_id", nullable = false, columnDefinition = "CHAR(36)")
     private String ownerId;
 
     @Column(name = "created_at", nullable = false, updatable = false)

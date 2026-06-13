@@ -13,14 +13,14 @@ import java.time.LocalDateTime;
 public class OrganizationMemberJpaEntity {
 
     @Id
-    @Column(name = "id", nullable = false, length = 36)
+    @Column(name = "id", nullable = false, columnDefinition = "CHAR(36)")
     @EqualsAndHashCode.Include
     private String id;
 
-    @Column(name = "organization_id", nullable = false, length = 36)
+    @Column(name = "organization_id", nullable = false, columnDefinition = "CHAR(36)")
     private String organizationId;
 
-    @Column(name = "user_id", nullable = false, length = 36)
+    @Column(name = "user_id", nullable = false, columnDefinition = "CHAR(36)")
     private String userId;
 
     @Column(name = "role", nullable = false, length = 50)
