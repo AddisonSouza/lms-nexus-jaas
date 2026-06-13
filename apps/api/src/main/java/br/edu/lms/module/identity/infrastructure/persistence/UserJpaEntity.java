@@ -28,7 +28,7 @@ public class UserJpaEntity {
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(name = "status", nullable = false, columnDefinition = "ENUM('PENDING_CONFIRMATION','ACTIVE','SUSPENDED')")
     private UserStatus status;
 
     @Column(name = "created_at", nullable = false, updatable = false)
