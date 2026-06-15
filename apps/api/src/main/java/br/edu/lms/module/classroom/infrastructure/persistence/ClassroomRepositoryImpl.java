@@ -141,6 +141,17 @@ public class ClassroomRepositoryImpl implements ClassroomRepository {
     }
 
     @Override
+    public Optional<Classroom> findByInviteCode(String code) {
+        return em.createQuery(
+                        "SELECT c FROM ClassroomJpaEntity c WHERE c.inviteCode = :code AND c.deletedAt IS NULL",
+                        ClassroomJpaEntity.class)
+                .setParameter("code", code)
+                .getResultStream()
+                .findFirst()
+                .map(this::toDomain);
+    }
+
+    @Override
     public boolean isUserInOrganization(String userId, String organizationId) {
         var count = em.createQuery(
                         "SELECT COUNT(m) FROM br.edu.lms.module.organization.infrastructure.persistence.OrganizationMemberJpaEntity m " +

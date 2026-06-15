@@ -44,3 +44,13 @@ export async function addClassroomMember(classroomId: string, data: AddMemberPay
 export async function removeClassroomMember(classroomId: string, userId: string): Promise<void> {
   await api.delete(`/classrooms/${classroomId}/members/${userId}`)
 }
+
+export async function joinClassroom(inviteCode: string): Promise<Classroom> {
+  const res = await api.post<Classroom>('/classrooms/join', { inviteCode })
+  return res.data
+}
+
+export async function regenerateInviteCode(classroomId: string): Promise<Classroom> {
+  const res = await api.post<Classroom>(`/classrooms/${classroomId}/invite-code/regenerate`)
+  return res.data
+}

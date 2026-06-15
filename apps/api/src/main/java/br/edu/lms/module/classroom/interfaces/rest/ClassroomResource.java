@@ -2,18 +2,22 @@ package br.edu.lms.module.classroom.interfaces.rest;
 
 import br.edu.lms.module.classroom.application.dto.AddClassroomMemberCommand;
 import br.edu.lms.module.classroom.application.dto.CreateClassroomCommand;
+import br.edu.lms.module.classroom.application.dto.JoinClassroomCommand;
 import br.edu.lms.module.classroom.application.dto.UpdateClassroomCommand;
 import br.edu.lms.module.classroom.domain.model.ClassroomId;
 import br.edu.lms.module.classroom.domain.port.in.AddClassroomMemberUseCase;
 import br.edu.lms.module.classroom.domain.port.in.CreateClassroomUseCase;
 import br.edu.lms.module.classroom.domain.port.in.DeleteClassroomUseCase;
 import br.edu.lms.module.classroom.domain.port.in.GetClassroomUseCase;
+import br.edu.lms.module.classroom.domain.port.in.JoinClassroomUseCase;
 import br.edu.lms.module.classroom.domain.port.in.ListClassroomMembersUseCase;
 import br.edu.lms.module.classroom.domain.port.in.ListClassroomsUseCase;
+import br.edu.lms.module.classroom.domain.port.in.RegenerateInviteCodeUseCase;
 import br.edu.lms.module.classroom.domain.port.in.RemoveClassroomMemberUseCase;
 import br.edu.lms.module.classroom.domain.port.in.UpdateClassroomUseCase;
 import br.edu.lms.module.classroom.interfaces.rest.dto.AddMemberRequest;
 import br.edu.lms.module.classroom.interfaces.rest.dto.CreateClassroomRequest;
+import br.edu.lms.module.classroom.interfaces.rest.dto.JoinClassroomRequest;
 import br.edu.lms.module.classroom.interfaces.rest.dto.UpdateClassroomRequest;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
@@ -42,6 +46,8 @@ public class ClassroomResource {
     private final AddClassroomMemberUseCase addClassroomMemberUseCase;
     private final RemoveClassroomMemberUseCase removeClassroomMemberUseCase;
     private final ListClassroomMembersUseCase listClassroomMembersUseCase;
+    private final JoinClassroomUseCase joinClassroomUseCase;
+    private final RegenerateInviteCodeUseCase regenerateInviteCodeUseCase;
     private final JsonWebToken jwt;
 
     @GET
@@ -155,6 +161,37 @@ public class ClassroomResource {
         var orgId = (String) jwt.getClaim("org");
         removeClassroomMemberUseCase.execute(ClassroomId.of(id), userId, orgId);
         return Response.noContent().build();
+    }
+
+    @POST
+    @Path("/join")
+    @RolesAllowed({"ADMIN_ORG", "GESTOR", "PROFESSOR", "ALUNO"})
+    @Operation(summary = "Ingressar em turma via código de convite")
+    @APIResponse(responseCode = "201", description = "Ingresso realizado com sucesso")
+    @APIResponse(responseCode = "200", description = "Usuário já era membro da turma")
+    @APIResponse(responseCode = "404", description = "Código inválido")
+    @APIResponse(responseCode = "422", description = "Turma arquivada")
+    public Response join(@Valid JoinClassroomRequest request) {
+        var userId = jwt.getSubject();
+        var result = joinClassroomUseCase.execute(
+                JoinClassroomCommand.builder()
+                        .inviteCode(request.inviteCode())
+                        .userId(userId)
+                        .build());
+        return Response.status(Response.Status.CREATED).entity(result).build();
+    }
+
+    @POST
+    @Path("/{id}/invite-code/regenerate")
+    @RolesAllowed({"ADMIN_ORG", "GESTOR", "PROFESSOR"})
+    @Operation(summary = "Regenerar código de convite da turma")
+    @APIResponse(responseCode = "200", description = "Código regenerado")
+    @APIResponse(responseCode = "404", description = "Turma não encontrada")
+    @APIResponse(responseCode = "422", description = "Turma arquivada")
+    public Response regenerateInviteCode(@PathParam("id") String id) {
+        var orgId = (String) jwt.getClaim("org");
+        var result = regenerateInviteCodeUseCase.execute(ClassroomId.of(id), orgId);
+        return Response.ok(result).build();
     }
 
     private String primaryRole() {

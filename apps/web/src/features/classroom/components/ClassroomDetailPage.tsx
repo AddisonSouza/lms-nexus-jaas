@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Pencil, Trash2 } from 'lucide-react'
+import { ArrowLeft, Pencil, Trash2, Copy, RefreshCw } from 'lucide-react'
 import { useClassroom } from '../hooks/useClassroom'
 import { useUpdateClassroom } from '../hooks/useUpdateClassroom'
 import { useDeleteClassroom } from '../hooks/useDeleteClassroom'
+import { useRegenerateInviteCode } from '../hooks/useRegenerateInviteCode'
 import { useAuthStore } from '@features/auth/store/authStore'
 import ClassroomFormDialog from './ClassroomFormDialog'
 import ClassroomMembersPanel from './ClassroomMembersPanel'
@@ -17,10 +18,12 @@ function ClassroomDetailPage() {
   const { data: classroom, isLoading } = useClassroom(id!)
   const updateClassroom = useUpdateClassroom(id!)
   const deleteClassroom = useDeleteClassroom()
+  const regenerateCode = useRegenerateInviteCode(id!)
 
   const token = useAuthStore((s) => s.accessToken)
   const role = token ? (JSON.parse(atob(token.split('.')[1])).groups?.[0] ?? 'ALUNO') : 'ALUNO'
   const canManage = role === 'ADMIN_ORG' || role === 'GESTOR'
+  const canRegenerateCode = role === 'ADMIN_ORG' || role === 'GESTOR' || role === 'PROFESSOR'
 
   const handleUpdate = (data: ClassroomFormData) => {
     updateClassroom.mutate(data, { onSuccess: () => setShowEdit(false) })
@@ -83,7 +86,26 @@ function ClassroomDetailPage() {
           {classroom.inviteCode && (
             <div>
               <p className="text-muted-foreground">Código de Convite</p>
-              <p className="font-mono font-medium">{classroom.inviteCode}</p>
+              <div className="flex items-center gap-2">
+                <span className="font-mono font-medium tracking-widest">{classroom.inviteCode}</span>
+                <button
+                  onClick={() => navigator.clipboard.writeText(classroom.inviteCode!)}
+                  className="text-muted-foreground hover:text-foreground"
+                  title="Copiar código"
+                >
+                  <Copy className="h-4 w-4" />
+                </button>
+                {canRegenerateCode && (
+                  <button
+                    onClick={() => regenerateCode.mutate()}
+                    disabled={regenerateCode.isPending}
+                    className="text-muted-foreground hover:text-foreground disabled:opacity-50"
+                    title="Regenerar código"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${regenerateCode.isPending ? 'animate-spin' : ''}`} />
+                  </button>
+                )}
+              </div>
             </div>
           )}
           {classroom.description && (
