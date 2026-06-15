@@ -63,26 +63,26 @@
 
 ## 10. Frontend — Setup e Types
 
-- [ ] 10.1 [FE] Estender `features/curriculum/types.ts` com interfaces `Topic`, `SubjectContent`, `ContentType`, `SubjectContentsGrouped`
-- [ ] 10.2 [FE] Criar `topic-api.ts` e `content-api.ts` em `features/curriculum/api/`; estender `query-keys.ts` com chaves `topics` e `contents`
-- [ ] 10.3 [FE] Criar schemas Zod `topicSchema.ts` e `contentSchema.ts` (discriminated union por `ContentType`) em `features/curriculum/schemas/`
+- [x] 10.1 [FE] Estender `features/curriculum/types.ts` com interfaces `Topic`, `SubjectContent`, `ContentType`, `SubjectContentsGrouped`
+- [x] 10.2 [FE] Criar `topic-api.ts` e `content-api.ts` em `features/curriculum/api/`; estender `query-keys.ts` com chaves `topics` e `contents`
+- [x] 10.3 [FE] Criar schemas Zod `topicSchema.ts` e `contentSchema.ts` (discriminated union por `ContentType`) em `features/curriculum/schemas/`
 
 ## 11. Frontend — Hooks
 
-- [ ] 11.1 [FE] Criar hooks de tópico: `useTopics`, `useCreateTopic`, `useUpdateTopic`, `useDeleteTopic`, `useReorderTopics`
-- [ ] 11.2 [FE] Criar hooks de conteúdo: `useSubjectContents`, `useCreateContent`, `useUpdateContent`, `useDeleteContent`
+- [x] 11.1 [FE] Criar hooks de tópico: `useTopics`, `useCreateTopic`, `useUpdateTopic`, `useDeleteTopic`, `useReorderTopics`
+- [x] 11.2 [FE] Criar hooks de conteúdo: `useSubjectContents`, `useCreateContent`, `useUpdateContent`, `useDeleteContent`
 
 ## 12. Frontend — Componentes
 
-- [ ] 12.1 [FE] Criar `SubjectDetailPage.tsx` — página de detalhe da disciplina; rota `/subjects/:subjectId` adicionada em `routes.tsx`
-- [ ] 12.2 [FE] Criar `TopicList.tsx` — lista de tópicos com accordion (collapse); cada tópico mostra conteúdos; professor vê botões de ação
-- [ ] 12.3 [FE] Criar `TopicFormDialog.tsx` — dialog de criar/editar tópico com React Hook Form + Zod
-- [ ] 12.4 [FE] Criar `ContentFormDialog.tsx` — dialog de criar/editar conteúdo; campos variam por `ContentType` (discriminated union); `FileUpload` para tipos com arquivo
-- [ ] 12.5 [FE] Criar `ContentCard.tsx` — card de material com ícone por tipo (Lucide), link externo ou download
-- [ ] 12.6 [FE] Adicionar link "Ver disciplina" na `SubjectListPage.tsx` para navegar ao detalhe
+- [x] 12.1 [FE] Criar `SubjectDetailPage.tsx` — página de detalhe da disciplina; rota `/curriculum/:subjectId` adicionada em `routes.tsx`
+- [x] 12.2 [FE] Criar `TopicList.tsx` — lista de tópicos com accordion (collapse); cada tópico mostra conteúdos; professor vê botões de ação
+- [x] 12.3 [FE] Criar `TopicFormDialog.tsx` — dialog de criar/editar tópico com React Hook Form + Zod
+- [x] 12.4 [FE] Criar `ContentFormDialog.tsx` — dialog de criar/editar conteúdo; campos variam por `ContentType` (discriminated union); `FileUpload` para tipos com arquivo
+- [x] 12.5 [FE] Criar `ContentCard.tsx` — card de material com ícone por tipo (Lucide), link externo ou download
+- [x] 12.6 [FE] Adicionar link "Ver disciplina" na `SubjectListPage.tsx` para navegar ao detalhe (já presente como link no nome)
 
 ## 13. Testes Frontend
 
-- [ ] 13.1 [FE] Testes de `TopicFormDialog` com Testing Library + MSW: criação e validação de erros
-- [ ] 13.2 [FE] Testes de `ContentFormDialog`: renderização por tipo, validação Zod, submit com FormData
-- [ ] 13.3 [FE] Testes de `useCreateContent` e `useCreateTopic` com renderHook
+- [x] 13.1 [FE] Testes de `TopicFormDialog` com Testing Library + MSW: criação e validação de erros
+- [x] 13.2 [FE] Testes de `ContentFormDialog`: renderização por tipo, validação Zod, submit com FormData
+- [x] 13.3 [FE] Testes de `useCreateContent` e `useCreateTopic` com renderHook
