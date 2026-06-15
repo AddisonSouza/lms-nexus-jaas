@@ -30,29 +30,29 @@
 
 ## 5. Infrastructure — Persistence (curriculum)
 
-- [ ] 5.1 [BE] Criar `TopicJpaEntity` + `TopicRepositoryImpl` + `TopicMapper` (MapStruct) em `curriculum/infrastructure/persistence/`
-- [ ] 5.2 [BE] Criar `SubjectContentJpaEntity` + `SubjectContentRepositoryImpl` + `SubjectContentMapper` (MapStruct) em `curriculum/infrastructure/persistence/`
+- [x] 5.1 [BE] Criar `TopicJpaEntity` + `TopicRepositoryImpl` + `TopicMapper` (MapStruct) em `curriculum/infrastructure/persistence/`
+- [x] 5.2 [BE] Criar `SubjectContentJpaEntity` + `SubjectContentRepositoryImpl` + `SubjectContentMapper` (MapStruct) em `curriculum/infrastructure/persistence/`
 
 ## 6. Application — Use Cases Topic
 
-- [ ] 6.1 [BE] Implementar `CreateTopicService`: valida que `subjectId` pertence à org do JWT, atribui `position = max + 1`, persiste
-- [ ] 6.2 [BE] Implementar `UpdateTopicService`: atualiza `title`; valida ownership
-- [ ] 6.3 [BE] Implementar `DeleteTopicService`: soft delete do topic + soft delete em cascata de todos os `SubjectContent` do tópico
-- [ ] 6.4 [BE] Implementar `ReorderTopicsService`: valida que todos os ids pertencem ao `subjectId`; atualiza `position` de cada topic
-- [ ] 6.5 [BE] Implementar `ListTopicsService`: filtra por `subjectId` + `organizationId` + `deletedAt IS NULL`, ordena por `position`
+- [x] 6.1 [BE] Implementar `CreateTopicService`: valida que `subjectId` pertence à org do JWT, atribui `position = max + 1`, persiste
+- [x] 6.2 [BE] Implementar `UpdateTopicService`: atualiza `title`; valida ownership
+- [x] 6.3 [BE] Implementar `DeleteTopicService`: soft delete do topic + soft delete em cascata de todos os `SubjectContent` do tópico
+- [x] 6.4 [BE] Implementar `ReorderTopicsService`: valida que todos os ids pertencem ao `subjectId`; atualiza `position` de cada topic
+- [x] 6.5 [BE] Implementar `ListTopicsService`: filtra por `subjectId` + `organizationId` + `deletedAt IS NULL`, ordena por `position`
 
 ## 7. Application — Use Cases Content
 
-- [ ] 7.1 [BE] Implementar `CreateContentService`: valida `topicId`, determina se é URL ou arquivo, chama `StoragePort.store()` para tipos com arquivo, persiste
-- [ ] 7.2 [BE] Implementar `UpdateContentService`: permite alterar `title`, `description`, `externalUrl`; substituição de arquivo requer soft delete do fileKey antigo + novo store
-- [ ] 7.3 [BE] Implementar `DeleteContentService`: soft delete do conteúdo; se `fileKey` presente, chama `StoragePort.delete()`
-- [ ] 7.4 [BE] Implementar `ListSubjectContentsService`: retorna conteúdos agrupados por tópico; valida acesso do ALUNO via `OrganizationMemberQueryPort`
+- [x] 7.1 [BE] Implementar `CreateContentService`: valida `topicId`, determina se é URL ou arquivo, chama `StoragePort.store()` para tipos com arquivo, persiste
+- [x] 7.2 [BE] Implementar `UpdateContentService`: permite alterar `title`, `description`, `externalUrl`; substituição de arquivo requer soft delete do fileKey antigo + novo store
+- [x] 7.3 [BE] Implementar `DeleteContentService`: soft delete do conteúdo; se `fileKey` presente, chama `StoragePort.delete()`
+- [x] 7.4 [BE] Implementar `ListSubjectContentsService`: retorna conteúdos agrupados por tópico; valida acesso do ALUNO via `OrganizationMemberQueryPort`
 
 ## 8. REST Resources (curriculum)
 
-- [ ] 8.1 [BE] Criar `TopicResource` em `curriculum/interfaces/rest/`: `POST`, `PUT`, `DELETE`, `PUT /reorder`, `GET` para `/subjects/{subjectId}/topics`; `@RolesAllowed` corretos
-- [ ] 8.2 [BE] Criar `ContentResource` em `curriculum/interfaces/rest/`: `POST` (multipart), `PUT`, `DELETE`, `GET` para `/subjects/{subjectId}/contents`; limite 50MB configurado
-- [ ] 8.3 [BE] Criar DTOs REST: `CreateTopicRequest`, `UpdateTopicRequest`, `ReorderTopicsRequest`, `CreateContentRequest`, `UpdateContentRequest` e responses correspondentes
+- [x] 8.1 [BE] Criar `TopicResource` em `curriculum/interfaces/rest/`: `POST`, `PUT`, `DELETE`, `PUT /reorder`, `GET` para `/subjects/{subjectId}/topics`; `@RolesAllowed` corretos
+- [x] 8.2 [BE] Criar `ContentResource` em `curriculum/interfaces/rest/`: `POST` (multipart), `PUT`, `DELETE`, `GET` para `/subjects/{subjectId}/contents`; limite 50MB configurado
+- [x] 8.3 [BE] Criar DTOs REST: `CreateTopicRequest`, `UpdateTopicRequest`, `ReorderTopicsRequest`, `UpdateContentRequest` e responses correspondentes
 
 ## 9. Testes Backend
 
