@@ -22,7 +22,7 @@ public class LinkSubjectToClassroomService implements LinkSubjectToClassroomUseC
     private final ClassroomQueryPort classroomQueryPort;
 
     @Override
-    public void execute(SubjectId subjectId, LinkClassroomCommand command) {
+    public boolean execute(SubjectId subjectId, LinkClassroomCommand command) {
         subjectRepository.findById(subjectId, command.getOrganizationId())
                 .orElseThrow(SubjectNotFoundException::new);
 
@@ -37,10 +37,11 @@ public class LinkSubjectToClassroomService implements LinkSubjectToClassroomUseC
 
         if (subjectRepository.existsSubjectClassroomLink(subjectId.getValue(), command.getClassroomId())) {
             log.info("Subject {} already linked to classroom {} — idempotent", subjectId.getValue(), command.getClassroomId());
-            return;
+            return false;
         }
 
         subjectRepository.saveSubjectClassroomLink(subjectId.getValue(), command.getClassroomId());
         log.info("Subject {} linked to classroom {}", subjectId.getValue(), command.getClassroomId());
+        return true;
     }
 }

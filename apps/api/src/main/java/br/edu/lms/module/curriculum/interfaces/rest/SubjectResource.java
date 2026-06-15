@@ -129,13 +129,13 @@ public class SubjectResource {
     @APIResponse(responseCode = "422", description = "Turma arquivada")
     public Response linkClassroom(@PathParam("id") String id, @Valid LinkClassroomRequest request) {
         var orgId = (String) jwt.getClaim("org");
-        linkSubjectToClassroomUseCase.execute(
+        boolean created = linkSubjectToClassroomUseCase.execute(
                 SubjectId.of(id),
                 LinkClassroomCommand.builder()
                         .classroomId(request.classroomId())
                         .organizationId(orgId)
                         .build());
-        return Response.status(Response.Status.CREATED).build();
+        return created ? Response.status(Response.Status.CREATED).build() : Response.ok().build();
     }
 
     @DELETE
@@ -160,13 +160,13 @@ public class SubjectResource {
     @APIResponse(responseCode = "422", description = "Membro não encontrado na organização ou não é PROFESSOR")
     public Response assignTeacher(@PathParam("id") String id, @Valid AssignTeacherRequest request) {
         var orgId = (String) jwt.getClaim("org");
-        assignTeacherToSubjectUseCase.execute(
+        boolean created = assignTeacherToSubjectUseCase.execute(
                 SubjectId.of(id),
                 AssignTeacherCommand.builder()
                         .memberId(request.memberId())
                         .organizationId(orgId)
                         .build());
-        return Response.status(Response.Status.CREATED).build();
+        return created ? Response.status(Response.Status.CREATED).build() : Response.ok().build();
     }
 
     @DELETE

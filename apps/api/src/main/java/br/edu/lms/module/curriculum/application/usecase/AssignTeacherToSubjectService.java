@@ -20,7 +20,7 @@ public class AssignTeacherToSubjectService implements AssignTeacherToSubjectUseC
     private final OrganizationMemberQueryPort memberQueryPort;
 
     @Override
-    public void execute(SubjectId subjectId, AssignTeacherCommand command) {
+    public boolean execute(SubjectId subjectId, AssignTeacherCommand command) {
         subjectRepository.findById(subjectId, command.getOrganizationId())
                 .orElseThrow(SubjectNotFoundException::new);
 
@@ -34,10 +34,11 @@ public class AssignTeacherToSubjectService implements AssignTeacherToSubjectUseC
 
         if (subjectRepository.existsSubjectTeacherLink(subjectId.getValue(), command.getMemberId())) {
             log.info("Teacher {} already assigned to subject {} — idempotent", command.getMemberId(), subjectId.getValue());
-            return;
+            return false;
         }
 
         subjectRepository.saveSubjectTeacherLink(subjectId.getValue(), command.getMemberId());
         log.info("Teacher {} assigned to subject {}", command.getMemberId(), subjectId.getValue());
+        return true;
     }
 }

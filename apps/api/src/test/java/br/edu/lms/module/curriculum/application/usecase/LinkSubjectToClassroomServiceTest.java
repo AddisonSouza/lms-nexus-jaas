@@ -43,8 +43,9 @@ class LinkSubjectToClassroomServiceTest {
         when(classroomQueryPort.isArchived("cls-1")).thenReturn(false);
         when(subjectRepository.existsSubjectClassroomLink("sub-1", "cls-1")).thenReturn(false);
 
-        sut.execute(subjectId, LinkClassroomCommand.builder().classroomId("cls-1").organizationId("org-1").build());
+        boolean created = sut.execute(subjectId, LinkClassroomCommand.builder().classroomId("cls-1").organizationId("org-1").build());
 
+        assertThat(created).isTrue();
         verify(subjectRepository).saveSubjectClassroomLink("sub-1", "cls-1");
     }
 
@@ -56,8 +57,9 @@ class LinkSubjectToClassroomServiceTest {
         when(classroomQueryPort.isArchived("cls-1")).thenReturn(false);
         when(subjectRepository.existsSubjectClassroomLink("sub-1", "cls-1")).thenReturn(true);
 
-        sut.execute(subjectId, LinkClassroomCommand.builder().classroomId("cls-1").organizationId("org-1").build());
+        boolean created = sut.execute(subjectId, LinkClassroomCommand.builder().classroomId("cls-1").organizationId("org-1").build());
 
+        assertThat(created).isFalse();
         verify(subjectRepository, never()).saveSubjectClassroomLink(any(), any());
     }
 

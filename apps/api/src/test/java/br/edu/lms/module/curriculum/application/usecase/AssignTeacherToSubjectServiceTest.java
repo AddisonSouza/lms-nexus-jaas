@@ -38,8 +38,9 @@ class AssignTeacherToSubjectServiceTest {
         when(memberQueryPort.hasProfessorRole("mem-1", "org-1")).thenReturn(true);
         when(subjectRepository.existsSubjectTeacherLink("sub-1", "mem-1")).thenReturn(false);
 
-        sut.execute(subjectId, AssignTeacherCommand.builder().memberId("mem-1").organizationId("org-1").build());
+        boolean created = sut.execute(subjectId, AssignTeacherCommand.builder().memberId("mem-1").organizationId("org-1").build());
 
+        assertThat(created).isTrue();
         verify(subjectRepository).saveSubjectTeacherLink("sub-1", "mem-1");
     }
 
@@ -51,8 +52,9 @@ class AssignTeacherToSubjectServiceTest {
         when(memberQueryPort.hasProfessorRole("mem-1", "org-1")).thenReturn(true);
         when(subjectRepository.existsSubjectTeacherLink("sub-1", "mem-1")).thenReturn(true);
 
-        sut.execute(subjectId, AssignTeacherCommand.builder().memberId("mem-1").organizationId("org-1").build());
+        boolean created = sut.execute(subjectId, AssignTeacherCommand.builder().memberId("mem-1").organizationId("org-1").build());
 
+        assertThat(created).isFalse();
         verify(subjectRepository, never()).saveSubjectTeacherLink(any(), any());
     }
 
