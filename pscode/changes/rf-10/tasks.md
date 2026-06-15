@@ -1,32 +1,32 @@
 ## 1. Storage Module
 
-- [ ] 1.1 [INFRA] Criar módulo `storage`: pacotes `domain/model/`, `domain/port/out/`, `application/usecase/`, `infrastructure/`, `interfaces/rest/`
-- [ ] 1.2 [BE] Criar VOs `StoredFile` e enum `StorageContext` (`LESSON_MATERIAL`, `TASK_ATTACHMENT`) em `storage/domain/model/`
-- [ ] 1.3 [BE] Criar interface `StoragePort` em `storage/domain/port/out/` com métodos `store`, `retrieve`, `delete`, `getPublicUrl`
-- [ ] 1.4 [INFRA] Adicionar dependência `quarkus-amazon-s3` ao `pom.xml`; adicionar serviço `minio` ao `docker-compose.yml` com volume `minio_data` e healthcheck
-- [ ] 1.5 [BE] Implementar `S3StorageAdapter` em `storage/infrastructure/` — usa Quarkus S3 Client; key pattern `{context}/{ano}/{mes}/{uuid}-{filename}`; em dev aponta para MinIO via `quarkus.s3.endpoint-override`
-- [ ] 1.6 [BE] Criar `FileResource` em `storage/interfaces/rest/` — `GET /api/files/{fileKey}` com autenticação; chama `ServeFileUseCase`
-- [ ] 1.7 [INFRA] Adicionar configurações MinIO/S3 ao `application.properties` (endpoint-override, credentials, bucket) e variáveis ao `.env.example`
+- [x] 1.1 [INFRA] Criar módulo `storage`: pacotes `domain/model/`, `domain/port/out/`, `application/usecase/`, `infrastructure/`, `interfaces/rest/`
+- [x] 1.2 [BE] Criar VOs `StoredFile` e enum `StorageContext` (`LESSON_MATERIAL`, `TASK_ATTACHMENT`) em `storage/domain/model/`
+- [x] 1.3 [BE] Criar interface `StoragePort` em `storage/domain/port/out/` com métodos `store`, `retrieve`, `delete`, `getPublicUrl`
+- [x] 1.4 [INFRA] Adicionar dependência `quarkus-amazon-s3` ao `pom.xml`; adicionar serviço `minio` ao `docker-compose.yml` com volume `minio_data` e healthcheck
+- [x] 1.5 [BE] Implementar `S3StorageAdapter` em `storage/infrastructure/` — usa Quarkus S3 Client; key pattern `{context}/{ano}/{mes}/{uuid}-{filename}`; em dev aponta para MinIO via `quarkus.s3.endpoint-override`
+- [x] 1.6 [BE] Criar `FileResource` em `storage/interfaces/rest/` — `GET /api/files/{fileKey}` com autenticação; chama `ServeFileUseCase`
+- [x] 1.7 [INFRA] Adicionar configurações MinIO/S3 ao `application.properties` (endpoint-override, credentials, bucket) e variáveis ao `.env.example`
 
 ## 2. Flyway Migrations
 
-- [ ] 2.1 [INFRA] Criar `V013__create_subject_topics_table.sql` — tabela `subject_topics` (`id`, `subject_id`, `organization_id`, `title`, `position INT NOT NULL`, `created_at`, `updated_at`, `deleted_at`; FK para `subjects`)
-- [ ] 2.2 [INFRA] Criar `V014__create_subject_contents_table.sql` — tabela `subject_contents` (`id`, `topic_id`, `organization_id`, `title`, `content_type VARCHAR(20)`, `external_url TEXT NULL`, `file_key VARCHAR(512) NULL`, `description TEXT NULL`, `position INT NOT NULL`, `created_at`, `updated_at`, `deleted_at`; FK para `subject_topics`)
+- [x] 2.1 [INFRA] Criar `V013__create_subject_topics_table.sql` — tabela `subject_topics` (`id`, `subject_id`, `organization_id`, `title`, `position INT NOT NULL`, `created_at`, `updated_at`, `deleted_at`; FK para `subjects`)
+- [x] 2.2 [INFRA] Criar `V014__create_subject_contents_table.sql` — tabela `subject_contents` (`id`, `topic_id`, `organization_id`, `title`, `content_type VARCHAR(20)`, `external_url TEXT NULL`, `file_key VARCHAR(512) NULL`, `description TEXT NULL`, `position INT NOT NULL`, `created_at`, `updated_at`, `deleted_at`; FK para `subject_topics`)
 
 ## 3. Domain — Topic
 
-- [ ] 3.1 [BE] Criar VO `TopicId` e domain model `Topic` em `curriculum/domain/model/` (`@Getter @Builder @EqualsAndHashCode`)
-- [ ] 3.2 [BE] Criar ports de entrada em `curriculum/domain/port/in/`: `CreateTopicUseCase`, `UpdateTopicUseCase`, `DeleteTopicUseCase`, `ReorderTopicsUseCase`, `ListTopicsUseCase`
-- [ ] 3.3 [BE] Criar `TopicRepository` em `curriculum/domain/port/out/`
-- [ ] 3.4 [BE] Criar exceptions `TopicNotFoundException`, `TopicAccessDeniedException` em `curriculum/domain/exception/`
+- [x] 3.1 [BE] Criar VO `TopicId` e domain model `Topic` em `curriculum/domain/model/` (`@Getter @Builder @EqualsAndHashCode`)
+- [x] 3.2 [BE] Criar ports de entrada em `curriculum/domain/port/in/`: `CreateTopicUseCase`, `UpdateTopicUseCase`, `DeleteTopicUseCase`, `ReorderTopicsUseCase`, `ListTopicsUseCase`
+- [x] 3.3 [BE] Criar `TopicRepository` em `curriculum/domain/port/out/`
+- [x] 3.4 [BE] Criar exceptions `TopicNotFoundException`, `TopicAccessDeniedException` em `curriculum/domain/exception/`
 
 ## 4. Domain — SubjectContent
 
-- [ ] 4.1 [BE] Criar enum `ContentType` (`VIDEO`, `DOCUMENTO`, `LINK`, `ARQUIVO`) e VO `SubjectContentId` em `curriculum/domain/model/`
-- [ ] 4.2 [BE] Criar domain model `SubjectContent` em `curriculum/domain/model/`
-- [ ] 4.3 [BE] Criar ports de entrada: `CreateContentUseCase`, `UpdateContentUseCase`, `DeleteContentUseCase`, `ListSubjectContentsUseCase`
-- [ ] 4.4 [BE] Criar `ContentRepository` em `curriculum/domain/port/out/`
-- [ ] 4.5 [BE] Criar exceptions `ContentNotFoundException`, `ContentAccessDeniedException`, `InvalidFileTypeException`
+- [x] 4.1 [BE] Criar enum `ContentType` (`VIDEO`, `DOCUMENTO`, `LINK`, `ARQUIVO`) e VO `SubjectContentId` em `curriculum/domain/model/`
+- [x] 4.2 [BE] Criar domain model `SubjectContent` em `curriculum/domain/model/`
+- [x] 4.3 [BE] Criar ports de entrada: `CreateContentUseCase`, `UpdateContentUseCase`, `DeleteContentUseCase`, `ListSubjectContentsUseCase`
+- [x] 4.4 [BE] Criar `ContentRepository` em `curriculum/domain/port/out/`
+- [x] 4.5 [BE] Criar exceptions `ContentNotFoundException`, `ContentAccessDeniedException`, `InvalidFileTypeException`
 
 ## 5. Infrastructure — Persistence (curriculum)
 

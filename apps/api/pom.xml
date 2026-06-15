@@ -88,6 +88,17 @@
       <artifactId>quarkus-hibernate-validator</artifactId>
     </dependency>
 
+    <!-- Storage — S3 / MinIO -->
+    <dependency>
+      <groupId>io.quarkiverse.amazonservices</groupId>
+      <artifactId>quarkus-amazon-s3</artifactId>
+      <version>3.0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>url-connection-client</artifactId>
+    </dependency>
+
     <!-- OpenAPI -->
     <dependency>
       <groupId>io.quarkus</groupId>
