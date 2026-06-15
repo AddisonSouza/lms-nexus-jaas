@@ -12,6 +12,7 @@ import AcceptInvitePage from '@features/invitation/components/AcceptInvitePage'
 import ClassroomListPage from '@features/classroom/components/ClassroomListPage'
 import ClassroomDetailPage from '@features/classroom/components/ClassroomDetailPage'
 import SubjectListPage from '@features/curriculum/components/SubjectListPage'
+import SubjectDetailPage from '@features/curriculum/components/SubjectDetailPage'
 
 export const router = createBrowserRouter([
   {
@@ -79,6 +80,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <SubjectListPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/curriculum/:subjectId',
+    element: (
+      <ProtectedRoute>
+        <SubjectDetailPage />
       </ProtectedRoute>
     ),
   },
