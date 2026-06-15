@@ -2,13 +2,17 @@ package br.edu.lms.module.assessment.interfaces.rest;
 
 import br.edu.lms.module.assessment.application.dto.AttachmentInput;
 import br.edu.lms.module.assessment.application.dto.CreateTaskCommand;
+import br.edu.lms.module.assessment.application.dto.TaskResponse;
+import br.edu.lms.module.assessment.application.usecase.CreateTaskService;
 import br.edu.lms.module.assessment.domain.port.in.CreateTaskUseCase;
 import br.edu.lms.module.assessment.domain.port.in.PublishTaskUseCase;
+import br.edu.lms.module.assessment.domain.port.out.TaskRepository;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -34,7 +38,17 @@ public class TaskResource {
 
     private final CreateTaskUseCase createTaskUseCase;
     private final PublishTaskUseCase publishTaskUseCase;
+    private final TaskRepository taskRepository;
     private final JsonWebToken jwt;
+
+    @GET
+    @Operation(summary = "Listar tarefas do professor na organização")
+    public List<TaskResponse> list() {
+        String orgId = (String) jwt.getClaim("org");
+        String userId = jwt.getSubject();
+        return taskRepository.findByOrganizationAndCreatedBy(orgId, userId)
+                .stream().map(CreateTaskService::toResponse).toList();
+    }
 
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)

@@ -10,6 +10,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
+import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,8 +24,9 @@ public class TaskRepositoryImpl implements TaskRepository {
     @Transactional
     public Task save(Task task) {
         var entity = toEntity(task);
-        em.merge(entity);
-        return task;
+        var managed = em.merge(entity);
+        em.flush();
+        return toDomain(managed);
     }
 
     @Override
@@ -40,6 +42,16 @@ public class TaskRepositoryImpl implements TaskRepository {
                 .filter(t -> t.getOrganizationId().equals(organizationId));
     }
 
+    @Override
+    public List<Task> findByOrganizationAndCreatedBy(String organizationId, String createdBy) {
+        TypedQuery<TaskJpaEntity> q = em.createQuery(
+                "SELECT t FROM TaskJpaEntity t WHERE t.organizationId = :orgId AND t.createdBy = :uid AND t.deletedAt IS NULL ORDER BY t.createdAt DESC",
+                TaskJpaEntity.class);
+        q.setParameter("orgId", organizationId);
+        q.setParameter("uid", createdBy);
+        return q.getResultList().stream().map(this::toDomain).toList();
+    }
+
     private TaskJpaEntity toEntity(Task task) {
         var entity = new TaskJpaEntity();
         entity.setId(task.getId().getValue());
@@ -51,6 +63,8 @@ public class TaskRepositoryImpl implements TaskRepository {
         entity.setDeadline(task.getDeadline());
         entity.setMaxScore(task.getMaxScore());
         entity.setStatus(task.getStatus().name());
+        entity.setCreatedAt(task.getCreatedAt());
+        entity.setUpdatedAt(task.getUpdatedAt());
         entity.setDeletedAt(task.getDeletedAt());
 
         if (task.getAttachments() != null) {

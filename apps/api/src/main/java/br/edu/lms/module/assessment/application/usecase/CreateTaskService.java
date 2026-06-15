@@ -97,7 +97,7 @@ public class CreateTaskService implements CreateTaskUseCase {
         }
     }
 
-    static TaskResponse toResponse(Task task) {
+    public static TaskResponse toResponse(Task task) {
         List<TaskAttachmentResponse> attachmentResponses = task.getAttachments() == null ? List.of() :
                 task.getAttachments().stream().map(a -> TaskAttachmentResponse.builder()
                         .id(a.id())
