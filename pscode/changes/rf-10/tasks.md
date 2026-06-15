@@ -56,10 +56,10 @@
 
 ## 9. Testes Backend
 
-- [ ] 9.1 [BE] Testes unitários: `CreateTopicServiceTest`, `DeleteTopicServiceTest`, `ReorderTopicsServiceTest` com Mockito
-- [ ] 9.2 [BE] Testes unitários: `CreateContentServiceTest`, `DeleteContentServiceTest` com mocks de `StoragePort` e `TopicRepository`
-- [ ] 9.3 [BE] Testes de integração `@QuarkusTest` + Testcontainers: `TopicResourceIT` (CRUD completo, RBAC, validações)
-- [ ] 9.4 [BE] Testes de integração `@QuarkusTest`: `ContentResourceIT` (CRUD, upload multipart, controle de acesso aluno)
+- [x] 9.1 [BE] Testes unitários: `CreateTopicServiceTest`, `DeleteTopicServiceTest`, `ReorderTopicsServiceTest` com Mockito
+- [x] 9.2 [BE] Testes unitários: `CreateContentServiceTest`, `DeleteContentServiceTest` com mocks de `StoragePort` e `TopicRepository`
+- [x] 9.3 [BE] Testes de integração `@QuarkusTest` + Testcontainers: `TopicResourceIT` (CRUD completo, RBAC, validações)
+- [x] 9.4 [BE] Testes de integração `@QuarkusTest`: `ContentResourceIT` (CRUD, upload multipart, controle de acesso aluno)
 
 ## 10. Frontend — Setup e Types
 
