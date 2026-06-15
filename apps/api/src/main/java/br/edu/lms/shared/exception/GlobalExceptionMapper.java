@@ -1,6 +1,10 @@
 package br.edu.lms.shared.exception;
 
 import br.edu.lms.module.classroom.domain.exception.ClassroomArchivedException;
+import br.edu.lms.module.curriculum.domain.exception.InvalidTeacherAssignmentException;
+import br.edu.lms.module.curriculum.domain.exception.SubjectClassroomLinkNotFoundException;
+import br.edu.lms.module.curriculum.domain.exception.SubjectNotFoundException;
+import br.edu.lms.module.curriculum.domain.exception.SubjectTeacherAssignmentNotFoundException;
 import br.edu.lms.module.classroom.domain.exception.ClassroomMemberNotFoundException;
 import br.edu.lms.module.classroom.domain.exception.ClassroomNotFoundException;
 import br.edu.lms.module.classroom.domain.exception.InvalidInviteCodeException;
@@ -140,6 +144,30 @@ public class GlobalExceptionMapper implements ExceptionMapper<Exception> {
         if (exception instanceof ClassroomArchivedException) {
             return Response.status(422)
                     .entity(Map.of("error", "CLASSROOM_ARCHIVED"))
+                    .build();
+        }
+
+        if (exception instanceof SubjectNotFoundException) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("error", "SUBJECT_NOT_FOUND"))
+                    .build();
+        }
+
+        if (exception instanceof SubjectClassroomLinkNotFoundException) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("error", "SUBJECT_CLASSROOM_LINK_NOT_FOUND"))
+                    .build();
+        }
+
+        if (exception instanceof SubjectTeacherAssignmentNotFoundException) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("error", "SUBJECT_TEACHER_ASSIGNMENT_NOT_FOUND"))
+                    .build();
+        }
+
+        if (exception instanceof InvalidTeacherAssignmentException e) {
+            return Response.status(422)
+                    .entity(Map.of("error", e.getMessage()))
                     .build();
         }
 
