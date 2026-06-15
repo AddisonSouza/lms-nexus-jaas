@@ -44,4 +44,24 @@ class ClassroomResourceIT {
                 .then()
                 .statusCode(401);
     }
+
+    @Test
+    void joinClassroom_withoutToken_returns401() {
+        given()
+                .contentType(ContentType.JSON)
+                .body("""
+                        {"inviteCode":"ABC123"}
+                        """)
+                .when().post("/classrooms/join")
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    void regenerateInviteCode_withoutToken_returns401() {
+        given()
+                .when().post("/classrooms/some-id/invite-code/regenerate")
+                .then()
+                .statusCode(401);
+    }
 }

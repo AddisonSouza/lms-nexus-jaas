@@ -19,4 +19,5 @@ public interface ClassroomRepository {
     void softDeleteMember(ClassroomId classroomId, String userId);
     List<ClassroomMember> findMembersByClassroom(ClassroomId classroomId, String organizationId);
     boolean isUserInOrganization(String userId, String organizationId);
+    Optional<Classroom> findByInviteCode(String code);
 }
