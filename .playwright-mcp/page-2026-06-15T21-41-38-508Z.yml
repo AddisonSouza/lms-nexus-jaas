@@ -1,0 +1,13 @@
+- generic [ref=e4]:
+  - heading "Entrar" [level=1] [ref=e5]
+  - paragraph [ref=e14]: E-mail ou senha inválidos.
+  - generic [ref=e6]:
+    - text: E-mail
+    - textbox "E-mail" [ref=e7]: admin@test.com
+  - generic [ref=e8]:
+    - text: Senha
+    - textbox "Senha" [ref=e9]: Admin@1234
+  - button "Entrar" [ref=e10] [cursor=pointer]
+  - paragraph [ref=e11]:
+    - link "Esqueci minha senha" [ref=e12] [cursor=pointer]:
+      - /url: /forgot-password

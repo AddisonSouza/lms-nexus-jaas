@@ -1,0 +1,76 @@
+- generic [ref=e52]:
+  - generic [ref=e53]:
+    - link [ref=e54] [cursor=pointer]:
+      - /url: /curriculum
+      - img [ref=e55]
+    - generic [ref=e57]:
+      - img [ref=e58]
+      - heading "Conteúdo da Disciplina" [level=1] [ref=e62]
+  - generic [ref=e63]:
+    - heading "Tópicos e Materiais" [level=2] [ref=e64]
+    - button "Novo Tópico" [ref=e65] [cursor=pointer]:
+      - img [ref=e66]
+      - text: Novo Tópico
+  - generic [ref=e67]:
+    - generic [ref=e68]:
+      - generic [ref=e69] [cursor=pointer]:
+        - img [ref=e71]
+        - generic [ref=e73]: Termodinâmica
+        - generic [ref=e74]: 0 item(s)
+        - generic [ref=e75]:
+          - button "Adicionar conteúdo" [ref=e76]:
+            - img [ref=e77]
+          - button "Editar tópico" [ref=e78]:
+            - img [ref=e79]
+          - button "Excluir tópico" [ref=e82]:
+            - img [ref=e83]
+      - paragraph [ref=e87]: Nenhum conteúdo neste tópico.
+    - generic [ref=e88]:
+      - generic [ref=e89] [cursor=pointer]:
+        - img [ref=e91]
+        - generic [ref=e93]: Mecânica Clássica
+        - generic [ref=e94]: 2 item(s)
+        - generic [ref=e95]:
+          - button "Adicionar conteúdo" [ref=e96]:
+            - img [ref=e97]
+          - button "Editar tópico" [ref=e98]:
+            - img [ref=e99]
+          - button "Excluir tópico" [ref=e102]:
+            - img [ref=e103]
+      - generic [ref=e106]:
+        - generic [ref=e107]:
+          - img [ref=e109]
+          - generic [ref=e112]:
+            - paragraph [ref=e113]: Introdução à Mecânica
+            - paragraph [ref=e114]: Vídeo introdutório
+            - generic [ref=e115]: Link
+          - generic [ref=e116]:
+            - link "Abrir link" [ref=e117] [cursor=pointer]:
+              - /url: https://youtube.com/watch?v=example
+              - img [ref=e118]
+            - button "Editar" [ref=e122] [cursor=pointer]
+            - button "Excluir" [ref=e123] [cursor=pointer]
+        - generic [ref=e124]:
+          - img [ref=e126]
+          - generic [ref=e129]:
+            - paragraph [ref=e130]: Apostila de Mecânica
+            - paragraph [ref=e131]: Apostila completa
+            - generic [ref=e132]: Arquivo
+          - generic [ref=e133]:
+            - link "Download" [ref=e134] [cursor=pointer]:
+              - /url: http://localhost:8080/api/files/lesson_material/2026/06/b8990dc1-8ee1-4d03-9a61-3b2355f7ab3b-test.pdf
+              - img [ref=e135]
+            - button "Editar" [ref=e138] [cursor=pointer]
+            - button "Excluir" [ref=e139] [cursor=pointer]
+  - generic [ref=e141]:
+    - generic [ref=e142]:
+      - heading "Novo Tópico" [level=2] [ref=e143]
+      - button [ref=e144] [cursor=pointer]:
+        - img [ref=e145]
+    - generic [ref=e148]:
+      - generic [ref=e149]:
+        - text: Título *
+        - 'textbox "Ex: Introdução" [active] [ref=e150]'
+      - generic [ref=e151]:
+        - button "Cancelar" [ref=e152] [cursor=pointer]
+        - button "Salvar" [ref=e153] [cursor=pointer]
