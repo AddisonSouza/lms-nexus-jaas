@@ -35,7 +35,11 @@ Estado atual: não existem `StoragePort`, módulo `storage`, entidade `Topic` ou
 
 ### D4 — `StoragePort` definido no módulo `storage`, consumido via Port em `curriculum`
 
-Para evitar dependência direta entre módulos, o módulo `curriculum` acessa storage via interface `StorageQueryPort` (leitura) definida em `curriculum/domain/port/out/`. O módulo `storage` expõe um `StoragePort` público consumido pelo use case de criação de conteúdo (injeção CDI). Sem referência direta a `LocalStorageAdapter` no domínio.
+Para evitar dependência direta entre módulos, o módulo `curriculum` acessa storage via interface `StorageQueryPort` (leitura) definida em `curriculum/domain/port/out/`. O módulo `storage` expõe um `StoragePort` público consumido pelo use case de criação de conteúdo (injeção CDI). Sem referência direta ao adapter no domínio.
+
+### D4a — `S3StorageAdapter` com MinIO para dev (S3-compatível)
+
+Ao invés de armazenar em disco (LocalStorageAdapter), o adapter usa a Quarkus Amazon S3 Extension (`quarkus-amazon-s3`). Em dev, apontado para um container **MinIO** via `quarkus.s3.endpoint-override`. Em produção, bastará remover o override e configurar credenciais reais da AWS. Mesma interface `StoragePort` — troca de target sem alterar nenhum use case. MinIO adicionado ao `docker-compose.yml` como serviço `minio`.
 
 ### D5 — Endpoint de serving de arquivos em `storage/interfaces/rest/`
 
@@ -126,10 +130,10 @@ storage/
       StoragePort.java                   ← interface pública
   application/usecase/
     ServeFileUseCase.java
-    DeleteFileUseCase.java
   infrastructure/
-    persistence/
-      LocalStorageAdapter.java           ← implementa StoragePort, @ConfigProperty("storage.provider")
+    S3StorageAdapter.java                ← implementa StoragePort via Quarkus Amazon S3 Extension
+                                           dev: MinIO via quarkus.s3.endpoint-override
+                                           prod: AWS S3 (só muda config, zero código)
   interfaces/rest/
     FileResource.java                    ← GET /api/files/{fileKey}
 ```
@@ -210,5 +214,37 @@ Rota nova em `routes.tsx`: `/subjects/:subjectId` → `SubjectDetailPage`.
 | Risco | Mitigação |
 |---|---|
 | Upload multipart com limite 50MB pode gerar timeout em conexões lentas | Configurar `quarkus.http.limits.max-body-size=50M`; feedback visual de progresso no FE |
-| `LocalStorageAdapter` armazena em disco do container — reinicialização apaga arquivos | Documentado como comportamento dev; volume Docker para persistência local |
+| MinIO container em dev — reinicialização perde arquivos se volume não configurado | `docker-compose.yml` com volume `minio_data`; documentado no README |
+| Credenciais MinIO dev expostas em docker-compose | Valores default (`minioadmin/minioadmin`) aceitáveis para dev; prod usa secrets reais via env |
 | Reordenação de tópicos: race condition se dois professores reordenam simultaneamente | Aceito para MVP — tópico por disciplina é editado por um professor de cada vez na prática |
+
+### Configuração MinIO no docker-compose.yml
+
+```yaml
+minio:
+  image: minio/minio:latest
+  command: server /data --console-address ":9001"
+  ports:
+    - "9000:9000"   # S3 API
+    - "9001:9001"   # Console Web
+  environment:
+    MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
+    MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin}
+  volumes:
+    - minio_data:/data
+  healthcheck:
+    test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+    interval: 10s
+    retries: 3
+```
+
+Configuração Quarkus (`application.properties` dev):
+```properties
+quarkus.s3.endpoint-override=http://minio:9000
+quarkus.s3.path-style-access=true
+quarkus.s3.aws.region=us-east-1
+quarkus.s3.aws.credentials.type=static
+quarkus.s3.aws.credentials.static-provider.access-key-id=${MINIO_ACCESS_KEY:minioadmin}
+quarkus.s3.aws.credentials.static-provider.secret-access-key=${MINIO_SECRET_KEY:minioadmin}
+storage.bucket=${STORAGE_BUCKET:lms-dev}
+```

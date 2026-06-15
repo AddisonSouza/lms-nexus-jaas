@@ -3,13 +3,13 @@
 ### Requirement: StoragePort abstrai armazenamento de arquivos
 O módulo `storage` define `StoragePort` em `domain/port/out/`. Nenhuma referência a disco, S3 ou caminho físico no domínio ou use cases.
 
-#### Scenario: Armazenar arquivo via LocalStorageAdapter
+#### Scenario: Armazenar arquivo via S3StorageAdapter (MinIO em dev)
 - **WHEN** Use case chama `StoragePort.store(inputStream, filename, mimeType, context)`
-- **THEN** Arquivo salvo em `{storage.base-path}/{context}/{ano}/{mes}/{uuid}-{filename}`; retorna `StoredFile` com `fileKey`
+- **THEN** Arquivo enviado ao bucket S3/MinIO com key `{context}/{ano}/{mes}/{uuid}-{filename}`; retorna `StoredFile` com `fileKey`
 
-#### Scenario: Trocar implementação de storage sem alterar use cases
-- **WHEN** `@ConfigProperty("storage.provider")` alterado de `local` para `s3`
-- **THEN** CDI injeta `S3StorageAdapter` sem qualquer alteração nos use cases
+#### Scenario: Trocar de MinIO (dev) para S3 real (prod) sem alterar use cases
+- **WHEN** Variáveis de ambiente alteradas de endpoint MinIO para AWS S3 real
+- **THEN** `S3StorageAdapter` passa a usar S3 sem qualquer alteração nos use cases — `StoragePort` permanece idêntico
 
 ---
 

@@ -3,9 +3,10 @@
 - [ ] 1.1 [INFRA] Criar módulo `storage`: pacotes `domain/model/`, `domain/port/out/`, `application/usecase/`, `infrastructure/`, `interfaces/rest/`
 - [ ] 1.2 [BE] Criar VOs `StoredFile` e enum `StorageContext` (`LESSON_MATERIAL`, `TASK_ATTACHMENT`) em `storage/domain/model/`
 - [ ] 1.3 [BE] Criar interface `StoragePort` em `storage/domain/port/out/` com métodos `store`, `retrieve`, `delete`, `getPublicUrl`
-- [ ] 1.4 [BE] Implementar `LocalStorageAdapter` em `storage/infrastructure/` com `@ApplicationScoped` + `@ConfigProperty("storage.base-path")`; armazena em `{base-path}/{context}/{ano}/{mes}/{uuid}-{filename}`
-- [ ] 1.5 [BE] Criar `FileResource` em `storage/interfaces/rest/` — `GET /api/files/{fileKey}` com autenticação; chama `ServeFileUseCase`
-- [ ] 1.6 [BE] Adicionar `storage.base-path` e `storage.provider=local` ao `application.properties`
+- [ ] 1.4 [INFRA] Adicionar dependência `quarkus-amazon-s3` ao `pom.xml`; adicionar serviço `minio` ao `docker-compose.yml` com volume `minio_data` e healthcheck
+- [ ] 1.5 [BE] Implementar `S3StorageAdapter` em `storage/infrastructure/` — usa Quarkus S3 Client; key pattern `{context}/{ano}/{mes}/{uuid}-{filename}`; em dev aponta para MinIO via `quarkus.s3.endpoint-override`
+- [ ] 1.6 [BE] Criar `FileResource` em `storage/interfaces/rest/` — `GET /api/files/{fileKey}` com autenticação; chama `ServeFileUseCase`
+- [ ] 1.7 [INFRA] Adicionar configurações MinIO/S3 ao `application.properties` (endpoint-override, credentials, bucket) e variáveis ao `.env.example`
 
 ## 2. Flyway Migrations
 
