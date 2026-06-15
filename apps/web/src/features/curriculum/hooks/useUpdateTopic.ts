@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { updateTopic } from '../api/topic-api'
-import { topicKeys } from '../api/query-keys'
+import { topicKeys, contentKeys } from '../api/query-keys'
 
 export function useUpdateTopic(subjectId: string) {
   const queryClient = useQueryClient()
@@ -9,6 +9,7 @@ export function useUpdateTopic(subjectId: string) {
       updateTopic(subjectId, topicId, title),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: topicKeys.bySubject(subjectId) })
+      queryClient.invalidateQueries({ queryKey: contentKeys.bySubject(subjectId) })
     },
   })
 }

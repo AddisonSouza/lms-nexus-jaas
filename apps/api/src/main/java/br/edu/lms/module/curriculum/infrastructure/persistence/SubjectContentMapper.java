@@ -7,7 +7,7 @@ import br.edu.lms.module.curriculum.domain.model.SubjectContentId;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "cdi")
+@Mapper(componentModel = "cdi", imports = {SubjectContentId.class, ContentType.class})
 public interface SubjectContentMapper {
 
     @Mapping(target = "id", expression = "java(SubjectContentId.of(entity.getId()))")
