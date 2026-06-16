@@ -4,6 +4,7 @@ import br.edu.lms.module.assessment.domain.model.SubmissionStatus;
 import lombok.Builder;
 import lombok.Value;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -16,6 +17,8 @@ public class SubmissionResponse {
     String organizationId;
     String textResponse;
     SubmissionStatus status;
+    BigDecimal grade;
+    String feedback;
     List<SubmissionAttachmentResponse> attachments;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;

@@ -33,6 +33,12 @@ public class TaskSubmissionJpaEntity {
     @Column(name = "status", nullable = false, length = 20)
     private String status;
 
+    @Column(name = "grade", precision = 5, scale = 2)
+    private java.math.BigDecimal grade;
+
+    @Column(name = "feedback", columnDefinition = "LONGTEXT")
+    private String feedback;
+
     @OneToMany(mappedBy = "submission", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<SubmissionAttachmentJpaEntity> attachments;
 

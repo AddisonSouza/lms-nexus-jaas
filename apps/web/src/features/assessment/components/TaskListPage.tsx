@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Send } from 'lucide-react'
+import { Plus, Send, Users } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { useCreateTask } from '../hooks/useCreateTask'
 import { usePublishTask } from '../hooks/usePublishTask'
@@ -7,6 +7,7 @@ import { taskKeys } from '../api/query-keys'
 import { subjectKeys } from '@features/curriculum/api/query-keys'
 import { listSubjects } from '@features/curriculum/api/subject-api'
 import TaskFormDialog from './TaskFormDialog'
+import SubmissionListDrawer from './SubmissionListDrawer'
 import type { Task } from '../types'
 import type { TaskFormData } from '../schemas/task.schema'
 import api from '@lib/axios'
@@ -14,6 +15,7 @@ import api from '@lib/axios'
 function TaskListPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedSubjectId, setSelectedSubjectId] = useState('')
+  const [submissionsTask, setSubmissionsTask] = useState<Task | null>(null)
 
   const { data: subjects = [] } = useQuery({
     queryKey: subjectKeys.lists(),
@@ -88,16 +90,27 @@ function TaskListPage() {
                   </span>
                 </p>
               </div>
-              {task.status === 'DRAFT' && (
-                <button
-                  onClick={() => publishTask.mutate(task.id)}
-                  disabled={publishTask.isPending}
-                  className="flex items-center gap-1 rounded border px-3 py-1 text-xs hover:bg-accent disabled:opacity-50"
-                >
-                  <Send className="h-3 w-3" />
-                  Publicar
-                </button>
-              )}
+              <div className="flex items-center gap-2">
+                {task.status === 'PUBLISHED' && (
+                  <button
+                    onClick={() => setSubmissionsTask(task)}
+                    className="flex items-center gap-1 rounded border px-3 py-1 text-xs hover:bg-accent"
+                  >
+                    <Users className="h-3 w-3" />
+                    Ver Submissões
+                  </button>
+                )}
+                {task.status === 'DRAFT' && (
+                  <button
+                    onClick={() => publishTask.mutate(task.id)}
+                    disabled={publishTask.isPending}
+                    className="flex items-center gap-1 rounded border px-3 py-1 text-xs hover:bg-accent disabled:opacity-50"
+                  >
+                    <Send className="h-3 w-3" />
+                    Publicar
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -110,6 +123,14 @@ function TaskListPage() {
         onSubmit={handleSubmit}
         isPending={createTask.isPending}
       />
+
+      {submissionsTask && (
+        <SubmissionListDrawer
+          open={!!submissionsTask}
+          task={submissionsTask}
+          onClose={() => setSubmissionsTask(null)}
+        />
+      )}
     </div>
   )
 }
