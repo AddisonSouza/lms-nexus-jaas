@@ -1,0 +1,20 @@
+CREATE TABLE task_submissions (
+    id               VARCHAR(36)    NOT NULL,
+    task_id          VARCHAR(36)    NOT NULL,
+    student_id       VARCHAR(36)    NOT NULL,
+    organization_id  VARCHAR(36)    NOT NULL,
+    text_response    LONGTEXT       NULL,
+    status           ENUM('SUBMITTED', 'EVALUATED') NOT NULL DEFAULT 'SUBMITTED',
+    created_at       DATETIME       NOT NULL,
+    updated_at       DATETIME       NOT NULL,
+    deleted_at       DATETIME       NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_submissions_task    FOREIGN KEY (task_id)         REFERENCES tasks(id),
+    CONSTRAINT fk_submissions_student FOREIGN KEY (student_id)      REFERENCES users(id),
+    CONSTRAINT fk_submissions_org     FOREIGN KEY (organization_id) REFERENCES organizations(id),
+    UNIQUE INDEX uq_submission_task_student (task_id, student_id),
+    INDEX idx_submissions_task        (task_id),
+    INDEX idx_submissions_student     (student_id),
+    INDEX idx_submissions_org         (organization_id),
+    INDEX idx_submissions_deleted     (deleted_at)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;

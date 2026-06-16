@@ -55,6 +55,16 @@ public class TaskRepositoryImpl implements TaskRepository {
         return q.getResultList().stream().map(this::toDomain).toList();
     }
 
+    @Override
+    @Transactional
+    public List<Task> findPublishedByOrganization(String organizationId) {
+        TypedQuery<TaskJpaEntity> q = em.createQuery(
+                "SELECT t FROM TaskJpaEntity t WHERE t.organizationId = :orgId AND t.status = 'PUBLISHED' AND t.deletedAt IS NULL ORDER BY t.deadline ASC",
+                TaskJpaEntity.class);
+        q.setParameter("orgId", organizationId);
+        return q.getResultList().stream().map(this::toDomain).toList();
+    }
+
     private TaskJpaEntity toEntity(Task task) {
         var entity = new TaskJpaEntity();
         entity.setId(task.getId().getValue());

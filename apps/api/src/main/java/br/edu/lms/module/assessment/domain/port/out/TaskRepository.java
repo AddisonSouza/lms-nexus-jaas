@@ -11,4 +11,5 @@ public interface TaskRepository {
     Optional<Task> findById(TaskId id);
     Optional<Task> findByIdAndOrganization(TaskId id, String organizationId);
     List<Task> findByOrganizationAndCreatedBy(String organizationId, String createdBy);
+    List<Task> findPublishedByOrganization(String organizationId);
 }

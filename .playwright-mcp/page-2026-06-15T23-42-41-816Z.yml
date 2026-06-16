@@ -1,0 +1,37 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - heading "Tarefas" [level=1] [ref=e5]
+    - button "Nova Tarefa" [ref=e6] [cursor=pointer]:
+      - img [ref=e7]
+      - text: Nova Tarefa
+  - generic [ref=e9]:
+    - generic [ref=e11]:
+      - paragraph [ref=e12]: Test
+      - paragraph [ref=e13]: "Prazo: 01/01/2027, 00:00:00 · Status: PUBLISHED"
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - paragraph [ref=e16]: Tarefa com Anexo PDF
+        - paragraph [ref=e17]: "Prazo: 01/05/2027, 00:00:00 · Status: DRAFT"
+      - button "Publicar" [ref=e18] [cursor=pointer]:
+        - img [ref=e19]
+        - text: Publicar
+    - generic [ref=e22]:
+      - generic [ref=e23]:
+        - paragraph [ref=e24]: Tarefa com Anexo
+        - paragraph [ref=e25]: "Prazo: 01/04/2027, 00:00:00 · Status: DRAFT"
+      - button "Publicar" [ref=e26] [cursor=pointer]:
+        - img [ref=e27]
+        - text: Publicar
+    - generic [ref=e31]:
+      - paragraph [ref=e32]: Lista de Exercícios 03
+      - paragraph [ref=e33]: "Prazo: 15/03/2027, 23:59:00 · Status: PUBLISHED"
+    - generic [ref=e35]:
+      - paragraph [ref=e36]: Lista de Exercícios 02
+      - paragraph [ref=e37]: "Prazo: 15/02/2027, 23:59:00 · Status: PUBLISHED"
+    - generic [ref=e38]:
+      - generic [ref=e39]:
+        - paragraph [ref=e40]: Lista de Exercícios 01
+        - paragraph [ref=e41]: "Prazo: 15/01/2027, 23:59:00 · Status: DRAFT"
+      - button "Publicar" [ref=e42] [cursor=pointer]:
+        - img [ref=e43]
+        - text: Publicar
