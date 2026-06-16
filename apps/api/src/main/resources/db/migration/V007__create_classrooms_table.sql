@@ -10,6 +10,5 @@ CREATE TABLE classrooms (
     updated_at      TIMESTAMP             NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at      TIMESTAMP             NULL,
     PRIMARY KEY (id),
-    UNIQUE KEY uq_classrooms_invite_code (invite_code),
     CONSTRAINT fk_classrooms_org FOREIGN KEY (organization_id) REFERENCES organizations (id)
 );
