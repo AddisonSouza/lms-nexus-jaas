@@ -222,7 +222,8 @@ class AnnouncementResourceIT {
                 .when().put("/announcements/{id}", id)
                 .then()
                 .statusCode(200)
-                .body("content", equalTo("Atualizado"));
+                .body("content", equalTo("Atualizado"))
+                .body("createdAt", notNullValue());
     }
 
     @Test

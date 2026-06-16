@@ -12,11 +12,11 @@ public interface AnnouncementMapper {
     @Mapping(target = "id", expression = "java(br.edu.lms.module.communication.domain.model.AnnouncementId.of(entity.getId()))")
     Announcement toDomain(AnnouncementJpaEntity entity);
 
-    // deletedAt is intentionally NOT ignored (unlike createdAt/updatedAt): there is no
-    // @PrePersist/@PreUpdate callback that sets it, so soft-delete relies on it being
-    // carried through from the domain object on every merge().
+    // deletedAt and createdAt are intentionally NOT ignored: there is no @PrePersist
+    // callback that restores createdAt on update (only @PreUpdate touches updatedAt),
+    // so both must be carried through from the domain object on every merge() or the
+    // managed entity returned by merge() ends up with createdAt/deletedAt nulled out.
     @Mapping(target = "id", expression = "java(domain.getId().getValue())")
-    @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "attachments", ignore = true)
     AnnouncementJpaEntity toEntity(Announcement domain);
