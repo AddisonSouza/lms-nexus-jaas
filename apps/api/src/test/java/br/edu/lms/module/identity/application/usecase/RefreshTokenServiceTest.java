@@ -2,10 +2,10 @@ package br.edu.lms.module.identity.application.usecase;
 
 import br.edu.lms.module.identity.application.dto.RefreshCommand;
 import br.edu.lms.module.identity.domain.exception.TokenNotFoundException;
+import br.edu.lms.module.identity.domain.exception.UserNotMemberOfOrganizationException;
 import br.edu.lms.module.identity.domain.port.out.OrganizationMemberLookupPort;
 import br.edu.lms.module.identity.domain.port.out.RefreshTokenRepository;
-import br.edu.lms.module.identity.infrastructure.security.JwtTokenService;
-import br.edu.lms.module.organization.domain.exception.NotAnOrganizationMemberException;
+import br.edu.lms.module.identity.domain.port.out.TokenGeneratorPort;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 class RefreshTokenServiceTest {
 
     @Mock RefreshTokenRepository refreshTokenRepository;
-    @Mock JwtTokenService jwtTokenService;
+    @Mock TokenGeneratorPort jwtTokenService;
     @Mock OrganizationMemberLookupPort organizationMemberLookupPort;
 
     @InjectMocks RefreshTokenService sut;
@@ -57,7 +57,7 @@ class RefreshTokenServiceTest {
                 .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> sut.execute(new RefreshCommand("rt", "org-x")))
-                .isInstanceOf(NotAnOrganizationMemberException.class);
+                .isInstanceOf(UserNotMemberOfOrganizationException.class);
     }
 
     @Test

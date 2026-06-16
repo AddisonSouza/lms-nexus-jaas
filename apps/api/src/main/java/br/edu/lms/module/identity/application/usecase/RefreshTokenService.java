@@ -6,7 +6,7 @@ import br.edu.lms.module.identity.domain.exception.TokenNotFoundException;
 import br.edu.lms.module.identity.domain.port.in.RefreshTokenUseCase;
 import br.edu.lms.module.identity.domain.port.out.OrganizationMemberLookupPort;
 import br.edu.lms.module.identity.domain.port.out.RefreshTokenRepository;
-import br.edu.lms.module.identity.infrastructure.security.JwtTokenService;
+import br.edu.lms.module.identity.domain.port.out.TokenGeneratorPort;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.time.Duration;
 import java.util.UUID;
 
-import br.edu.lms.module.organization.domain.exception.NotAnOrganizationMemberException;
+import br.edu.lms.module.identity.domain.exception.UserNotMemberOfOrganizationException;
 
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -24,7 +24,7 @@ public class RefreshTokenService implements RefreshTokenUseCase {
     private static final Duration REFRESH_TOKEN_TTL = Duration.ofDays(7);
 
     private final RefreshTokenRepository refreshTokenRepository;
-    private final JwtTokenService jwtTokenService;
+    private final TokenGeneratorPort jwtTokenService;
     private final OrganizationMemberLookupPort organizationMemberLookupPort;
 
     @Override
@@ -38,7 +38,7 @@ public class RefreshTokenService implements RefreshTokenUseCase {
         if (command.organizationId() != null && !command.organizationId().isBlank()) {
             var role = organizationMemberLookupPort
                     .findRoleByUserAndOrg(userId, command.organizationId())
-                    .orElseThrow(NotAnOrganizationMemberException::new);
+                    .orElseThrow(UserNotMemberOfOrganizationException::new);
             newAccessToken = jwtTokenService.generateAccessToken(userId, command.organizationId(), role);
         } else {
             newAccessToken = jwtTokenService.generateAccessToken(userId);

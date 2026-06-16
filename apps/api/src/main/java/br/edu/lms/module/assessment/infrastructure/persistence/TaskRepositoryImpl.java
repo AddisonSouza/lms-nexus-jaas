@@ -3,7 +3,6 @@ package br.edu.lms.module.assessment.infrastructure.persistence;
 import br.edu.lms.module.assessment.domain.model.Task;
 import br.edu.lms.module.assessment.domain.model.TaskAttachment;
 import br.edu.lms.module.assessment.domain.model.TaskId;
-import br.edu.lms.module.assessment.domain.model.TaskStatus;
 import br.edu.lms.module.assessment.domain.port.out.TaskRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
@@ -19,14 +18,15 @@ import java.util.Optional;
 public class TaskRepositoryImpl implements TaskRepository {
 
     private final EntityManager em;
+    private final TaskMapper taskMapper;
 
     @Override
     @Transactional
     public Task save(Task task) {
-        var entity = toEntity(task);
+        var entity = toEntityWithAttachments(task);
         var managed = em.merge(entity);
         em.flush();
-        return toDomain(managed);
+        return taskMapper.toDomain(managed);
     }
 
     @Override
@@ -34,7 +34,7 @@ public class TaskRepositoryImpl implements TaskRepository {
     public Optional<Task> findById(TaskId id) {
         var entity = em.find(TaskJpaEntity.class, id.getValue());
         if (entity == null || entity.getDeletedAt() != null) return Optional.empty();
-        return Optional.of(toDomain(entity));
+        return Optional.of(taskMapper.toDomain(entity));
     }
 
     @Override
@@ -52,7 +52,7 @@ public class TaskRepositoryImpl implements TaskRepository {
                 TaskJpaEntity.class);
         q.setParameter("orgId", organizationId);
         q.setParameter("uid", createdBy);
-        return q.getResultList().stream().map(this::toDomain).toList();
+        return q.getResultList().stream().map(taskMapper::toDomain).toList();
     }
 
     @Override
@@ -62,23 +62,15 @@ public class TaskRepositoryImpl implements TaskRepository {
                 "SELECT t FROM TaskJpaEntity t WHERE t.organizationId = :orgId AND t.status = 'PUBLISHED' AND t.deletedAt IS NULL ORDER BY t.deadline ASC",
                 TaskJpaEntity.class);
         q.setParameter("orgId", organizationId);
-        return q.getResultList().stream().map(this::toDomain).toList();
+        return q.getResultList().stream().map(taskMapper::toDomain).toList();
     }
 
-    private TaskJpaEntity toEntity(Task task) {
-        var entity = new TaskJpaEntity();
-        entity.setId(task.getId().getValue());
-        entity.setSubjectId(task.getSubjectId());
-        entity.setOrganizationId(task.getOrganizationId());
-        entity.setCreatedBy(task.getCreatedBy());
-        entity.setTitle(task.getTitle());
-        entity.setDescription(task.getDescription());
-        entity.setDeadline(task.getDeadline());
-        entity.setMaxScore(task.getMaxScore());
-        entity.setStatus(task.getStatus().name());
-        entity.setCreatedAt(task.getCreatedAt());
-        entity.setUpdatedAt(task.getUpdatedAt());
-        entity.setDeletedAt(task.getDeletedAt());
+    /**
+     * Uses TaskMapper for main fields but handles attachments manually
+     * because of the bi-directional JPA back-reference (ae.setTask(entity)).
+     */
+    private TaskJpaEntity toEntityWithAttachments(Task task) {
+        var entity = taskMapper.toEntity(task);
 
         if (task.getAttachments() != null) {
             List<TaskAttachmentJpaEntity> attachmentEntities = task.getAttachments().stream()
@@ -95,28 +87,5 @@ public class TaskRepositoryImpl implements TaskRepository {
             entity.setAttachments(attachmentEntities);
         }
         return entity;
-    }
-
-    private Task toDomain(TaskJpaEntity e) {
-        List<TaskAttachment> attachments = e.getAttachments() == null ? List.of() :
-                e.getAttachments().stream()
-                        .map(a -> new TaskAttachment(a.getId(), a.getFileKey(), a.getOriginalName(), a.getMimeType(), a.getSizeBytes()))
-                        .toList();
-
-        return Task.builder()
-                .id(TaskId.of(e.getId()))
-                .subjectId(e.getSubjectId())
-                .organizationId(e.getOrganizationId())
-                .createdBy(e.getCreatedBy())
-                .title(e.getTitle())
-                .description(e.getDescription())
-                .deadline(e.getDeadline())
-                .maxScore(e.getMaxScore())
-                .status(TaskStatus.valueOf(e.getStatus()))
-                .attachments(attachments)
-                .createdAt(e.getCreatedAt())
-                .updatedAt(e.getUpdatedAt())
-                .deletedAt(e.getDeletedAt())
-                .build();
     }
 }

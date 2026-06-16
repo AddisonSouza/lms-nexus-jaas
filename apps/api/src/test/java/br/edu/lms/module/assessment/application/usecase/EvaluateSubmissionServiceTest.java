@@ -7,11 +7,11 @@ import br.edu.lms.module.assessment.domain.exception.GradeNotAllowedException;
 import br.edu.lms.module.assessment.domain.exception.SubmissionAlreadyEvaluatedException;
 import br.edu.lms.module.assessment.domain.exception.SubmissionNotFoundException;
 import br.edu.lms.module.assessment.domain.exception.TaskNotFoundException;
+import br.edu.lms.module.assessment.domain.exception.UnauthorizedTaskOperationException;
 import br.edu.lms.module.assessment.domain.model.*;
 import br.edu.lms.module.assessment.domain.port.out.SubmissionRepository;
 import br.edu.lms.module.assessment.domain.port.out.TaskRepository;
 import jakarta.enterprise.event.Event;
-import jakarta.ws.rs.ForbiddenException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -172,7 +172,7 @@ class EvaluateSubmissionServiceTest {
                 .grade(new BigDecimal("5")).feedback("x").build();
 
         assertThatThrownBy(() -> service.execute(cmd))
-                .isInstanceOf(ForbiddenException.class);
+                .isInstanceOf(UnauthorizedTaskOperationException.class);
     }
 
     @Test

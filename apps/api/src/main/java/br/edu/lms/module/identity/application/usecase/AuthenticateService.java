@@ -6,10 +6,10 @@ import br.edu.lms.module.identity.domain.exception.InvalidCredentialsException;
 import br.edu.lms.module.identity.domain.model.Email;
 import br.edu.lms.module.identity.domain.model.UserStatus;
 import br.edu.lms.module.identity.domain.port.in.AuthenticateUseCase;
+import br.edu.lms.module.identity.domain.port.out.PasswordHasher;
 import br.edu.lms.module.identity.domain.port.out.RefreshTokenRepository;
+import br.edu.lms.module.identity.domain.port.out.TokenGeneratorPort;
 import br.edu.lms.module.identity.domain.port.out.UserRepository;
-import br.edu.lms.module.identity.infrastructure.security.BcryptPasswordService;
-import br.edu.lms.module.identity.infrastructure.security.JwtTokenService;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,8 +25,8 @@ public class AuthenticateService implements AuthenticateUseCase {
     private static final Duration REFRESH_TOKEN_TTL = Duration.ofDays(7);
 
     private final UserRepository userRepository;
-    private final BcryptPasswordService passwordService;
-    private final JwtTokenService jwtTokenService;
+    private final PasswordHasher passwordService;
+    private final TokenGeneratorPort jwtTokenService;
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Override

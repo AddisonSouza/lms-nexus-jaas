@@ -4,7 +4,8 @@ import br.edu.lms.module.assessment.application.dto.AttachmentInput;
 import br.edu.lms.module.assessment.application.dto.CreateTaskCommand;
 import br.edu.lms.module.assessment.application.dto.TaskAttachmentResponse;
 import br.edu.lms.module.assessment.application.dto.TaskResponse;
-import br.edu.lms.module.assessment.domain.exception.InvalidTaskStateException;
+import br.edu.lms.module.assessment.domain.exception.DeadlineNotInFutureException;
+import br.edu.lms.module.assessment.domain.exception.InvalidAttachmentTypeException;
 import br.edu.lms.module.assessment.domain.exception.UnauthorizedTaskOperationException;
 import br.edu.lms.module.assessment.domain.model.Task;
 import br.edu.lms.module.assessment.domain.model.TaskAttachment;
@@ -13,7 +14,6 @@ import br.edu.lms.module.assessment.domain.model.TaskStatus;
 import br.edu.lms.module.assessment.domain.port.in.CreateTaskUseCase;
 import br.edu.lms.module.assessment.domain.port.out.SubjectQueryPort;
 import br.edu.lms.module.assessment.domain.port.out.TaskRepository;
-import br.edu.lms.module.curriculum.domain.exception.InvalidFileTypeException;
 import br.edu.lms.module.storage.domain.model.StorageContext;
 import br.edu.lms.module.storage.domain.port.out.StoragePort;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -51,7 +51,7 @@ public class CreateTaskService implements CreateTaskUseCase {
         }
 
         if (!command.getDeadline().isAfter(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Task deadline must be in the future");
+            throw new DeadlineNotInFutureException();
         }
 
         List<TaskAttachment> attachments = new ArrayList<>();
@@ -93,7 +93,7 @@ public class CreateTaskService implements CreateTaskUseCase {
 
     private void validateMimeType(String mimeType) {
         if (mimeType == null || !ALLOWED_MIME_TYPES.contains(mimeType)) {
-            throw new InvalidFileTypeException(mimeType);
+            throw new InvalidAttachmentTypeException(mimeType);
         }
     }
 

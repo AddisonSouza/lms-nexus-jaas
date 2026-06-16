@@ -26,4 +26,11 @@ public class TaskSubmission {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
+
+    public TaskSubmission evaluate(java.math.BigDecimal grade, String feedback) {
+        if (this.status == SubmissionStatus.EVALUATED) {
+            throw new br.edu.lms.module.assessment.domain.exception.SubmissionAlreadyEvaluatedException(this.id.getValue());
+        }
+        return this.toBuilder().grade(grade).feedback(feedback).status(SubmissionStatus.EVALUATED).build();
+    }
 }

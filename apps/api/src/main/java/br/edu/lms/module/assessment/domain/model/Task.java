@@ -28,4 +28,18 @@ public class Task {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
+
+    public Task publish() {
+        if (this.status != TaskStatus.DRAFT) {
+            throw new br.edu.lms.module.assessment.domain.exception.InvalidTaskStateException(this.status, TaskStatus.PUBLISHED);
+        }
+        return this.toBuilder().status(TaskStatus.PUBLISHED).build();
+    }
+
+    public Task close() {
+        if (this.status != TaskStatus.PUBLISHED) {
+            throw new br.edu.lms.module.assessment.domain.exception.InvalidTaskStateException(this.status, TaskStatus.CLOSED);
+        }
+        return this.toBuilder().status(TaskStatus.CLOSED).build();
+    }
 }
