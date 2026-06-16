@@ -30,6 +30,7 @@ public class TaskRepositoryImpl implements TaskRepository {
     }
 
     @Override
+    @Transactional
     public Optional<Task> findById(TaskId id) {
         var entity = em.find(TaskJpaEntity.class, id.getValue());
         if (entity == null || entity.getDeletedAt() != null) return Optional.empty();
@@ -37,12 +38,14 @@ public class TaskRepositoryImpl implements TaskRepository {
     }
 
     @Override
+    @Transactional
     public Optional<Task> findByIdAndOrganization(TaskId id, String organizationId) {
         return findById(id)
                 .filter(t -> t.getOrganizationId().equals(organizationId));
     }
 
     @Override
+    @Transactional
     public List<Task> findByOrganizationAndCreatedBy(String organizationId, String createdBy) {
         TypedQuery<TaskJpaEntity> q = em.createQuery(
                 "SELECT t FROM TaskJpaEntity t WHERE t.organizationId = :orgId AND t.createdBy = :uid AND t.deletedAt IS NULL ORDER BY t.createdAt DESC",

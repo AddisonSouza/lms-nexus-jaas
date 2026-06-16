@@ -12,6 +12,7 @@ import br.edu.lms.module.assessment.domain.port.in.PublishTaskUseCase;
 import br.edu.lms.module.assessment.domain.port.out.TaskRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,6 +25,7 @@ public class PublishTaskService implements PublishTaskUseCase {
     private final Event<TaskCreatedEvent> taskCreatedEvent;
 
     @Override
+    @Transactional
     public TaskResponse execute(String taskId, String organizationId, String requestingUserId) {
         var task = taskRepository.findByIdAndOrganization(TaskId.of(taskId), organizationId)
                 .orElseThrow(() -> new TaskNotFoundException(taskId));

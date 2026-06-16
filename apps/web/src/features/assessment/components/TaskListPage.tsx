@@ -4,16 +4,21 @@ import { useQuery } from '@tanstack/react-query'
 import { useCreateTask } from '../hooks/useCreateTask'
 import { usePublishTask } from '../hooks/usePublishTask'
 import { taskKeys } from '../api/query-keys'
+import { subjectKeys } from '@features/curriculum/api/query-keys'
+import { listSubjects } from '@features/curriculum/api/subject-api'
 import TaskFormDialog from './TaskFormDialog'
 import type { Task } from '../types'
 import type { TaskFormData } from '../schemas/task.schema'
 import api from '@lib/axios'
 
-const SUBJECT_ID_PLACEHOLDER = ''
-
 function TaskListPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [selectedSubjectId] = useState(SUBJECT_ID_PLACEHOLDER)
+  const [selectedSubjectId, setSelectedSubjectId] = useState('')
+
+  const { data: subjects = [] } = useQuery({
+    queryKey: subjectKeys.lists(),
+    queryFn: listSubjects,
+  })
 
   const { data: tasks = [] } = useQuery<Task[]>({
     queryKey: taskKeys.lists(),
@@ -44,13 +49,28 @@ function TaskListPage() {
     <div className="p-6">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Tarefas</h1>
-        <button
-          onClick={() => setDialogOpen(true)}
-          className="flex items-center gap-2 rounded bg-primary px-4 py-2 text-sm text-primary-foreground"
-        >
-          <Plus className="h-4 w-4" />
-          Nova Tarefa
-        </button>
+        <div className="flex items-center gap-3">
+          <select
+            value={selectedSubjectId}
+            onChange={(e) => setSelectedSubjectId(e.target.value)}
+            className="rounded border px-3 py-2 text-sm"
+          >
+            <option value="">Selecione uma disciplina</option>
+            {subjects.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={() => setDialogOpen(true)}
+            disabled={!selectedSubjectId}
+            className="flex items-center gap-2 rounded bg-primary px-4 py-2 text-sm text-primary-foreground disabled:opacity-50"
+          >
+            <Plus className="h-4 w-4" />
+            Nova Tarefa
+          </button>
+        </div>
       </div>
 
       {tasks.length === 0 ? (
