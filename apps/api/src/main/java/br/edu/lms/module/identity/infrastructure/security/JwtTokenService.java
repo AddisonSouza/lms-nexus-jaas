@@ -1,5 +1,6 @@
 package br.edu.lms.module.identity.infrastructure.security;
 
+import br.edu.lms.module.identity.domain.port.out.TokenGeneratorPort;
 import io.smallrye.jwt.build.Jwt;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -9,7 +10,7 @@ import java.time.Instant;
 import java.util.Set;
 
 @ApplicationScoped
-public class JwtTokenService {
+public class JwtTokenService implements TokenGeneratorPort {
 
     @ConfigProperty(name = "mp.jwt.verify.issuer")
     String issuer;

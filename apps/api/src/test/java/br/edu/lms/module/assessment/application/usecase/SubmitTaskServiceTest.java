@@ -3,6 +3,7 @@ package br.edu.lms.module.assessment.application.usecase;
 import br.edu.lms.module.assessment.application.dto.SubmitTaskCommand;
 import br.edu.lms.module.assessment.domain.event.TaskSubmittedEvent;
 import br.edu.lms.module.assessment.domain.exception.DeadlineExpiredException;
+import br.edu.lms.module.assessment.domain.exception.EmptySubmissionException;
 import br.edu.lms.module.assessment.domain.exception.InvalidTaskStateException;
 import br.edu.lms.module.assessment.domain.exception.SubmissionAlreadyExistsException;
 import br.edu.lms.module.assessment.domain.model.SubmissionId;
@@ -125,7 +126,6 @@ class SubmitTaskServiceTest {
     void shouldThrowWhenNoTextNorFiles() {
         when(taskRepository.findByIdAndOrganization(TaskId.of("task-1"), "org-1"))
                 .thenReturn(Optional.of(publishedTask(LocalDateTime.now().plusDays(1))));
-        when(submissionRepository.findByTaskAndStudent("task-1", "student-1")).thenReturn(Optional.empty());
 
         var command = SubmitTaskCommand.builder()
                 .taskId("task-1")
@@ -136,6 +136,6 @@ class SubmitTaskServiceTest {
                 .build();
 
         assertThatThrownBy(() -> sut.execute(command))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(EmptySubmissionException.class);
     }
 }

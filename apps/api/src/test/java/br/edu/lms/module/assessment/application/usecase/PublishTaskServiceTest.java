@@ -1,6 +1,6 @@
 package br.edu.lms.module.assessment.application.usecase;
 
-import br.edu.lms.module.assessment.domain.event.TaskCreatedEvent;
+import br.edu.lms.module.assessment.domain.event.TaskPublishedEvent;
 import br.edu.lms.module.assessment.domain.exception.InvalidTaskStateException;
 import br.edu.lms.module.assessment.domain.exception.TaskNotFoundException;
 import br.edu.lms.module.assessment.domain.exception.UnauthorizedTaskOperationException;
@@ -26,7 +26,7 @@ import static org.mockito.Mockito.*;
 class PublishTaskServiceTest {
 
     @Mock TaskRepository taskRepository;
-    @Mock Event<TaskCreatedEvent> taskCreatedEvent;
+    @Mock Event<TaskPublishedEvent> taskPublishedEvent;
 
     @InjectMocks PublishTaskService sut;
 
@@ -53,7 +53,7 @@ class PublishTaskServiceTest {
         var result = sut.execute("task-1", "org-1", "user-1");
 
         assertThat(result.getStatus()).isEqualTo(TaskStatus.PUBLISHED);
-        verify(taskCreatedEvent).fire(any(TaskCreatedEvent.class));
+        verify(taskPublishedEvent).fire(any(TaskPublishedEvent.class));
     }
 
     @Test
