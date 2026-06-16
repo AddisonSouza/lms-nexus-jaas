@@ -5,6 +5,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 @ApplicationScoped
 @RequiredArgsConstructor
 public class ClassroomQueryPortImpl implements ClassroomQueryPort {
@@ -29,5 +31,23 @@ public class ClassroomQueryPortImpl implements ClassroomQueryPort {
         }
 
         return query.getSingleResult() > 0;
+    }
+
+    @Override
+    public List<String> listMemberUserIds(String classroomId, String role) {
+        var jpql = new StringBuilder(
+                "SELECT m.userId FROM br.edu.lms.module.classroom.infrastructure.persistence.ClassroomMemberJpaEntity m " +
+                        "WHERE m.classroomId = :cid AND m.deletedAt IS NULL");
+        if (role != null) {
+            jpql.append(" AND m.role = :role");
+        }
+
+        var query = em.createQuery(jpql.toString(), String.class)
+                .setParameter("cid", classroomId);
+        if (role != null) {
+            query.setParameter("role", role);
+        }
+
+        return query.getResultList();
     }
 }
