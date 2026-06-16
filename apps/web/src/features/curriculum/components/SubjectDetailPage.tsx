@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, BookOpenCheck, Plus } from 'lucide-react'
 import { useAuthStore } from '@features/auth/store/authStore'
+import { API_BASE_URL } from '@lib/axios'
 import { useSubjectContents } from '../hooks/useSubjectContents'
 import { useTopics } from '../hooks/useTopics'
 import { useCreateTopic } from '../hooks/useCreateTopic'
@@ -15,15 +16,19 @@ import ContentFormDialog from './ContentFormDialog'
 import type { TopicFormData } from '../schemas/topicSchema'
 import type { ContentFormData } from '../schemas/contentSchema'
 import type { SubjectContent } from '../types'
-
-const API_BASE_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:8080') + '/api'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@features/components/ui/dialog'
+import ConfirmDialog from '@components/shared/ConfirmDialog'
 
 function SubjectDetailPage() {
   const { subjectId } = useParams<{ subjectId: string }>()
   const id = subjectId!
 
-  const token = useAuthStore((s) => s.accessToken)
-  const role = token ? (JSON.parse(atob(token.split('.')[1])).groups?.[0] ?? 'ALUNO') : 'ALUNO'
+  const role = useAuthStore((s) => s.role)
   const canManage = role === 'PROFESSOR' || role === 'ADMIN_ORG' || role === 'GESTOR'
 
   const { data: grouped, isLoading } = useSubjectContents(id)
@@ -31,9 +36,11 @@ function SubjectDetailPage() {
 
   const [showCreateTopic, setShowCreateTopic] = useState(false)
   const [editTopic, setEditTopic] = useState<{ id: string; title: string } | null>(null)
+  const [deleteTopicTarget, setDeleteTopicTarget] = useState<{ id: string; title: string } | null>(null)
   const [defaultTopicId, setDefaultTopicId] = useState<string | undefined>()
   const [showCreateContent, setShowCreateContent] = useState(false)
   const [editContent, setEditContent] = useState<SubjectContent | null>(null)
+  const [deleteContentTarget, setDeleteContentTarget] = useState<SubjectContent | null>(null)
 
   const createTopic = useCreateTopic(id)
   const updateTopic = useUpdateTopic(id)
@@ -53,9 +60,13 @@ function SubjectDetailPage() {
     )
   }
 
-  const handleDeleteTopic = (topicId: string) => {
-    if (!confirm('Excluir tópico e todos os conteúdos vinculados?')) return
-    deleteTopic.mutate(topicId)
+  const handleDeleteTopic = (topicId: string, title: string) => {
+    setDeleteTopicTarget({ id: topicId, title })
+  }
+
+  const handleConfirmDeleteTopic = () => {
+    if (!deleteTopicTarget) return
+    deleteTopic.mutate(deleteTopicTarget.id, { onSuccess: () => setDeleteTopicTarget(null) })
   }
 
   const handleAddContent = (topicId: string) => {
@@ -77,9 +88,13 @@ function SubjectDetailPage() {
     )
   }
 
-  const handleDeleteContent = (contentId: string) => {
-    if (!confirm('Excluir este conteúdo?')) return
-    deleteContent.mutate(contentId)
+  const handleDeleteContent = (content: SubjectContent) => {
+    setDeleteContentTarget(content)
+  }
+
+  const handleConfirmDeleteContent = () => {
+    if (!deleteContentTarget) return
+    deleteContent.mutate(deleteContentTarget.id, { onSuccess: () => setDeleteContentTarget(null) })
   }
 
   return (
@@ -112,12 +127,12 @@ function SubjectDetailPage() {
         <TopicList
           topicsWithContents={grouped?.topics ?? []}
           canManage={canManage}
-          apiBaseUrl={API_BASE_URL}
+          apiBaseUrl={`${API_BASE_URL}/api`}
           onEditTopic={(topicId, title) => setEditTopic({ id: topicId, title })}
-          onDeleteTopic={handleDeleteTopic}
+          onDeleteTopic={(topicId, title) => handleDeleteTopic(topicId, title)}
           onAddContent={handleAddContent}
           onEditContent={(content) => setEditContent(content)}
-          onDeleteContent={handleDeleteContent}
+          onDeleteContent={(content) => handleDeleteContent(content)}
         />
       )}
 
@@ -148,16 +163,39 @@ function SubjectDetailPage() {
         title="Novo Conteúdo"
       />
 
-      {editContent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="rounded-lg border bg-background p-6 shadow-lg text-sm">
-            <p className="mb-4 font-medium">Edição de conteúdo não disponível para arquivos. Exclua e recrie.</p>
-            <button onClick={() => setEditContent(null)} className="rounded border px-4 py-2">
+      <ConfirmDialog
+        open={!!deleteTopicTarget}
+        title="Excluir tópico"
+        description={`Excluir "${deleteTopicTarget?.title}" e todos os conteúdos vinculados? Esta ação não pode ser desfeita.`}
+        confirmLabel="Excluir"
+        onConfirm={handleConfirmDeleteTopic}
+        onCancel={() => setDeleteTopicTarget(null)}
+      />
+
+      <ConfirmDialog
+        open={!!deleteContentTarget}
+        title="Excluir conteúdo"
+        description={`Excluir "${deleteContentTarget?.title}"? Esta ação não pode ser desfeita.`}
+        confirmLabel="Excluir"
+        onConfirm={handleConfirmDeleteContent}
+        onCancel={() => setDeleteContentTarget(null)}
+      />
+
+      <Dialog open={!!editContent} onOpenChange={(isOpen) => { if (!isOpen) setEditContent(null) }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Editar Conteúdo</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Edição de conteúdo não disponível para arquivos. Exclua e recrie.
+          </p>
+          <div className="flex justify-end">
+            <button onClick={() => setEditContent(null)} className="rounded border px-4 py-2 text-sm">
               Fechar
             </button>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
