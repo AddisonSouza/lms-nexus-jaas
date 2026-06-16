@@ -8,13 +8,12 @@ import br.edu.lms.module.assessment.application.dto.SubmitTaskCommand;
 import br.edu.lms.module.assessment.application.dto.TaskResponse;
 import br.edu.lms.module.assessment.application.dto.TaskWithGradeResponse;
 import br.edu.lms.module.assessment.application.usecase.CreateTaskService;
-import br.edu.lms.module.assessment.domain.exception.UnauthorizedTaskOperationException;
 import br.edu.lms.module.assessment.domain.port.in.CreateTaskUseCase;
 import br.edu.lms.module.assessment.domain.port.in.EditSubmissionUseCase;
 import br.edu.lms.module.assessment.domain.port.in.ListStudentGradesUseCase;
+import br.edu.lms.module.assessment.domain.port.in.ListTaskSubmissionsUseCase;
 import br.edu.lms.module.assessment.domain.port.in.PublishTaskUseCase;
 import br.edu.lms.module.assessment.domain.port.in.SubmitTaskUseCase;
-import br.edu.lms.module.assessment.domain.port.out.SubmissionRepository;
 import br.edu.lms.module.assessment.domain.port.out.TaskRepository;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -48,8 +47,8 @@ public class TaskResource {
     private final SubmitTaskUseCase submitTaskUseCase;
     private final EditSubmissionUseCase editSubmissionUseCase;
     private final ListStudentGradesUseCase listStudentGradesUseCase;
+    private final ListTaskSubmissionsUseCase listTaskSubmissionsUseCase;
     private final TaskRepository taskRepository;
-    private final SubmissionRepository submissionRepository;
     private final JsonWebToken jwt;
 
     @GET
@@ -200,14 +199,7 @@ public class TaskResource {
     public List<SubmissionResponse> listSubmissions(@PathParam("taskId") String taskId) {
         String orgId = (String) jwt.getClaim("org");
         String userId = jwt.getSubject();
-        var task = taskRepository.findByIdAndOrganization(
-                br.edu.lms.module.assessment.domain.model.TaskId.of(taskId), orgId)
-                .orElseThrow(() -> new jakarta.ws.rs.NotFoundException("Task not found: " + taskId));
-        if (!task.getCreatedBy().equals(userId)) {
-            throw new UnauthorizedTaskOperationException(userId, taskId);
-        }
-        return submissionRepository.findByTask(taskId, orgId)
-                .stream().map(br.edu.lms.module.assessment.application.usecase.SubmitTaskService::toResponse).toList();
+        return listTaskSubmissionsUseCase.execute(taskId, userId, orgId);
     }
 
     private List<AttachmentInput> buildAttachments(List<FileUpload> files) throws IOException {

@@ -2,11 +2,8 @@ package br.edu.lms.module.assessment.interfaces.rest;
 
 import br.edu.lms.module.assessment.application.dto.EvaluateSubmissionCommand;
 import br.edu.lms.module.assessment.application.dto.SubmissionResponse;
-import br.edu.lms.module.assessment.application.usecase.SubmitTaskService;
-import br.edu.lms.module.assessment.domain.model.SubmissionId;
-import br.edu.lms.module.assessment.domain.model.SubmissionStatus;
 import br.edu.lms.module.assessment.domain.port.in.EvaluateSubmissionUseCase;
-import br.edu.lms.module.assessment.domain.port.out.SubmissionRepository;
+import br.edu.lms.module.assessment.domain.port.in.GetSubmissionFeedbackUseCase;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.*;
@@ -27,7 +24,7 @@ import java.math.BigDecimal;
 public class SubmissionResource {
 
     private final EvaluateSubmissionUseCase evaluateSubmissionUseCase;
-    private final SubmissionRepository submissionRepository;
+    private final GetSubmissionFeedbackUseCase getSubmissionFeedbackUseCase;
     private final JsonWebToken jwt;
 
     @PATCH
@@ -59,19 +56,7 @@ public class SubmissionResource {
     public SubmissionResponse getFeedback(@PathParam("id") String submissionId) {
         String studentId = jwt.getSubject();
         String orgId = (String) jwt.getClaim("org");
-
-        var submission = submissionRepository.findById(SubmissionId.of(submissionId))
-                .orElseThrow(() -> new NotFoundException("Submissão não encontrada: " + submissionId));
-
-        if (!submission.getStudentId().equals(studentId) || !submission.getOrganizationId().equals(orgId)) {
-            throw new ForbiddenException("Acesso negado à submissão: " + submissionId);
-        }
-
-        if (submission.getStatus() != SubmissionStatus.EVALUATED) {
-            throw new ClientErrorException("Submissão ainda não foi avaliada", 409);
-        }
-
-        return SubmitTaskService.toResponse(submission);
+        return getSubmissionFeedbackUseCase.execute(submissionId, studentId, orgId);
     }
 
     public record EvaluationRequest(BigDecimal grade, String feedback) {}
