@@ -8,20 +8,21 @@ import { useRegenerateInviteCode } from '../hooks/useRegenerateInviteCode'
 import { useAuthStore } from '@features/auth/store/authStore'
 import ClassroomFormDialog from './ClassroomFormDialog'
 import ClassroomMembersPanel from './ClassroomMembersPanel'
+import ConfirmDialog from '@components/shared/ConfirmDialog'
 import type { ClassroomFormData } from '../schemas/classroomSchema'
 
 function ClassroomDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [showEdit, setShowEdit] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const { data: classroom, isLoading } = useClassroom(id!)
   const updateClassroom = useUpdateClassroom(id!)
   const deleteClassroom = useDeleteClassroom()
   const regenerateCode = useRegenerateInviteCode(id!)
 
-  const token = useAuthStore((s) => s.accessToken)
-  const role = token ? (JSON.parse(atob(token.split('.')[1])).groups?.[0] ?? 'ALUNO') : 'ALUNO'
+  const role = useAuthStore((s) => s.role)
   const canManage = role === 'ADMIN_ORG' || role === 'GESTOR'
   const canRegenerateCode = role === 'ADMIN_ORG' || role === 'GESTOR' || role === 'PROFESSOR'
 
@@ -29,9 +30,10 @@ function ClassroomDetailPage() {
     updateClassroom.mutate(data, { onSuccess: () => setShowEdit(false) })
   }
 
-  const handleDelete = () => {
-    if (!confirm(`Excluir a turma "${classroom?.name}"?`)) return
-    deleteClassroom.mutate(id!, { onSuccess: () => navigate('/classrooms') })
+  const handleConfirmDelete = () => {
+    deleteClassroom.mutate(id!, {
+      onSuccess: () => { setShowDeleteConfirm(false); navigate('/classrooms') },
+    })
   }
 
   if (isLoading) {
@@ -58,7 +60,7 @@ function ClassroomDetailPage() {
               <Pencil className="h-4 w-4" /> Editar
             </button>
             <button
-              onClick={handleDelete}
+              onClick={() => setShowDeleteConfirm(true)}
               className="flex items-center gap-1 rounded border border-destructive px-3 py-1.5 text-sm text-destructive hover:bg-destructive/10"
             >
               <Trash2 className="h-4 w-4" /> Excluir
@@ -77,8 +79,8 @@ function ClassroomDetailPage() {
             <p className="text-muted-foreground">Status</p>
             <span className={`inline-block rounded px-2 py-0.5 text-xs font-medium ${
               classroom.status === 'ACTIVE'
-                ? 'bg-green-100 text-green-700'
-                : 'bg-gray-100 text-gray-600'
+                ? 'bg-primary/10 text-primary'
+                : 'bg-muted text-muted-foreground'
             }`}>
               {classroom.status === 'ACTIVE' ? 'Ativa' : 'Arquivada'}
             </span>
@@ -128,6 +130,15 @@ function ClassroomDetailPage() {
         isPending={updateClassroom.isPending}
         defaultValues={classroom}
         title="Editar Turma"
+      />
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        title="Excluir turma"
+        description={`Excluir a turma "${classroom?.name}"? Esta ação não pode ser desfeita.`}
+        confirmLabel="Excluir"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
       />
     </div>
   )

@@ -8,10 +8,10 @@ interface Props {
   canManage: boolean
   apiBaseUrl: string
   onEditTopic: (topicId: string, currentTitle: string) => void
-  onDeleteTopic: (topicId: string) => void
+  onDeleteTopic: (topicId: string, title: string) => void
   onAddContent: (topicId: string) => void
   onEditContent: (content: SubjectContent) => void
-  onDeleteContent: (contentId: string) => void
+  onDeleteContent: (content: SubjectContent) => void
 }
 
 function TopicList({
@@ -66,7 +66,7 @@ function TopicList({
                     <Pencil className="h-3.5 w-3.5" />
                   </button>
                   <button
-                    onClick={() => onDeleteTopic(topic.id)}
+                    onClick={() => onDeleteTopic(topic.id, topic.title)}
                     className="rounded p-1 text-muted-foreground hover:text-destructive"
                     title="Excluir tópico"
                   >
@@ -88,7 +88,7 @@ function TopicList({
                       canManage={canManage}
                       apiBaseUrl={apiBaseUrl}
                       onEdit={onEditContent}
-                      onDelete={onDeleteContent}
+                      onDelete={() => onDeleteContent(c)}
                     />
                   ))
                 )}

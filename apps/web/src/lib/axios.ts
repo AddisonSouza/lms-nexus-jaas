@@ -1,13 +1,16 @@
 import axios from 'axios'
+import { useAuthStore } from '@features/auth/store/authStore'
+
+export const API_BASE_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:8080') as string
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:8080',
+  baseURL: API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true,
 })
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token')
+  const token = useAuthStore.getState().accessToken
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
@@ -45,14 +48,14 @@ api.interceptors.response.use(
         {},
         { withCredentials: true },
       )
-      localStorage.setItem('access_token', data.accessToken)
+      useAuthStore.getState().setToken(data.accessToken)
       api.defaults.headers.common.Authorization = `Bearer ${data.accessToken}`
       processQueue(null, data.accessToken)
       original.headers.Authorization = `Bearer ${data.accessToken}`
       return api(original)
     } catch (refreshError) {
       processQueue(refreshError, null)
-      localStorage.removeItem('access_token')
+      useAuthStore.getState().clearToken()
       window.location.href = '/login'
       return Promise.reject(refreshError)
     } finally {

@@ -1,30 +1,42 @@
+import { z } from 'zod'
 import api from '@lib/axios'
 import type {
   AssignTeacherPayload,
   CreateSubjectPayload,
   LinkClassroomPayload,
-  Subject,
   UpdateSubjectPayload,
 } from '../types'
 
-export async function listSubjects(): Promise<Subject[]> {
-  const res = await api.get<Subject[]>('/subjects')
-  return res.data
+const subjectSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  code: z.string().nullable().default(null),
+  description: z.string().nullable().default(null),
+  workloadHours: z.number().nullable().default(null),
+  organizationId: z.string().default(''),
+  classroomIds: z.array(z.string()).default([]),
+  teacherMemberIds: z.array(z.string()).default([]),
+  createdAt: z.string().default(''),
+})
+
+export async function listSubjects() {
+  const res = await api.get('/subjects')
+  return z.array(subjectSchema).parse(res.data)
 }
 
-export async function getSubject(id: string): Promise<Subject> {
-  const res = await api.get<Subject>(`/subjects/${id}`)
-  return res.data
+export async function getSubject(id: string) {
+  const res = await api.get(`/subjects/${id}`)
+  return subjectSchema.parse(res.data)
 }
 
-export async function createSubject(data: CreateSubjectPayload): Promise<Subject> {
-  const res = await api.post<Subject>('/subjects', data)
-  return res.data
+export async function createSubject(data: CreateSubjectPayload) {
+  const res = await api.post('/subjects', data)
+  return subjectSchema.parse(res.data)
 }
 
-export async function updateSubject(id: string, data: UpdateSubjectPayload): Promise<Subject> {
-  const res = await api.put<Subject>(`/subjects/${id}`, data)
-  return res.data
+export async function updateSubject(id: string, data: UpdateSubjectPayload) {
+  const res = await api.put(`/subjects/${id}`, data)
+  return subjectSchema.parse(res.data)
 }
 
 export async function deleteSubject(id: string): Promise<void> {

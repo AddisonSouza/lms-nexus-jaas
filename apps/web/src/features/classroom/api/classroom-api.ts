@@ -1,56 +1,74 @@
+import { z } from 'zod'
 import api from '@lib/axios'
 import type {
   AddMemberPayload,
-  Classroom,
-  ClassroomMember,
   CreateClassroomPayload,
   UpdateClassroomPayload,
 } from '../types'
 
-export async function getClassrooms(): Promise<Classroom[]> {
-  const res = await api.get<Classroom[]>('/classrooms')
-  return res.data
+const classroomSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().nullable(),
+  academicPeriod: z.string(),
+  status: z.enum(['ACTIVE', 'ARCHIVED']),
+  inviteCode: z.string().nullable(),
+  organizationId: z.string(),
+  createdAt: z.string(),
+})
+
+const classroomMemberSchema = z.object({
+  id: z.string(),
+  classroomId: z.string(),
+  userId: z.string(),
+  role: z.enum(['PROFESSOR', 'ALUNO']),
+  joinedAt: z.string(),
+})
+
+export async function getClassrooms() {
+  const res = await api.get('/classrooms')
+  return z.array(classroomSchema).parse(res.data)
 }
 
-export async function getClassroom(id: string): Promise<Classroom> {
-  const res = await api.get<Classroom>(`/classrooms/${id}`)
-  return res.data
+export async function getClassroom(id: string) {
+  const res = await api.get(`/classrooms/${id}`)
+  return classroomSchema.parse(res.data)
 }
 
-export async function createClassroom(data: CreateClassroomPayload): Promise<Classroom> {
-  const res = await api.post<Classroom>('/classrooms', data)
-  return res.data
+export async function createClassroom(data: CreateClassroomPayload) {
+  const res = await api.post('/classrooms', data)
+  return classroomSchema.parse(res.data)
 }
 
-export async function updateClassroom(id: string, data: UpdateClassroomPayload): Promise<Classroom> {
-  const res = await api.put<Classroom>(`/classrooms/${id}`, data)
-  return res.data
+export async function updateClassroom(id: string, data: UpdateClassroomPayload) {
+  const res = await api.put(`/classrooms/${id}`, data)
+  return classroomSchema.parse(res.data)
 }
 
 export async function deleteClassroom(id: string): Promise<void> {
   await api.delete(`/classrooms/${id}`)
 }
 
-export async function getClassroomMembers(id: string): Promise<ClassroomMember[]> {
-  const res = await api.get<ClassroomMember[]>(`/classrooms/${id}/members`)
-  return res.data
+export async function getClassroomMembers(id: string) {
+  const res = await api.get(`/classrooms/${id}/members`)
+  return z.array(classroomMemberSchema).parse(res.data)
 }
 
-export async function addClassroomMember(classroomId: string, data: AddMemberPayload): Promise<ClassroomMember> {
-  const res = await api.post<ClassroomMember>(`/classrooms/${classroomId}/members`, data)
-  return res.data
+export async function addClassroomMember(classroomId: string, data: AddMemberPayload) {
+  const res = await api.post(`/classrooms/${classroomId}/members`, data)
+  return classroomMemberSchema.parse(res.data)
 }
 
 export async function removeClassroomMember(classroomId: string, userId: string): Promise<void> {
   await api.delete(`/classrooms/${classroomId}/members/${userId}`)
 }
 
-export async function joinClassroom(inviteCode: string): Promise<Classroom> {
-  const res = await api.post<Classroom>('/classrooms/join', { inviteCode })
-  return res.data
+export async function joinClassroom(inviteCode: string) {
+  const res = await api.post('/classrooms/join', { inviteCode })
+  return classroomSchema.parse(res.data)
 }
 
-export async function regenerateInviteCode(classroomId: string): Promise<Classroom> {
-  const res = await api.post<Classroom>(`/classrooms/${classroomId}/invite-code/regenerate`)
-  return res.data
+export async function regenerateInviteCode(classroomId: string) {
+  const res = await api.post(`/classrooms/${classroomId}/invite-code/regenerate`)
+  return classroomSchema.parse(res.data)
 }

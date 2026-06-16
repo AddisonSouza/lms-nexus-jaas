@@ -7,20 +7,21 @@ import { useUpdateSubject } from '../hooks/useUpdateSubject'
 import { useDeleteSubject } from '../hooks/useDeleteSubject'
 import { useAuthStore } from '@features/auth/store/authStore'
 import SubjectFormDialog from './SubjectFormDialog'
+import ConfirmDialog from '@components/shared/ConfirmDialog'
 import type { SubjectFormData } from '../schemas/subjectSchema'
 import type { Subject } from '../types'
 
 function SubjectListPage() {
   const [showCreate, setShowCreate] = useState(false)
   const [editTarget, setEditTarget] = useState<Subject | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<Subject | null>(null)
 
   const { data: subjects, isLoading } = useSubjects()
   const createSubject = useCreateSubject()
   const updateSubject = useUpdateSubject(editTarget?.id ?? '')
   const deleteSubject = useDeleteSubject()
 
-  const token = useAuthStore((s) => s.accessToken)
-  const role = token ? (JSON.parse(atob(token.split('.')[1])).groups?.[0] ?? 'ALUNO') : 'ALUNO'
+  const role = useAuthStore((s) => s.role)
   const canManage = role === 'ADMIN_ORG' || role === 'GESTOR'
 
   const handleCreate = (data: SubjectFormData) => {
@@ -48,9 +49,9 @@ function SubjectListPage() {
     )
   }
 
-  const handleDelete = (id: string) => {
-    if (!confirm('Confirmar exclusão da disciplina?')) return
-    deleteSubject.mutate(id)
+  const handleConfirmDelete = () => {
+    if (!deleteTarget) return
+    deleteSubject.mutate(deleteTarget.id, { onSuccess: () => setDeleteTarget(null) })
   }
 
   return (
@@ -107,7 +108,7 @@ function SubjectListPage() {
                         <Pencil className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={() => handleDelete(s.id)}
+                        onClick={() => setDeleteTarget(s)}
                         className="text-muted-foreground hover:text-destructive"
                         title="Excluir"
                       >
@@ -137,6 +138,15 @@ function SubjectListPage() {
         isPending={updateSubject.isPending}
         defaultValues={editTarget ?? undefined}
         title="Editar Disciplina"
+      />
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Excluir disciplina"
+        description={`Confirmar exclusão de "${deleteTarget?.name}"? Esta ação não pode ser desfeita.`}
+        confirmLabel="Excluir"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteTarget(null)}
       />
     </div>
   )

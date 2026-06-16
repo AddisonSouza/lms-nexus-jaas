@@ -1,31 +1,35 @@
+import { z } from 'zod'
 import api from '@lib/axios'
 import type { RegisterFormData } from '../schemas/registerSchema'
 import type { LoginFormData } from '../schemas/loginSchema'
 
-export interface RegisterResponse {
-  userId: string
-  email: string
-  status: 'PENDING_CONFIRMATION' | 'ACTIVE' | 'SUSPENDED'
-}
+const registerResponseSchema = z.object({
+  userId: z.string(),
+  email: z.string(),
+  status: z.enum(['PENDING_CONFIRMATION', 'ACTIVE', 'SUSPENDED']),
+})
 
-export interface LoginResponse {
-  accessToken: string
-}
+const loginResponseSchema = z.object({
+  accessToken: z.string(),
+})
+
+export type RegisterResponse = z.infer<typeof registerResponseSchema>
+export type LoginResponse = z.infer<typeof loginResponseSchema>
 
 export async function registerUser(data: RegisterFormData): Promise<RegisterResponse> {
-  const response = await api.post<RegisterResponse>('/auth/register', {
+  const response = await api.post('/auth/register', {
     fullName: data.fullName,
     email: data.email,
     password: data.password,
   })
-  return response.data
+  return registerResponseSchema.parse(response.data)
 }
 
 export async function loginUser(data: LoginFormData): Promise<LoginResponse> {
-  const response = await api.post<LoginResponse>('/auth/login', data, {
+  const response = await api.post('/auth/login', data, {
     withCredentials: true,
   })
-  return response.data
+  return loginResponseSchema.parse(response.data)
 }
 
 export async function logoutUser(): Promise<void> {
@@ -33,12 +37,12 @@ export async function logoutUser(): Promise<void> {
 }
 
 export async function refreshTokens(organizationId?: string): Promise<LoginResponse> {
-  const response = await api.post<LoginResponse>(
+  const response = await api.post(
     '/auth/refresh',
     organizationId ? { organizationId } : {},
     { withCredentials: true },
   )
-  return response.data
+  return loginResponseSchema.parse(response.data)
 }
 
 export async function forgotPassword(email: string): Promise<void> {

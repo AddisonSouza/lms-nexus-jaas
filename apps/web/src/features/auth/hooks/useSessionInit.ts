@@ -1,20 +1,31 @@
 import { useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { refreshTokens } from '../api/auth-api'
 import { useAuthStore } from '../store/authStore'
 
 export function useSessionInit() {
-  const { isAuthenticated, setToken, clearToken } = useAuthStore()
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const setToken = useAuthStore((s) => s.setToken)
+  const clearToken = useAuthStore((s) => s.clearToken)
   const navigate = useNavigate()
 
-  useEffect(() => {
-    if (isAuthenticated) return
+  const { isError } = useQuery({
+    queryKey: ['session', 'init'],
+    queryFn: async () => {
+      const { accessToken } = await refreshTokens()
+      setToken(accessToken)
+      return accessToken
+    },
+    enabled: !isAuthenticated,
+    retry: false,
+    staleTime: Infinity,
+  })
 
-    refreshTokens()
-      .then(({ accessToken }) => setToken(accessToken))
-      .catch(() => {
-        clearToken()
-        navigate('/login', { replace: true })
-      })
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (isError) {
+      clearToken()
+      navigate('/login', { replace: true })
+    }
+  }, [isError, clearToken, navigate])
 }
