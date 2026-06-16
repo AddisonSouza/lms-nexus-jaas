@@ -50,17 +50,17 @@
 
 ## 8. Frontend — Tipos e API
 
-- [ ] 8.1 [FE] Adicionar tipos `Notification`, `NotificationType` em `features/communication/types.ts`
-- [ ] 8.2 [FE] Criar `features/communication/api/notifications.ts` com `listNotifications`, `markNotificationRead`, `markAllNotificationsRead`
-- [ ] 8.3 [FE] Adicionar `["notifications"]` em `features/communication/api/query-keys.ts`
+- [x] 8.1 [FE] Adicionar tipos `Notification`, `NotificationType` em `features/communication/types.ts`
+- [x] 8.2 [FE] Criar `features/communication/api/notifications.ts` com `listNotifications`, `markNotificationRead`, `markAllNotificationsRead`
+- [x] 8.3 [FE] Adicionar `["notifications"]` em `features/communication/api/query-keys.ts`
 
 ## 9. Frontend — Hooks e componentes
 
-- [ ] 9.1 [FE] Criar hook `useNotifications()` (TanStack Query, `refetchInterval: 30_000`, query key `["notifications"]`)
-- [ ] 9.2 [FE] Criar hooks de mutação `useMarkNotificationRead`, `useMarkAllNotificationsRead` com invalidação de `["notifications"]`
-- [ ] 9.3 [FE] Criar `NotificationBell.tsx` (ícone Lucide `Bell` + badge com `unreadCount`)
-- [ ] 9.4 [FE] Criar `NotificationPanel.tsx` (popover/dropdown Shadcn com a lista; clique marca como lida e navega via `actionLink`; botão "marcar todas como lidas")
-- [ ] 9.5 [FE] Integrar `NotificationBell` no layout principal (header autenticado), visível para todos os papéis
+- [x] 9.1 [FE] Criar hook `useNotifications()` (TanStack Query, `refetchInterval: 30_000`, query key `["notifications"]`)
+- [x] 9.2 [FE] Criar hooks de mutação `useMarkNotificationRead`, `useMarkAllNotificationsRead` com invalidação de `["notifications"]`
+- [x] 9.3 [FE] Criar `NotificationBell.tsx` (ícone Lucide `Bell` + badge com `unreadCount`)
+- [x] 9.4 [FE] Criar `NotificationPanel.tsx` (popover/dropdown Shadcn com a lista; clique marca como lida e navega via `actionLink`; botão "marcar todas como lidas")
+- [x] 9.5 [FE] Integrar `NotificationBell` no layout principal (header autenticado), visível para todos os papéis
 
 ## 10. Frontend — Testes
 
