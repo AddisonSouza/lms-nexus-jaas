@@ -8,6 +8,7 @@ import { useRegenerateInviteCode } from '../hooks/useRegenerateInviteCode'
 import { useAuthStore } from '@features/auth/store/authStore'
 import ClassroomFormDialog from './ClassroomFormDialog'
 import ClassroomMembersPanel from './ClassroomMembersPanel'
+import AnnouncementFeed from '@features/communication/components/AnnouncementFeed'
 import ConfirmDialog from '@components/shared/ConfirmDialog'
 import type { ClassroomFormData } from '../schemas/classroomSchema'
 
@@ -121,6 +122,11 @@ function ClassroomDetailPage() {
 
       <div className="rounded-lg border p-4">
         <ClassroomMembersPanel classroomId={id!} canManage={canManage} />
+      </div>
+
+      <div className="rounded-lg border p-4 space-y-3">
+        <h2 className="text-lg font-semibold">Mural de Avisos</h2>
+        <AnnouncementFeed classroomId={id!} />
       </div>
 
       <ClassroomFormDialog
