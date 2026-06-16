@@ -1,5 +1,8 @@
 package br.edu.lms.shared.exception;
 
+import br.edu.lms.module.assessment.domain.exception.InvalidTaskStateException;
+import br.edu.lms.module.assessment.domain.exception.TaskNotFoundException;
+import br.edu.lms.module.assessment.domain.exception.UnauthorizedTaskOperationException;
 import br.edu.lms.module.classroom.domain.exception.ClassroomArchivedException;
 import br.edu.lms.module.curriculum.domain.exception.ContentAccessDeniedException;
 import br.edu.lms.module.curriculum.domain.exception.ContentNotFoundException;
@@ -190,6 +193,30 @@ public class GlobalExceptionMapper implements ExceptionMapper<Exception> {
         if (exception instanceof SubjectTeacherAssignmentNotFoundException) {
             return Response.status(Response.Status.NOT_FOUND)
                     .entity(Map.of("error", "SUBJECT_TEACHER_ASSIGNMENT_NOT_FOUND"))
+                    .build();
+        }
+
+        if (exception instanceof TaskNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("error", "TASK_NOT_FOUND"))
+                    .build();
+        }
+
+        if (exception instanceof UnauthorizedTaskOperationException e) {
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity(Map.of("error", "TASK_FORBIDDEN"))
+                    .build();
+        }
+
+        if (exception instanceof InvalidTaskStateException e) {
+            return Response.status(Response.Status.CONFLICT)
+                    .entity(Map.of("error", e.getMessage()))
+                    .build();
+        }
+
+        if (exception instanceof IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(Map.of("error", e.getMessage()))
                     .build();
         }
 

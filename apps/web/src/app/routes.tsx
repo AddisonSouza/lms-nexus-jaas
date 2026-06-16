@@ -13,6 +13,7 @@ import ClassroomListPage from '@features/classroom/components/ClassroomListPage'
 import ClassroomDetailPage from '@features/classroom/components/ClassroomDetailPage'
 import SubjectListPage from '@features/curriculum/components/SubjectListPage'
 import SubjectDetailPage from '@features/curriculum/components/SubjectDetailPage'
+import TaskListPage from '@features/assessment/components/TaskListPage'
 
 export const router = createBrowserRouter([
   {
@@ -88,6 +89,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <SubjectDetailPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/assessment/tasks',
+    element: (
+      <ProtectedRoute>
+        <TaskListPage />
       </ProtectedRoute>
     ),
   },

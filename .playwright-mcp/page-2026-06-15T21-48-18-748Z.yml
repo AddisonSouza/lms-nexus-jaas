@@ -1,0 +1,9 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - img [ref=e6]
+      - heading "Disciplinas" [level=1] [ref=e10]
+    - button "Nova Disciplina" [ref=e11] [cursor=pointer]:
+      - img [ref=e12]
+      - text: Nova Disciplina
+  - paragraph [ref=e13]: Carregando disciplinas...
