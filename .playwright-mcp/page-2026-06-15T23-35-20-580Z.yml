@@ -1,0 +1,36 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - heading "Tarefas" [level=1] [ref=e5]
+    - button "Nova Tarefa" [ref=e6] [cursor=pointer]:
+      - img [ref=e7]
+      - text: Nova Tarefa
+  - paragraph [ref=e8]: Nenhuma tarefa criada ainda.
+  - generic [ref=e10]:
+    - generic [ref=e11]:
+      - heading "Nova Tarefa" [level=2] [ref=e12]
+      - button [ref=e13] [cursor=pointer]:
+        - img [ref=e14]
+    - generic [ref=e17]:
+      - generic [ref=e18]:
+        - text: Título *
+        - 'textbox "Ex: Lista de exercícios 01" [ref=e19]'
+        - paragraph [ref=e33]: Título é obrigatório
+      - generic [ref=e20]:
+        - text: Enunciado * (Markdown suportado)
+        - textbox "Descreva a tarefa em Markdown..." [ref=e21]
+        - paragraph [ref=e34]: Enunciado é obrigatório
+      - generic [ref=e22]:
+        - generic [ref=e23]:
+          - text: Prazo *
+          - textbox "Prazo *" [ref=e24]
+          - paragraph [ref=e35]: Prazo é obrigatório
+        - generic [ref=e25]:
+          - text: Pontuação máxima
+          - spinbutton [ref=e26]
+      - generic [ref=e27]:
+        - text: Materiais de apoio
+        - button "Choose File" [ref=e28]
+        - paragraph [ref=e29]: PDF, DOC, DOCX, ZIP, JPG, PNG — máx. 50MB cada
+      - generic [ref=e30]:
+        - button "Cancelar" [ref=e31] [cursor=pointer]
+        - button "Criar Tarefa" [active] [ref=e32] [cursor=pointer]

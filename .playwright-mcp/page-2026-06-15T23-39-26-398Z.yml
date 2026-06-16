@@ -1,0 +1,7 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - heading "Tarefas" [level=1] [ref=e5]
+    - button "Nova Tarefa" [ref=e6] [cursor=pointer]:
+      - img [ref=e7]
+      - text: Nova Tarefa
+  - paragraph [ref=e8]: Nenhuma tarefa criada ainda.

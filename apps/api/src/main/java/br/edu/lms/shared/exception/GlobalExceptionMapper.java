@@ -1,6 +1,10 @@
 package br.edu.lms.shared.exception;
 
+import br.edu.lms.module.assessment.domain.exception.DeadlineExpiredException;
 import br.edu.lms.module.assessment.domain.exception.InvalidTaskStateException;
+import br.edu.lms.module.assessment.domain.exception.SubmissionAlreadyEvaluatedException;
+import br.edu.lms.module.assessment.domain.exception.SubmissionAlreadyExistsException;
+import br.edu.lms.module.assessment.domain.exception.SubmissionNotFoundException;
 import br.edu.lms.module.assessment.domain.exception.TaskNotFoundException;
 import br.edu.lms.module.assessment.domain.exception.UnauthorizedTaskOperationException;
 import br.edu.lms.module.classroom.domain.exception.ClassroomArchivedException;
@@ -199,6 +203,30 @@ public class GlobalExceptionMapper implements ExceptionMapper<Exception> {
         if (exception instanceof TaskNotFoundException e) {
             return Response.status(Response.Status.NOT_FOUND)
                     .entity(Map.of("error", "TASK_NOT_FOUND"))
+                    .build();
+        }
+
+        if (exception instanceof SubmissionNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(Map.of("error", "SUBMISSION_NOT_FOUND"))
+                    .build();
+        }
+
+        if (exception instanceof SubmissionAlreadyExistsException e) {
+            return Response.status(Response.Status.CONFLICT)
+                    .entity(Map.of("error", "SUBMISSION_ALREADY_EXISTS"))
+                    .build();
+        }
+
+        if (exception instanceof SubmissionAlreadyEvaluatedException e) {
+            return Response.status(422)
+                    .entity(Map.of("error", "SUBMISSION_ALREADY_EVALUATED"))
+                    .build();
+        }
+
+        if (exception instanceof DeadlineExpiredException e) {
+            return Response.status(422)
+                    .entity(Map.of("error", "DEADLINE_EXPIRED"))
                     .build();
         }
 
