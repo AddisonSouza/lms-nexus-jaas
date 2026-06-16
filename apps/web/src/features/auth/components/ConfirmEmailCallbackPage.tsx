@@ -1,7 +1,8 @@
 import { useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { CheckCircle, Loader2, Mail, XCircle } from 'lucide-react'
-import { useConfirmEmail } from '../hooks/useConfirmEmail'
+import { confirmEmail } from '../api/auth-api'
 import ResendConfirmationForm from './ResendConfirmationForm'
 
 function StaticPendingPage() {
@@ -25,13 +26,13 @@ function ConfirmEmailCallbackPage() {
   const token = searchParams.get('token')
   const navigate = useNavigate()
 
-  const { mutate: confirm, isPending, isSuccess, isError, error } = useConfirmEmail()
-
-  useEffect(() => {
-    if (token) {
-      confirm(token)
-    }
-  }, [token, confirm])
+  const { isLoading, isSuccess, isError, error } = useQuery({
+    queryKey: ['confirm-email', token],
+    queryFn: () => confirmEmail(token!),
+    enabled: !!token,
+    retry: false,
+    staleTime: Infinity,
+  })
 
   useEffect(() => {
     if (isSuccess) {
@@ -44,7 +45,7 @@ function ConfirmEmailCallbackPage() {
     return <StaticPendingPage />
   }
 
-  if (isPending) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="w-full max-w-md rounded-lg border p-8 shadow-sm text-center">
@@ -59,7 +60,7 @@ function ConfirmEmailCallbackPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="w-full max-w-md rounded-lg border p-8 shadow-sm text-center">
-          <CheckCircle className="mx-auto mb-4 h-12 w-12 text-green-500" />
+          <CheckCircle className="mx-auto mb-4 h-12 w-12 text-primary" />
           <h1 className="text-2xl font-semibold mb-2">E-mail confirmado!</h1>
           <p className="text-sm text-muted-foreground">
             Sua conta está ativa. Redirecionando para o login...

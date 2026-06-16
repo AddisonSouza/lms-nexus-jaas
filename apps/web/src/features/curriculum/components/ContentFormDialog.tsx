@@ -1,9 +1,16 @@
 import { useEffect, useRef } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2, X } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { contentSchema, type ContentFormData } from '../schemas/contentSchema'
 import type { Topic, ContentType } from '../types'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@features/components/ui/dialog'
 
 const CONTENT_TYPES: { value: ContentType; label: string }[] = [
   { value: 'VIDEO', label: 'Vídeo' },
@@ -69,20 +76,15 @@ function ContentFormDialog({ open, onClose, onSubmit, isPending, topics, default
     }
   }, [contentType, isUrlBased, setValue])
 
-  if (!open) return null
-
   const urlError = (errors as Record<string, { message?: string }>).externalUrl
   const fileError = (errors as Record<string, { message?: string }>).file
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-md rounded-lg border bg-background p-6 shadow-lg">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">{title}</h2>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-1">
@@ -113,7 +115,7 @@ function ContentFormDialog({ open, onClose, onSubmit, isPending, topics, default
               name="contentType"
               control={control}
               render={({ field }) => (
-                <div className="flex gap-2 flex-wrap">
+                <div className="flex flex-wrap gap-2">
                   {CONTENT_TYPES.map((ct) => (
                     <button
                       key={ct.value}
@@ -173,7 +175,7 @@ function ContentFormDialog({ open, onClose, onSubmit, isPending, topics, default
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
+          <DialogFooter>
             <button type="button" onClick={onClose} className="rounded border px-4 py-2 text-sm">
               Cancelar
             </button>
@@ -185,10 +187,10 @@ function ContentFormDialog({ open, onClose, onSubmit, isPending, topics, default
               {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
               Salvar
             </button>
-          </div>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }
 

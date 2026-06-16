@@ -3,31 +3,24 @@ import { Plus, Send, Users } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { useCreateTask } from '../hooks/useCreateTask'
 import { usePublishTask } from '../hooks/usePublishTask'
+import { useSubjectList } from '../hooks/useSubjectList'
 import { taskKeys } from '../api/query-keys'
-import { subjectKeys } from '@features/curriculum/api/query-keys'
-import { listSubjects } from '@features/curriculum/api/subject-api'
+import { listTasks } from '../api/tasks'
 import TaskFormDialog from './TaskFormDialog'
 import SubmissionListDrawer from './SubmissionListDrawer'
 import type { Task } from '../types'
 import type { TaskFormData } from '../schemas/task.schema'
-import api from '@lib/axios'
 
 function TaskListPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedSubjectId, setSelectedSubjectId] = useState('')
   const [submissionsTask, setSubmissionsTask] = useState<Task | null>(null)
 
-  const { data: subjects = [] } = useQuery({
-    queryKey: subjectKeys.lists(),
-    queryFn: listSubjects,
-  })
+  const { data: subjects = [] } = useSubjectList()
 
   const { data: tasks = [] } = useQuery<Task[]>({
     queryKey: taskKeys.lists(),
-    queryFn: async () => {
-      const res = await api.get<Task[]>('/tasks')
-      return res.data
-    },
+    queryFn: listTasks,
   })
 
   const createTask = useCreateTask()
