@@ -20,7 +20,7 @@ public class DeleteAnnouncementService implements DeleteAnnouncementUseCase {
 
     @Override
     public void execute(String announcementId, String userId, String organizationId) {
-        var announcement = announcementRepository.findById(AnnouncementId.of(announcementId))
+        var announcement = announcementRepository.findById(AnnouncementId.of(announcementId), organizationId)
                 .orElseThrow(() -> new AnnouncementNotFoundException(announcementId));
 
         if (!announcement.isAuthoredBy(userId)) {

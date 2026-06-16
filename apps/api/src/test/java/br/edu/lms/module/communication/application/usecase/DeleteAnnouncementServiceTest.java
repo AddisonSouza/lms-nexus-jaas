@@ -40,7 +40,7 @@ class DeleteAnnouncementServiceTest {
 
     @Test
     void delete_success_setsDeletedAt() {
-        when(announcementRepository.findById(AnnouncementId.of(ANNOUNCEMENT_ID))).thenReturn(Optional.of(existing(AUTHOR_ID)));
+        when(announcementRepository.findById(AnnouncementId.of(ANNOUNCEMENT_ID), ORG_ID)).thenReturn(Optional.of(existing(AUTHOR_ID)));
 
         service.execute(ANNOUNCEMENT_ID, AUTHOR_ID, ORG_ID);
 
@@ -51,7 +51,7 @@ class DeleteAnnouncementServiceTest {
 
     @Test
     void delete_throws_whenNotAuthor() {
-        when(announcementRepository.findById(AnnouncementId.of(ANNOUNCEMENT_ID))).thenReturn(Optional.of(existing("other-prof")));
+        when(announcementRepository.findById(AnnouncementId.of(ANNOUNCEMENT_ID), ORG_ID)).thenReturn(Optional.of(existing("other-prof")));
 
         assertThatThrownBy(() -> service.execute(ANNOUNCEMENT_ID, AUTHOR_ID, ORG_ID))
                 .isInstanceOf(UnauthorizedAnnouncementOperationException.class);
@@ -59,7 +59,7 @@ class DeleteAnnouncementServiceTest {
 
     @Test
     void delete_throws_whenNotFound() {
-        when(announcementRepository.findById(AnnouncementId.of(ANNOUNCEMENT_ID))).thenReturn(Optional.empty());
+        when(announcementRepository.findById(AnnouncementId.of(ANNOUNCEMENT_ID), ORG_ID)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.execute(ANNOUNCEMENT_ID, AUTHOR_ID, ORG_ID))
                 .isInstanceOf(AnnouncementNotFoundException.class);

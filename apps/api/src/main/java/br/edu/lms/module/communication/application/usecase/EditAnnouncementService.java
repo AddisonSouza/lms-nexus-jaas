@@ -23,7 +23,7 @@ public class EditAnnouncementService implements EditAnnouncementUseCase {
 
     @Override
     public AnnouncementResponse execute(EditAnnouncementCommand command) {
-        var announcement = announcementRepository.findById(AnnouncementId.of(command.getAnnouncementId()))
+        var announcement = announcementRepository.findById(AnnouncementId.of(command.getAnnouncementId()), command.getOrganizationId())
                 .orElseThrow(() -> new AnnouncementNotFoundException(command.getAnnouncementId()));
 
         if (!announcement.isAuthoredBy(command.getUserId())) {

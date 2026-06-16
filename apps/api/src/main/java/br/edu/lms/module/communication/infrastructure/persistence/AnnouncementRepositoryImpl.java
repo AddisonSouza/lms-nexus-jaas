@@ -30,9 +30,11 @@ public class AnnouncementRepositoryImpl implements AnnouncementRepository {
 
     @Override
     @Transactional
-    public Optional<Announcement> findById(AnnouncementId id) {
+    public Optional<Announcement> findById(AnnouncementId id, String organizationId) {
         var entity = em.find(AnnouncementJpaEntity.class, id.getValue());
-        if (entity == null || entity.getDeletedAt() != null) return Optional.empty();
+        if (entity == null || entity.getDeletedAt() != null || !entity.getOrganizationId().equals(organizationId)) {
+            return Optional.empty();
+        }
         return Optional.of(announcementMapper.toDomain(entity));
     }
 

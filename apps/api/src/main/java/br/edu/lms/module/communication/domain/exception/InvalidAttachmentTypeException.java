@@ -8,5 +8,5 @@ public class InvalidAttachmentTypeException extends RuntimeException implements 
     }
 
     @Override public int httpStatus() { return 422; }
-    @Override public String errorCode() { return getMessage(); }
+    @Override public String errorCode() { return "INVALID_ATTACHMENT_TYPE"; }
 }

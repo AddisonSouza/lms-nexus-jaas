@@ -8,6 +8,6 @@ import java.util.Optional;
 
 public interface AnnouncementRepository {
     Announcement save(Announcement announcement);
-    Optional<Announcement> findById(AnnouncementId id);
+    Optional<Announcement> findById(AnnouncementId id, String organizationId);
     List<Announcement> findByClassroomOrderByCreatedAtDesc(String classroomId, String organizationId);
 }

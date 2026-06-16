@@ -1,7 +1,6 @@
 package br.edu.lms.module.communication.interfaces.rest;
 
 import br.edu.lms.module.communication.application.dto.AnnouncementResponse;
-import br.edu.lms.module.communication.application.dto.AttachmentInput;
 import br.edu.lms.module.communication.application.dto.PostAnnouncementCommand;
 import br.edu.lms.module.communication.domain.port.in.ListAnnouncementsUseCase;
 import br.edu.lms.module.communication.domain.port.in.PostAnnouncementUseCase;
@@ -17,10 +16,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.resteasy.reactive.multipart.FileUpload;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
-import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
 
 @Path("/classrooms")
@@ -54,7 +50,7 @@ public class ClassroomAnnouncementResource {
                 .organizationId(orgId)
                 .authorId(userId)
                 .content(content)
-                .attachments(buildAttachments(files, externalUrl, linkTitle))
+                .attachments(AnnouncementAttachmentRequestMapper.buildAttachments(files, externalUrl, linkTitle))
                 .build();
 
         var response = postAnnouncementUseCase.execute(command);
@@ -70,21 +66,5 @@ public class ClassroomAnnouncementResource {
         String orgId = (String) jwt.getClaim("org");
         String userId = jwt.getSubject();
         return listAnnouncementsUseCase.execute(classroomId, userId, orgId);
-    }
-
-    private List<AttachmentInput> buildAttachments(List<FileUpload> files, String externalUrl, String linkTitle) throws IOException {
-        List<AttachmentInput> attachments = new ArrayList<>();
-        if (files != null) {
-            for (FileUpload file : files) {
-                if (file != null && file.filePath() != null) {
-                    InputStream stream = Files.newInputStream(file.filePath());
-                    attachments.add(new AttachmentInput(stream, file.fileName(), file.contentType(), Files.size(file.filePath()), null, null));
-                }
-            }
-        }
-        if (externalUrl != null && !externalUrl.isBlank()) {
-            attachments.add(new AttachmentInput(null, null, null, null, externalUrl, linkTitle));
-        }
-        return attachments;
     }
 }

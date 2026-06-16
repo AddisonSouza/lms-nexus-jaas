@@ -43,7 +43,7 @@ class EditAnnouncementServiceTest {
 
     @Test
     void edit_success() {
-        when(announcementRepository.findById(AnnouncementId.of(ANNOUNCEMENT_ID))).thenReturn(Optional.of(existing(AUTHOR_ID)));
+        when(announcementRepository.findById(AnnouncementId.of(ANNOUNCEMENT_ID), ORG_ID)).thenReturn(Optional.of(existing(AUTHOR_ID)));
         when(announcementRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         var cmd = EditAnnouncementCommand.builder()
@@ -57,7 +57,7 @@ class EditAnnouncementServiceTest {
 
     @Test
     void edit_throws_whenNotAuthor() {
-        when(announcementRepository.findById(AnnouncementId.of(ANNOUNCEMENT_ID))).thenReturn(Optional.of(existing("other-prof")));
+        when(announcementRepository.findById(AnnouncementId.of(ANNOUNCEMENT_ID), ORG_ID)).thenReturn(Optional.of(existing("other-prof")));
 
         var cmd = EditAnnouncementCommand.builder()
                 .announcementId(ANNOUNCEMENT_ID).userId(AUTHOR_ID).organizationId(ORG_ID)
@@ -69,7 +69,7 @@ class EditAnnouncementServiceTest {
 
     @Test
     void edit_throws_whenAnnouncementNotFound() {
-        when(announcementRepository.findById(AnnouncementId.of(ANNOUNCEMENT_ID))).thenReturn(Optional.empty());
+        when(announcementRepository.findById(AnnouncementId.of(ANNOUNCEMENT_ID), ORG_ID)).thenReturn(Optional.empty());
 
         var cmd = EditAnnouncementCommand.builder()
                 .announcementId(ANNOUNCEMENT_ID).userId(AUTHOR_ID).organizationId(ORG_ID)
@@ -81,7 +81,7 @@ class EditAnnouncementServiceTest {
 
     @Test
     void edit_throws_whenContentBlank() {
-        when(announcementRepository.findById(AnnouncementId.of(ANNOUNCEMENT_ID))).thenReturn(Optional.of(existing(AUTHOR_ID)));
+        when(announcementRepository.findById(AnnouncementId.of(ANNOUNCEMENT_ID), ORG_ID)).thenReturn(Optional.of(existing(AUTHOR_ID)));
 
         var cmd = EditAnnouncementCommand.builder()
                 .announcementId(ANNOUNCEMENT_ID).userId(AUTHOR_ID).organizationId(ORG_ID)
