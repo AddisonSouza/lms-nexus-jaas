@@ -48,6 +48,8 @@ export interface TaskSubmission {
   organizationId: string
   textResponse: string | null
   status: SubmissionStatus
+  grade: number | null
+  feedback: string | null
   attachments: SubmissionAttachment[]
   createdAt: string
   updatedAt: string | null
@@ -64,4 +66,9 @@ export interface EditSubmissionPayload {
   submissionId: string
   textResponse?: string
   files?: File[]
+}
+
+export interface EvaluateSubmissionPayload {
+  grade?: number | null
+  feedback: string
 }

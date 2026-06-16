@@ -1,5 +1,5 @@
 import api from '@lib/axios'
-import type { EditSubmissionPayload, SubmitTaskPayload, Task, TaskSubmission } from '../types'
+import type { EditSubmissionPayload, EvaluateSubmissionPayload, SubmitTaskPayload, Task, TaskSubmission } from '../types'
 
 export async function listPublishedTasks(): Promise<Task[]> {
   const res = await api.get<Task[]>('/tasks/published')
@@ -25,5 +25,18 @@ export async function updateSubmission(data: EditSubmissionPayload): Promise<Tas
     form,
     { headers: { 'Content-Type': 'multipart/form-data' } }
   )
+  return res.data
+}
+
+export async function listSubmissions(taskId: string): Promise<TaskSubmission[]> {
+  const res = await api.get<TaskSubmission[]>(`/tasks/${taskId}/submissions`)
+  return res.data
+}
+
+export async function evaluateSubmission(
+  submissionId: string,
+  payload: EvaluateSubmissionPayload,
+): Promise<TaskSubmission> {
+  const res = await api.patch<TaskSubmission>(`/submissions/${submissionId}/evaluation`, payload)
   return res.data
 }

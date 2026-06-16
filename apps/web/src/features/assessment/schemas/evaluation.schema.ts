@@ -1,0 +1,12 @@
+import { z } from 'zod'
+
+export const evaluationSchema = z.object({
+  grade: z.coerce
+    .number({ invalid_type_error: 'Nota inválida' })
+    .min(0, 'Nota não pode ser negativa')
+    .optional()
+    .nullable(),
+  feedback: z.string().min(1, 'Feedback é obrigatório'),
+})
+
+export type EvaluationFormData = z.infer<typeof evaluationSchema>

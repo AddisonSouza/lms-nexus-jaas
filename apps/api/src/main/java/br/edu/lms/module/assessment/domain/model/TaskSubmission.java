@@ -20,6 +20,8 @@ public class TaskSubmission {
     private final String organizationId;
     private String textResponse;
     private SubmissionStatus status;
+    private java.math.BigDecimal grade;
+    private String feedback;
     private List<SubmissionAttachment> attachments;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

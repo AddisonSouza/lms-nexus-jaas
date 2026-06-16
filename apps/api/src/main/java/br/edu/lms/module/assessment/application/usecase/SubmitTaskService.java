@@ -106,6 +106,8 @@ public class SubmitTaskService implements SubmitTaskUseCase {
                 .organizationId(s.getOrganizationId())
                 .textResponse(s.getTextResponse())
                 .status(s.getStatus())
+                .grade(s.getGrade())
+                .feedback(s.getFeedback())
                 .attachments(attachmentResponses)
                 .createdAt(s.getCreatedAt())
                 .updatedAt(s.getUpdatedAt())
