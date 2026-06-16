@@ -7,14 +7,14 @@ import br.edu.lms.module.assessment.application.dto.SubmissionResponse;
 import br.edu.lms.module.assessment.application.dto.SubmitTaskCommand;
 import br.edu.lms.module.assessment.application.dto.TaskResponse;
 import br.edu.lms.module.assessment.application.dto.TaskWithGradeResponse;
-import br.edu.lms.module.assessment.application.usecase.CreateTaskService;
 import br.edu.lms.module.assessment.domain.port.in.CreateTaskUseCase;
 import br.edu.lms.module.assessment.domain.port.in.EditSubmissionUseCase;
+import br.edu.lms.module.assessment.domain.port.in.ListPublishedTasksUseCase;
 import br.edu.lms.module.assessment.domain.port.in.ListStudentGradesUseCase;
 import br.edu.lms.module.assessment.domain.port.in.ListTaskSubmissionsUseCase;
+import br.edu.lms.module.assessment.domain.port.in.ListTasksUseCase;
 import br.edu.lms.module.assessment.domain.port.in.PublishTaskUseCase;
 import br.edu.lms.module.assessment.domain.port.in.SubmitTaskUseCase;
-import br.edu.lms.module.assessment.domain.port.out.TaskRepository;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.*;
@@ -48,7 +48,8 @@ public class TaskResource {
     private final EditSubmissionUseCase editSubmissionUseCase;
     private final ListStudentGradesUseCase listStudentGradesUseCase;
     private final ListTaskSubmissionsUseCase listTaskSubmissionsUseCase;
-    private final TaskRepository taskRepository;
+    private final ListTasksUseCase listTasksUseCase;
+    private final ListPublishedTasksUseCase listPublishedTasksUseCase;
     private final JsonWebToken jwt;
 
     @GET
@@ -57,8 +58,7 @@ public class TaskResource {
     public List<TaskResponse> list() {
         String orgId = (String) jwt.getClaim("org");
         String userId = jwt.getSubject();
-        return taskRepository.findByOrganizationAndCreatedBy(orgId, userId)
-                .stream().map(CreateTaskService::toResponse).toList();
+        return listTasksUseCase.execute(orgId, userId);
     }
 
     @GET
@@ -67,8 +67,7 @@ public class TaskResource {
     @Operation(summary = "Listar tarefas publicadas (aluno)")
     public List<TaskResponse> listPublished() {
         String orgId = (String) jwt.getClaim("org");
-        return taskRepository.findPublishedByOrganization(orgId)
-                .stream().map(CreateTaskService::toResponse).toList();
+        return listPublishedTasksUseCase.execute(orgId);
     }
 
     @GET

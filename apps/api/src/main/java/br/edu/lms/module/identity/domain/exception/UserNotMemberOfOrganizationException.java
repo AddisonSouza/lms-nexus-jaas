@@ -1,9 +1,9 @@
-package br.edu.lms.module.organization.domain.exception;
+package br.edu.lms.module.identity.domain.exception;
 
 import br.edu.lms.shared.exception.HttpMappable;
 
-public class NotAnOrganizationMemberException extends RuntimeException implements HttpMappable {
-    public NotAnOrganizationMemberException() {
+public class UserNotMemberOfOrganizationException extends RuntimeException implements HttpMappable {
+    public UserNotMemberOfOrganizationException() {
         super("User is not a member of this organization");
     }
 

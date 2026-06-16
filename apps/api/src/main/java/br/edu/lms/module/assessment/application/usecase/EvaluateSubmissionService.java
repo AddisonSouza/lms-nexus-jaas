@@ -5,12 +5,10 @@ import br.edu.lms.module.assessment.application.dto.SubmissionResponse;
 import br.edu.lms.module.assessment.domain.event.SubmissionEvaluatedEvent;
 import br.edu.lms.module.assessment.domain.exception.GradeExceedsMaxScoreException;
 import br.edu.lms.module.assessment.domain.exception.GradeNotAllowedException;
-import br.edu.lms.module.assessment.domain.exception.SubmissionAlreadyEvaluatedException;
 import br.edu.lms.module.assessment.domain.exception.SubmissionNotFoundException;
 import br.edu.lms.module.assessment.domain.exception.TaskNotFoundException;
 import br.edu.lms.module.assessment.domain.exception.UnauthorizedTaskOperationException;
 import br.edu.lms.module.assessment.domain.model.SubmissionId;
-import br.edu.lms.module.assessment.domain.model.SubmissionStatus;
 import br.edu.lms.module.assessment.domain.model.TaskId;
 import br.edu.lms.module.assessment.domain.port.in.EvaluateSubmissionUseCase;
 import br.edu.lms.module.assessment.domain.port.out.SubmissionRepository;
@@ -41,10 +39,6 @@ public class EvaluateSubmissionService implements EvaluateSubmissionUseCase {
             throw new UnauthorizedTaskOperationException(command.getProfessorId(), submission.getTaskId());
         }
 
-        if (submission.getStatus() == SubmissionStatus.EVALUATED) {
-            throw new SubmissionAlreadyEvaluatedException(command.getSubmissionId());
-        }
-
         if (command.getGrade() != null) {
             if (task.getMaxScore() == null) {
                 throw new GradeNotAllowedException(submission.getTaskId());
@@ -54,11 +48,7 @@ public class EvaluateSubmissionService implements EvaluateSubmissionUseCase {
             }
         }
 
-        var evaluated = submission.toBuilder()
-                .grade(command.getGrade())
-                .feedback(command.getFeedback())
-                .status(SubmissionStatus.EVALUATED)
-                .build();
+        var evaluated = submission.evaluate(command.getGrade(), command.getFeedback());
 
         var saved = submissionRepository.save(evaluated);
         evaluatedEvent.fire(new SubmissionEvaluatedEvent(

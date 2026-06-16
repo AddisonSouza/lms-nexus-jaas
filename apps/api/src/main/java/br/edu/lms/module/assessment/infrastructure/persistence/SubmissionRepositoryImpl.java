@@ -2,7 +2,6 @@ package br.edu.lms.module.assessment.infrastructure.persistence;
 
 import br.edu.lms.module.assessment.domain.model.SubmissionAttachment;
 import br.edu.lms.module.assessment.domain.model.SubmissionId;
-import br.edu.lms.module.assessment.domain.model.SubmissionStatus;
 import br.edu.lms.module.assessment.domain.model.TaskSubmission;
 import br.edu.lms.module.assessment.domain.port.out.SubmissionRepository;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -19,14 +18,15 @@ import java.util.Optional;
 public class SubmissionRepositoryImpl implements SubmissionRepository {
 
     private final EntityManager em;
+    private final SubmissionMapper submissionMapper;
 
     @Override
     @Transactional
     public TaskSubmission save(TaskSubmission submission) {
-        var entity = toEntity(submission);
+        var entity = toEntityWithAttachments(submission);
         var managed = em.merge(entity);
         em.flush();
-        return toDomain(managed);
+        return submissionMapper.toDomain(managed);
     }
 
     @Override
@@ -34,7 +34,7 @@ public class SubmissionRepositoryImpl implements SubmissionRepository {
     public Optional<TaskSubmission> findById(SubmissionId id) {
         var entity = em.find(TaskSubmissionJpaEntity.class, id.getValue());
         if (entity == null || entity.getDeletedAt() != null) return Optional.empty();
-        return Optional.of(toDomain(entity));
+        return Optional.of(submissionMapper.toDomain(entity));
     }
 
     @Override
@@ -45,7 +45,7 @@ public class SubmissionRepositoryImpl implements SubmissionRepository {
                 TaskSubmissionJpaEntity.class);
         q.setParameter("taskId", taskId);
         q.setParameter("studentId", studentId);
-        return q.getResultStream().findFirst().map(this::toDomain);
+        return q.getResultStream().findFirst().map(submissionMapper::toDomain);
     }
 
     @Override
@@ -56,7 +56,7 @@ public class SubmissionRepositoryImpl implements SubmissionRepository {
                 TaskSubmissionJpaEntity.class);
         q.setParameter("taskId", taskId);
         q.setParameter("orgId", organizationId);
-        return q.getResultList().stream().map(this::toDomain).toList();
+        return q.getResultList().stream().map(submissionMapper::toDomain).toList();
     }
 
     @Override
@@ -67,22 +67,15 @@ public class SubmissionRepositoryImpl implements SubmissionRepository {
                 TaskSubmissionJpaEntity.class);
         q.setParameter("studentId", studentId);
         q.setParameter("orgId", organizationId);
-        return q.getResultList().stream().map(this::toDomain).toList();
+        return q.getResultList().stream().map(submissionMapper::toDomain).toList();
     }
 
-    private TaskSubmissionJpaEntity toEntity(TaskSubmission submission) {
-        var entity = new TaskSubmissionJpaEntity();
-        entity.setId(submission.getId().getValue());
-        entity.setTaskId(submission.getTaskId());
-        entity.setStudentId(submission.getStudentId());
-        entity.setOrganizationId(submission.getOrganizationId());
-        entity.setTextResponse(submission.getTextResponse());
-        entity.setStatus(submission.getStatus().name());
-        entity.setGrade(submission.getGrade());
-        entity.setFeedback(submission.getFeedback());
-        entity.setCreatedAt(submission.getCreatedAt());
-        entity.setUpdatedAt(submission.getUpdatedAt());
-        entity.setDeletedAt(submission.getDeletedAt());
+    /**
+     * Uses SubmissionMapper for main fields but handles attachments manually
+     * because of the bi-directional JPA back-reference (ae.setSubmission(entity)).
+     */
+    private TaskSubmissionJpaEntity toEntityWithAttachments(TaskSubmission submission) {
+        var entity = submissionMapper.toEntity(submission);
 
         if (submission.getAttachments() != null) {
             List<SubmissionAttachmentJpaEntity> attachmentEntities = submission.getAttachments().stream()
@@ -99,27 +92,5 @@ public class SubmissionRepositoryImpl implements SubmissionRepository {
             entity.setAttachments(attachmentEntities);
         }
         return entity;
-    }
-
-    private TaskSubmission toDomain(TaskSubmissionJpaEntity e) {
-        List<SubmissionAttachment> attachments = e.getAttachments() == null ? List.of() :
-                e.getAttachments().stream()
-                        .map(a -> new SubmissionAttachment(a.getId(), a.getFileKey(), a.getOriginalName(), a.getMimeType(), a.getSizeBytes()))
-                        .toList();
-
-        return TaskSubmission.builder()
-                .id(SubmissionId.of(e.getId()))
-                .taskId(e.getTaskId())
-                .studentId(e.getStudentId())
-                .organizationId(e.getOrganizationId())
-                .textResponse(e.getTextResponse())
-                .status(SubmissionStatus.valueOf(e.getStatus()))
-                .grade(e.getGrade())
-                .feedback(e.getFeedback())
-                .attachments(attachments)
-                .createdAt(e.getCreatedAt())
-                .updatedAt(e.getUpdatedAt())
-                .deletedAt(e.getDeletedAt())
-                .build();
     }
 }

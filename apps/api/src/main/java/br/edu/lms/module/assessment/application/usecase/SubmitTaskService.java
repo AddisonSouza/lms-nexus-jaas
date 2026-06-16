@@ -6,6 +6,7 @@ import br.edu.lms.module.assessment.application.dto.SubmissionResponse;
 import br.edu.lms.module.assessment.application.dto.SubmitTaskCommand;
 import br.edu.lms.module.assessment.domain.event.TaskSubmittedEvent;
 import br.edu.lms.module.assessment.domain.exception.DeadlineExpiredException;
+import br.edu.lms.module.assessment.domain.exception.EmptySubmissionException;
 import br.edu.lms.module.assessment.domain.exception.InvalidTaskStateException;
 import br.edu.lms.module.assessment.domain.exception.SubmissionAlreadyExistsException;
 import br.edu.lms.module.assessment.domain.exception.TaskNotFoundException;
@@ -56,7 +57,7 @@ public class SubmitTaskService implements SubmitTaskUseCase {
         boolean hasText = command.getTextResponse() != null && !command.getTextResponse().isBlank();
         boolean hasFiles = command.getAttachments() != null && !command.getAttachments().isEmpty();
         if (!hasText && !hasFiles) {
-            throw new IllegalArgumentException("Submission must have text or at least one file");
+            throw new EmptySubmissionException();
         }
 
         submissionRepository.findByTaskAndStudent(command.getTaskId(), command.getStudentId())

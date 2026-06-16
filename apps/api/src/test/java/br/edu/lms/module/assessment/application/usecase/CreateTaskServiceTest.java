@@ -2,12 +2,13 @@ package br.edu.lms.module.assessment.application.usecase;
 
 import br.edu.lms.module.assessment.application.dto.AttachmentInput;
 import br.edu.lms.module.assessment.application.dto.CreateTaskCommand;
+import br.edu.lms.module.assessment.domain.exception.DeadlineNotInFutureException;
+import br.edu.lms.module.assessment.domain.exception.InvalidAttachmentTypeException;
 import br.edu.lms.module.assessment.domain.exception.UnauthorizedTaskOperationException;
 import br.edu.lms.module.assessment.domain.model.Task;
 import br.edu.lms.module.assessment.domain.model.TaskStatus;
 import br.edu.lms.module.assessment.domain.port.out.SubjectQueryPort;
 import br.edu.lms.module.assessment.domain.port.out.TaskRepository;
-import br.edu.lms.module.curriculum.domain.exception.InvalidFileTypeException;
 import br.edu.lms.module.storage.domain.model.StorageContext;
 import br.edu.lms.module.storage.domain.model.StoredFile;
 import br.edu.lms.module.storage.domain.port.out.StoragePort;
@@ -76,7 +77,7 @@ class CreateTaskServiceTest {
         when(subjectQueryPort.existsByIdAndTeacher("sub-1", "org-1", "user-1")).thenReturn(true);
 
         assertThatThrownBy(() -> sut.execute(baseCommand().deadline(LocalDateTime.now().minusHours(1)).build()))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(DeadlineNotInFutureException.class)
                 .hasMessageContaining("future");
     }
 
@@ -86,7 +87,7 @@ class CreateTaskServiceTest {
 
         var attachment = new AttachmentInput(new ByteArrayInputStream(new byte[]{1}), "virus.exe", "application/x-msdownload", 100);
         assertThatThrownBy(() -> sut.execute(baseCommand().attachments(List.of(attachment)).build()))
-                .isInstanceOf(InvalidFileTypeException.class);
+                .isInstanceOf(InvalidAttachmentTypeException.class);
     }
 
     @Test

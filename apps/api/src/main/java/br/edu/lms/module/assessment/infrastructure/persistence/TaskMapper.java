@@ -1,7 +1,6 @@
 package br.edu.lms.module.assessment.infrastructure.persistence;
 
 import br.edu.lms.module.assessment.application.dto.TaskAttachmentResponse;
-import br.edu.lms.module.assessment.application.dto.TaskResponse;
 import br.edu.lms.module.assessment.domain.model.Task;
 import br.edu.lms.module.assessment.domain.model.TaskAttachment;
 import br.edu.lms.module.assessment.domain.model.TaskId;
@@ -21,6 +20,7 @@ public interface TaskMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "deletedAt", ignore = true)
+    @Mapping(target = "attachments", ignore = true)
     TaskJpaEntity toEntity(Task domain);
 
     @Mapping(target = "id", source = "id")
@@ -29,4 +29,14 @@ public interface TaskMapper {
     @Mapping(target = "mimeType", source = "mimeType")
     @Mapping(target = "sizeBytes", source = "sizeBytes")
     TaskAttachmentResponse toAttachmentResponse(TaskAttachment attachment);
+
+    default TaskAttachment toAttachmentDomain(TaskAttachmentJpaEntity entity) {
+        return new TaskAttachment(
+                entity.getId(),
+                entity.getFileKey(),
+                entity.getOriginalName(),
+                entity.getMimeType(),
+                entity.getSizeBytes()
+        );
+    }
 }
