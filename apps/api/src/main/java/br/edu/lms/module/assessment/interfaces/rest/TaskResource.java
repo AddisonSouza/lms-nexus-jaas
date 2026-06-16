@@ -6,10 +6,12 @@ import br.edu.lms.module.assessment.application.dto.EditSubmissionCommand;
 import br.edu.lms.module.assessment.application.dto.SubmissionResponse;
 import br.edu.lms.module.assessment.application.dto.SubmitTaskCommand;
 import br.edu.lms.module.assessment.application.dto.TaskResponse;
+import br.edu.lms.module.assessment.application.dto.TaskWithGradeResponse;
 import br.edu.lms.module.assessment.application.usecase.CreateTaskService;
 import br.edu.lms.module.assessment.domain.exception.UnauthorizedTaskOperationException;
 import br.edu.lms.module.assessment.domain.port.in.CreateTaskUseCase;
 import br.edu.lms.module.assessment.domain.port.in.EditSubmissionUseCase;
+import br.edu.lms.module.assessment.domain.port.in.ListStudentGradesUseCase;
 import br.edu.lms.module.assessment.domain.port.in.PublishTaskUseCase;
 import br.edu.lms.module.assessment.domain.port.in.SubmitTaskUseCase;
 import br.edu.lms.module.assessment.domain.port.out.SubmissionRepository;
@@ -45,6 +47,7 @@ public class TaskResource {
     private final PublishTaskUseCase publishTaskUseCase;
     private final SubmitTaskUseCase submitTaskUseCase;
     private final EditSubmissionUseCase editSubmissionUseCase;
+    private final ListStudentGradesUseCase listStudentGradesUseCase;
     private final TaskRepository taskRepository;
     private final SubmissionRepository submissionRepository;
     private final JsonWebToken jwt;
@@ -67,6 +70,16 @@ public class TaskResource {
         String orgId = (String) jwt.getClaim("org");
         return taskRepository.findPublishedByOrganization(orgId)
                 .stream().map(CreateTaskService::toResponse).toList();
+    }
+
+    @GET
+    @Path("/my-grades")
+    @RolesAllowed("ALUNO")
+    @Operation(summary = "Listar tarefas com notas e feedback do aluno")
+    public List<TaskWithGradeResponse> myGrades() {
+        String orgId = (String) jwt.getClaim("org");
+        String studentId = jwt.getSubject();
+        return listStudentGradesUseCase.execute(studentId, orgId);
     }
 
     @POST

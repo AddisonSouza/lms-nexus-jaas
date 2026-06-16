@@ -8,4 +8,5 @@ export const taskKeys = {
 export const submissionKeys = {
   all: ['submissions'] as const,
   byTask: (taskId: string) => [...submissionKeys.all, 'task', taskId] as const,
+  myGrades: () => [...submissionKeys.all, 'my-grades'] as const,
 }

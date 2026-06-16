@@ -59,6 +59,17 @@ public class SubmissionRepositoryImpl implements SubmissionRepository {
         return q.getResultList().stream().map(this::toDomain).toList();
     }
 
+    @Override
+    @Transactional
+    public List<TaskSubmission> findByStudentAndOrganization(String studentId, String organizationId) {
+        TypedQuery<TaskSubmissionJpaEntity> q = em.createQuery(
+                "SELECT s FROM TaskSubmissionJpaEntity s WHERE s.studentId = :studentId AND s.organizationId = :orgId AND s.deletedAt IS NULL",
+                TaskSubmissionJpaEntity.class);
+        q.setParameter("studentId", studentId);
+        q.setParameter("orgId", organizationId);
+        return q.getResultList().stream().map(this::toDomain).toList();
+    }
+
     private TaskSubmissionJpaEntity toEntity(TaskSubmission submission) {
         var entity = new TaskSubmissionJpaEntity();
         entity.setId(submission.getId().getValue());
