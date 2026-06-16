@@ -191,7 +191,7 @@ public class TaskResource {
                 br.edu.lms.module.assessment.domain.model.TaskId.of(taskId), orgId)
                 .orElseThrow(() -> new jakarta.ws.rs.NotFoundException("Task not found: " + taskId));
         if (!task.getCreatedBy().equals(userId)) {
-            throw new jakarta.ws.rs.ForbiddenException("Professor does not own this task");
+            throw new UnauthorizedTaskOperationException(userId, taskId);
         }
         return submissionRepository.findByTask(taskId, orgId)
                 .stream().map(br.edu.lms.module.assessment.application.usecase.SubmitTaskService::toResponse).toList();

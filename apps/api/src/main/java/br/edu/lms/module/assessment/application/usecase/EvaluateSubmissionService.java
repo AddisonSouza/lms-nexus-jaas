@@ -15,7 +15,6 @@ import br.edu.lms.module.assessment.domain.port.out.SubmissionRepository;
 import br.edu.lms.module.assessment.domain.port.out.TaskRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
-import jakarta.ws.rs.ForbiddenException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,7 +36,7 @@ public class EvaluateSubmissionService implements EvaluateSubmissionUseCase {
                 .orElseThrow(() -> new TaskNotFoundException(submission.getTaskId()));
 
         if (!task.getCreatedBy().equals(command.getProfessorId())) {
-            throw new ForbiddenException("Professor does not own this task");
+            throw new UnauthorizedTaskOperationException(command.getProfessorId(), submission.getTaskId());
         }
 
         if (submission.getStatus() == SubmissionStatus.EVALUATED) {
