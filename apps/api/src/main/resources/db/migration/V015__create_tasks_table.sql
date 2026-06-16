@@ -1,0 +1,21 @@
+CREATE TABLE tasks (
+    id               VARCHAR(36)    NOT NULL,
+    subject_id       VARCHAR(36)    NOT NULL,
+    organization_id  VARCHAR(36)    NOT NULL,
+    created_by       VARCHAR(36)    NOT NULL,
+    title            VARCHAR(255)   NOT NULL,
+    description      LONGTEXT       NOT NULL,
+    deadline         DATETIME       NOT NULL,
+    max_score        DECIMAL(10, 2) NULL,
+    status           ENUM('DRAFT', 'PUBLISHED', 'CLOSED', 'GRADED') NOT NULL DEFAULT 'DRAFT',
+    created_at       DATETIME       NOT NULL,
+    updated_at       DATETIME       NOT NULL,
+    deleted_at       DATETIME       NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_tasks_subject    FOREIGN KEY (subject_id)      REFERENCES subjects(id),
+    CONSTRAINT fk_tasks_org        FOREIGN KEY (organization_id) REFERENCES organizations(id),
+    INDEX idx_tasks_subject        (subject_id),
+    INDEX idx_tasks_org            (organization_id),
+    INDEX idx_tasks_status         (status),
+    INDEX idx_tasks_deleted        (deleted_at)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;

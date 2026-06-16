@@ -1,0 +1,108 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - link [ref=e5] [cursor=pointer]:
+      - /url: /curriculum
+      - img [ref=e6]
+    - generic [ref=e8]:
+      - img [ref=e9]
+      - heading "Conteúdo da Disciplina" [level=1] [ref=e13]
+  - generic [ref=e14]:
+    - heading "Tópicos e Materiais" [level=2] [ref=e15]
+    - button "Novo Tópico" [ref=e16] [cursor=pointer]:
+      - img [ref=e17]
+      - text: Novo Tópico
+  - generic [ref=e19]:
+    - generic [ref=e20]:
+      - generic [ref=e21] [cursor=pointer]:
+        - img [ref=e23]
+        - generic [ref=e25]: Termodinâmica
+        - generic [ref=e26]: 0 item(s)
+        - generic [ref=e27]:
+          - button "Adicionar conteúdo" [ref=e28]:
+            - img [ref=e29]
+          - button "Editar tópico" [ref=e30]:
+            - img [ref=e31]
+          - button "Excluir tópico" [ref=e34]:
+            - img [ref=e35]
+      - paragraph [ref=e39]: Nenhum conteúdo neste tópico.
+    - generic [ref=e40]:
+      - generic [ref=e41] [cursor=pointer]:
+        - img [ref=e43]
+        - generic [ref=e45]: Mecânica Clássica
+        - generic [ref=e46]: 2 item(s)
+        - generic [ref=e47]:
+          - button "Adicionar conteúdo" [ref=e48]:
+            - img [ref=e49]
+          - button "Editar tópico" [ref=e50]:
+            - img [ref=e51]
+          - button "Excluir tópico" [ref=e54]:
+            - img [ref=e55]
+      - generic [ref=e58]:
+        - generic [ref=e59]:
+          - img [ref=e61]
+          - generic [ref=e64]:
+            - paragraph [ref=e65]: Introdução à Mecânica
+            - paragraph [ref=e66]: Vídeo introdutório
+            - generic [ref=e67]: Link
+          - generic [ref=e68]:
+            - link "Abrir link" [ref=e69] [cursor=pointer]:
+              - /url: https://youtube.com/watch?v=example
+              - img [ref=e70]
+            - button "Editar" [ref=e74] [cursor=pointer]
+            - button "Excluir" [ref=e75] [cursor=pointer]
+        - generic [ref=e76]:
+          - img [ref=e78]
+          - generic [ref=e81]:
+            - paragraph [ref=e82]: Apostila de Mecânica
+            - paragraph [ref=e83]: Apostila completa
+            - generic [ref=e84]: Arquivo
+          - generic [ref=e85]:
+            - link "Download" [ref=e86] [cursor=pointer]:
+              - /url: http://localhost:8080/api/files/lesson_material/2026/06/b8990dc1-8ee1-4d03-9a61-3b2355f7ab3b-test.pdf
+              - img [ref=e87]
+            - button "Editar" [ref=e90] [cursor=pointer]
+            - button "Excluir" [ref=e91] [cursor=pointer]
+    - generic [ref=e92]:
+      - generic [ref=e93] [cursor=pointer]:
+        - img [ref=e95]
+        - generic [ref=e97]: Óptica
+        - generic [ref=e98]: 0 item(s)
+        - generic [ref=e99]:
+          - button "Adicionar conteúdo" [active] [ref=e100]:
+            - img [ref=e101]
+          - button "Editar tópico" [ref=e102]:
+            - img [ref=e103]
+          - button "Excluir tópico" [ref=e106]:
+            - img [ref=e107]
+      - paragraph [ref=e111]: Nenhum conteúdo neste tópico.
+  - generic [ref=e113]:
+    - generic [ref=e114]:
+      - heading "Novo Conteúdo" [level=2] [ref=e115]
+      - button [ref=e116] [cursor=pointer]:
+        - img [ref=e117]
+    - generic [ref=e120]:
+      - generic [ref=e121]:
+        - text: Tópico *
+        - combobox [ref=e122]:
+          - option "Termodinâmica"
+          - option "Mecânica Clássica"
+          - option "Óptica" [selected]
+      - generic [ref=e123]:
+        - text: Título *
+        - 'textbox "Ex: Aula 1 — Introdução" [ref=e124]'
+      - generic [ref=e125]:
+        - text: Tipo *
+        - generic [ref=e126]:
+          - button "Vídeo" [ref=e127] [cursor=pointer]
+          - button "Link" [ref=e128] [cursor=pointer]
+          - button "Documento" [ref=e129] [cursor=pointer]
+          - button "Arquivo" [ref=e130] [cursor=pointer]
+      - generic [ref=e131]:
+        - text: URL *
+        - textbox "https://..." [ref=e132]
+      - generic [ref=e133]:
+        - text: Descrição
+        - textbox "Descrição opcional" [ref=e134]
+      - generic [ref=e135]:
+        - button "Cancelar" [ref=e136] [cursor=pointer]
+        - button "Salvar" [ref=e137] [cursor=pointer]
