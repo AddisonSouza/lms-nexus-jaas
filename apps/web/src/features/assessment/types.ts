@@ -72,3 +72,27 @@ export interface EvaluateSubmissionPayload {
   grade?: number | null
   feedback: string
 }
+
+export interface SubmissionSummary {
+  id: string
+  status: SubmissionStatus
+  grade: number | null
+  feedback: string | null
+  submittedAt: string
+  lateSubmission: boolean
+}
+
+export interface TaskWithGrade {
+  id: string
+  subjectId: string
+  organizationId: string
+  createdBy: string
+  title: string
+  description: string
+  deadline: string
+  maxScore: number | null
+  status: TaskStatus
+  attachments: TaskAttachment[]
+  createdAt: string
+  submission: SubmissionSummary | null
+}

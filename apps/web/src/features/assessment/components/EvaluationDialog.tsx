@@ -72,7 +72,7 @@ function EvaluationDialog({ open, submission, task, onClose, onSubmit, isPending
                 step="0.01"
                 min="0"
                 max={task.maxScore}
-                {...register('grade')}
+                {...register('grade', { valueAsNumber: true })}
                 className="w-full rounded border px-3 py-2 text-sm"
                 placeholder="Ex: 8.5"
               />

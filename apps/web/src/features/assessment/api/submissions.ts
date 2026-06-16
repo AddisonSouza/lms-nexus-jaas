@@ -1,5 +1,5 @@
 import api from '@lib/axios'
-import type { EditSubmissionPayload, EvaluateSubmissionPayload, SubmitTaskPayload, Task, TaskSubmission } from '../types'
+import type { EditSubmissionPayload, EvaluateSubmissionPayload, SubmitTaskPayload, Task, TaskSubmission, TaskWithGrade } from '../types'
 
 export async function listPublishedTasks(): Promise<Task[]> {
   const res = await api.get<Task[]>('/tasks/published')
@@ -38,5 +38,10 @@ export async function evaluateSubmission(
   payload: EvaluateSubmissionPayload,
 ): Promise<TaskSubmission> {
   const res = await api.patch<TaskSubmission>(`/submissions/${submissionId}/evaluation`, payload)
+  return res.data
+}
+
+export async function listStudentGrades(): Promise<TaskWithGrade[]> {
+  const res = await api.get<TaskWithGrade[]>('/tasks/my-grades')
   return res.data
 }

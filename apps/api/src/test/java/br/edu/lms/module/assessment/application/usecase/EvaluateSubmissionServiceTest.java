@@ -2,6 +2,8 @@ package br.edu.lms.module.assessment.application.usecase;
 
 import br.edu.lms.module.assessment.application.dto.EvaluateSubmissionCommand;
 import br.edu.lms.module.assessment.domain.event.SubmissionEvaluatedEvent;
+import br.edu.lms.module.assessment.domain.exception.GradeExceedsMaxScoreException;
+import br.edu.lms.module.assessment.domain.exception.GradeNotAllowedException;
 import br.edu.lms.module.assessment.domain.exception.SubmissionAlreadyEvaluatedException;
 import br.edu.lms.module.assessment.domain.exception.SubmissionNotFoundException;
 import br.edu.lms.module.assessment.domain.exception.TaskNotFoundException;
@@ -136,8 +138,7 @@ class EvaluateSubmissionServiceTest {
                 .grade(new BigDecimal("11.00")).feedback("x").build();
 
         assertThatThrownBy(() -> service.execute(cmd))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("exceeds maximum");
+                .isInstanceOf(GradeExceedsMaxScoreException.class);
     }
 
     @Test
@@ -152,8 +153,7 @@ class EvaluateSubmissionServiceTest {
                 .grade(new BigDecimal("5")).feedback("x").build();
 
         assertThatThrownBy(() -> service.execute(cmd))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("does not have a maximum score");
+                .isInstanceOf(GradeNotAllowedException.class);
     }
 
     @Test

@@ -8,6 +8,7 @@ export function useSubmitTask(taskId: string) {
     mutationFn: createSubmission,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: submissionKeys.byTask(taskId) })
+      queryClient.invalidateQueries({ queryKey: submissionKeys.myGrades() })
     },
   })
 }

@@ -3,6 +3,8 @@ package br.edu.lms.module.assessment.application.usecase;
 import br.edu.lms.module.assessment.application.dto.EvaluateSubmissionCommand;
 import br.edu.lms.module.assessment.application.dto.SubmissionResponse;
 import br.edu.lms.module.assessment.domain.event.SubmissionEvaluatedEvent;
+import br.edu.lms.module.assessment.domain.exception.GradeExceedsMaxScoreException;
+import br.edu.lms.module.assessment.domain.exception.GradeNotAllowedException;
 import br.edu.lms.module.assessment.domain.exception.SubmissionAlreadyEvaluatedException;
 import br.edu.lms.module.assessment.domain.exception.SubmissionNotFoundException;
 import br.edu.lms.module.assessment.domain.exception.TaskNotFoundException;
@@ -45,11 +47,10 @@ public class EvaluateSubmissionService implements EvaluateSubmissionUseCase {
 
         if (command.getGrade() != null) {
             if (task.getMaxScore() == null) {
-                throw new IllegalArgumentException("Task does not have a maximum score");
+                throw new GradeNotAllowedException(submission.getTaskId());
             }
             if (command.getGrade().compareTo(task.getMaxScore()) > 0) {
-                throw new IllegalArgumentException(
-                        "Grade " + command.getGrade() + " exceeds maximum score " + task.getMaxScore());
+                throw new GradeExceedsMaxScoreException(command.getGrade(), task.getMaxScore());
             }
         }
 
