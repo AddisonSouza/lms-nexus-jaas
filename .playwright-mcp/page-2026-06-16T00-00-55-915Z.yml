@@ -1,0 +1,10 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - heading "Tarefas" [level=1] [ref=e5]
+    - generic [ref=e6]:
+      - combobox [ref=e7]:
+        - option "Selecione uma disciplina" [selected]
+      - button "Nova Tarefa" [disabled] [ref=e8]:
+        - img [ref=e9]
+        - text: Nova Tarefa
+  - paragraph [ref=e10]: Nenhuma tarefa criada ainda.

@@ -1,0 +1,41 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - heading "Tarefas" [level=1] [ref=e5]
+    - generic [ref=e6]:
+      - combobox [active] [ref=e7]:
+        - option "Selecione uma disciplina" [selected]
+        - option "MatemÃ¡tica RF11"
+      - button "Nova Tarefa" [disabled] [ref=e8]:
+        - img [ref=e9]
+        - text: Nova Tarefa
+  - generic [ref=e11]:
+    - generic [ref=e13]:
+      - paragraph [ref=e14]: Test
+      - paragraph [ref=e15]: "Prazo: 01/01/2027, 00:00:00 · Status: PUBLISHED"
+    - generic [ref=e16]:
+      - generic [ref=e17]:
+        - paragraph [ref=e18]: Tarefa com Anexo PDF
+        - paragraph [ref=e19]: "Prazo: 01/05/2027, 00:00:00 · Status: DRAFT"
+      - button "Publicar" [ref=e20] [cursor=pointer]:
+        - img [ref=e21]
+        - text: Publicar
+    - generic [ref=e24]:
+      - generic [ref=e25]:
+        - paragraph [ref=e26]: Tarefa com Anexo
+        - paragraph [ref=e27]: "Prazo: 01/04/2027, 00:00:00 · Status: DRAFT"
+      - button "Publicar" [ref=e28] [cursor=pointer]:
+        - img [ref=e29]
+        - text: Publicar
+    - generic [ref=e33]:
+      - paragraph [ref=e34]: Lista de Exercícios 03
+      - paragraph [ref=e35]: "Prazo: 15/03/2027, 23:59:00 · Status: PUBLISHED"
+    - generic [ref=e37]:
+      - paragraph [ref=e38]: Lista de Exercícios 02
+      - paragraph [ref=e39]: "Prazo: 15/02/2027, 23:59:00 · Status: PUBLISHED"
+    - generic [ref=e40]:
+      - generic [ref=e41]:
+        - paragraph [ref=e42]: Lista de Exercícios 01
+        - paragraph [ref=e43]: "Prazo: 15/01/2027, 23:59:00 · Status: DRAFT"
+      - button "Publicar" [ref=e44] [cursor=pointer]:
+        - img [ref=e45]
+        - text: Publicar
