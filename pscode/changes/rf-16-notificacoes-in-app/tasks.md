@@ -1,7 +1,7 @@
 ## 1. Backend — Migration e modelo de domínio
 
-- [ ] 1.1 [INFRA] Criar `V023__create_notifications_table.sql` (tabela `notifications`: `id`, `user_id`, `organization_id`, `type`, `reference_id`, `metadata` JSON, `read_at`, `created_at`, índices `(user_id, created_at)` e `(user_id, read_at)`)
-- [ ] 1.2 [BE] Criar `Notification`, `NotificationId`, `NotificationType` (enum) em `communication/domain/model/`
+- [ ] 1.1 [INFRA] Criar `V023__create_notifications_table.sql` (tabela `notifications`: `id`, `user_id`, `organization_id`, `type`, `reference_id`, `title`, `message`, `action_link`, `read_at`, `created_at`, índices `(user_id, created_at)` e `(user_id, read_at)`)
+- [ ] 1.2 [BE] Criar `Notification`, `NotificationId`, `NotificationType` (enum) em `communication/domain/model/` — incluindo campos `title`, `message` e `actionLink` (textos fixos por tipo, ver Decisão 4 do design.md)
 - [ ] 1.3 [BE] Criar exceções `NotificationNotFoundException`, `UnauthorizedNotificationOperationException` em `communication/domain/exception/`
 
 ## 2. Backend — Ports
@@ -59,7 +59,7 @@
 - [ ] 9.1 [FE] Criar hook `useNotifications()` (TanStack Query, `refetchInterval: 30_000`, query key `["notifications"]`)
 - [ ] 9.2 [FE] Criar hooks de mutação `useMarkNotificationRead`, `useMarkAllNotificationsRead` com invalidação de `["notifications"]`
 - [ ] 9.3 [FE] Criar `NotificationBell.tsx` (ícone Lucide `Bell` + badge com `unreadCount`)
-- [ ] 9.4 [FE] Criar `NotificationPanel.tsx` (popover/dropdown Shadcn com a lista; clique marca como lida e navega via `metadata`; botão "marcar todas como lidas")
+- [ ] 9.4 [FE] Criar `NotificationPanel.tsx` (popover/dropdown Shadcn com a lista; clique marca como lida e navega via `actionLink`; botão "marcar todas como lidas")
 - [ ] 9.5 [FE] Integrar `NotificationBell` no layout principal (header autenticado), visível para todos os papéis
 
 ## 10. Frontend — Testes

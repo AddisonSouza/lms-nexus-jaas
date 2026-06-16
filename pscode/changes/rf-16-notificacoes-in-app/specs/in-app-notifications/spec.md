@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Criação automática de notificação por Domain Event
-O sistema SHALL criar uma notificação in-app para cada destinatário resolvido, ao consumir os Domain Events `AnnouncementPostedEvent`, `TaskPublishedEvent`, `TaskSubmittedEvent` e `SubmissionEvaluatedEvent`.
+O sistema SHALL criar uma notificação in-app para cada destinatário resolvido, ao consumir os Domain Events `AnnouncementPostedEvent`, `TaskPublishedEvent`, `TaskSubmittedEvent` e `SubmissionEvaluatedEvent`. Cada notificação criada SHALL conter `title`, `message` e `action_link` (texto fixo por tipo, conforme tabela do design.md).
 
 #### Scenario: Aviso publicado notifica os alunos da turma
 - **WHEN** `AnnouncementPostedEvent` é publicado para uma turma com alunos vinculados
@@ -43,7 +43,7 @@ O sistema SHALL retornar as notificações do usuário autenticado ordenadas por
 
 #### Scenario: Listagem bem-sucedida
 - **WHEN** usuário autenticado chama `GET /notifications`
-- **THEN** sistema retorna 200 com a lista de notificações do usuário ordenada por `created_at` decrescente e o campo `unreadCount`
+- **THEN** sistema retorna 200 com a lista de notificações do usuário ordenada por `created_at` decrescente, o campo `unreadCount`, e cada item da lista contendo `title`, `message` e `actionLink`
 
 #### Scenario: Usuário sem notificações
 - **WHEN** usuário autenticado sem nenhuma notificação chama `GET /notifications`

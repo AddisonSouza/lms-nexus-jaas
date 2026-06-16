@@ -24,7 +24,7 @@ Os eventos carregam apenas IDs (`subjectId`, `classroomId`, `studentId`...), nun
 O issue menciona "módulo notification" no contexto, mas a estrutura de módulos do projeto (`pscode/config.yaml`) já define `communication` como o módulo correto — `AnnouncementPostedEvent` já vive lá. Criar um módulo novo só para isso duplicaria infraestrutura sem necessidade.
 
 **2. Notificação é genérica (`type` + IDs de referência), não uma subclasse por evento.**
-Tabela única `notifications` com colunas `type` (enum string: `ANNOUNCEMENT_POSTED`, `TASK_PUBLISHED`, `TASK_SUBMITTED`, `SUBMISSION_EVALUATED`), `reference_id` (id da entidade de origem — announcementId/taskId/submissionId) e `metadata` (JSON curto, ex.: `classroomId`/`subjectId`, usado pelo frontend para montar o link). Alternativa considerada: tabela por tipo de evento — rejeitada por multiplicar trabalho de migration/repository sem ganho, já que a listagem e o contador tratam todas como a mesma entidade.
+Tabela única `notifications` com colunas `type` (enum string: `ANNOUNCEMENT_POSTED`, `TASK_PUBLISHED`, `TASK_SUBMITTED`, `SUBMISSION_EVALUATED`), `reference_id` (id da entidade de origem — announcementId/taskId/submissionId), `title` e `message` (texto curto em português, montado pelo listener no momento da criação — exigência explícita de `docs/requirements/RF.md` RF-16: "Título e mensagem curta") e `action_link` (deep link relativo, ex.: `/classrooms/{id}/announcements`, `/tasks/{id}` — também exigido pelo RF.md como "Link de ação"). Alternativa considerada: guardar apenas `metadata` genérico e montar título/mensagem no frontend — rejeitada por divergir do critério de aceite explícito do RF-16; manter o texto fixo no backend também evita duplicar regras de tradução/formatação no frontend. Alternativa de tabela por tipo de evento — rejeitada por multiplicar trabalho de migration/repository sem ganho, já que a listagem e o contador tratam todas como a mesma entidade.
 
 **3. Resolução de destinatários via novos Ports cross-module no `communication`, seguindo o padrão FQN-JPQL de RF-15.**
 - `ClassroomQueryPort` (já existe) ganha `List<String> listMemberUserIds(String classroomId, String role)` — JPQL contra `ClassroomMemberJpaEntity` (módulo `classroom`), mesmo padrão de `isMember`.
@@ -33,13 +33,18 @@ Tabela única `notifications` com colunas `type` (enum string: `ANNOUNCEMENT_POS
   - `List<String> findTeacherUserIdsBySubject(String subjectId)` — JPQL join `SubjectTeacherJpaEntity` → `OrganizationMemberJpaEntity` (resolve `memberId` → `userId`, pois `SubjectTeacherJpaEntity.id.memberId` referencia `organization_members.id`, não `users.id` diretamente).
   Alternativa considerada: expor esses métodos como porta pública do `curriculum`/`classroom` para outros módulos consumirem diretamente — rejeitada pela regra do projeto "módulos comunicam via interfaces Java, nunca import direto entre bounded contexts dono"; cada módulo consumidor define seu próprio port com a forma mínima necessária (mesma decisão já tomada em RF-15).
 
-**4. Destinatários por evento:**
-| Evento | Destinatários |
-|---|---|
-| `AnnouncementPostedEvent` | ALUNOs da `classroomId`, exceto o autor (já é o publicador) |
-| `TaskPublishedEvent` | ALUNOs de todas as `classroomId`s vinculadas ao `subjectId` (via `findClassroomIdsBySubject` + `listMemberUserIds(..., "ALUNO")`) |
-| `TaskSubmittedEvent` | PROFESSORes do `subjectId` da tarefa (via `findTeacherUserIdsBySubject`) — requer resolver `taskId → subjectId` (novo `TaskQueryPort.findSubjectIdByTask`, JPQL contra `TaskJpaEntity`) |
-| `SubmissionEvaluatedEvent` | o próprio `studentId` do evento (notificação direta, sem fan-out) |
+**4. Destinatários e texto por evento:**
+
+`action_link` usa as rotas que **já existem** em `apps/web/src/app/routes.tsx` (não há rota de detalhe por tarefa/submissão — RF-13/14 usam lista + drawer client-side, conforme `TaskListPage`/`StudentTaskListPage`). Por isso o link aponta para a rota de lista correspondente, com o id relevante como query param para o componente abrir o drawer certo (ajuste de UX trivial, fora do escopo desta change alterar).
+
+| Evento | Destinatários | `title` / `message` (fixo, em português) | `action_link` |
+|---|---|---|---|
+| `AnnouncementPostedEvent` | ALUNOs da `classroomId`, exceto o autor (já é o publicador) | "Novo aviso" / "Um novo aviso foi publicado na turma." | `/classrooms/{classroomId}` (rota existente) |
+| `TaskPublishedEvent` | ALUNOs de todas as `classroomId`s vinculadas ao `subjectId` (via `findClassroomIdsBySubject` + `listMemberUserIds(..., "ALUNO")`) | "Nova tarefa" / "Uma nova tarefa foi publicada." | `/assessment/student-tasks?taskId={taskId}` |
+| `TaskSubmittedEvent` | PROFESSORes do `subjectId` da tarefa (via `findTeacherUserIdsBySubject`) — requer resolver `taskId → subjectId` (novo `TaskQueryPort.findSubjectIdByTask`, JPQL contra `TaskJpaEntity`) | "Nova resposta" / "Um aluno enviou uma resposta para avaliação." | `/assessment/tasks?taskId={taskId}` |
+| `SubmissionEvaluatedEvent` | o próprio `studentId` do evento (notificação direta, sem fan-out) | "Avaliação disponível" / "Sua resposta foi avaliada." | `/assessment/student-tasks?taskId={taskId}` |
+
+Textos fixos por tipo (sem interpolação de nomes de turma/disciplina para evitar mais uma consulta cross-module só para exibição).
 
 **5. Contador de não lidas em Redis, fonte de verdade para o badge; tabela MySQL é fonte de verdade para a lista.**
 Cada criação de notificação faz `INCR communication:unread-count:{userId}`; cada leitura (individual ou "marcar todas") recalcula via `DECRBY`/`SET 0` a partir da contagem real não lida no MySQL pós-update, evitando drift entre Redis e banco em caso de falha parcial. Alternativa considerada: Redis como única fonte (sem persistir notificações) — rejeitada porque `GET /notifications` precisa listar histórico, não só o contador.
@@ -88,7 +93,9 @@ Os 4 listeners de evento (`CreateNotificationOnXxx`) ficam em `application/useca
       organization_id  VARCHAR(36)  NOT NULL,
       type             VARCHAR(40)  NOT NULL,
       reference_id     VARCHAR(36)  NOT NULL,
-      metadata         JSON         NULL,
+      title            VARCHAR(120) NOT NULL,
+      message          VARCHAR(500) NOT NULL,
+      action_link      VARCHAR(255) NOT NULL,
       read_at          DATETIME(6)  NULL,
       created_at       DATETIME(6)  NOT NULL,
       PRIMARY KEY (id),
@@ -114,7 +121,7 @@ Os 4 listeners de evento (`CreateNotificationOnXxx`) ficam em `application/useca
   - `hooks/useNotifications.ts` (TanStack Query, `refetchInterval: 30_000`)
   - `hooks/useNotificationMutations.ts` (mark read / mark all read, invalida `["notifications"]`)
   - `components/NotificationBell.tsx` (ícone Lucide `Bell` + badge com `unreadCount`)
-  - `components/NotificationPanel.tsx` (dropdown/popover Shadcn com a lista; cada item navega para a referência via `metadata`)
+  - `components/NotificationPanel.tsx` (dropdown/popover Shadcn com a lista; cada item exibe `title`/`message` e navega para `actionLink` ao ser clicado)
 - **Integração:** `NotificationBell` adicionado ao layout principal (header autenticado), visível para todos os papéis — sem rota própria.
 
 ## Risks / Trade-offs
