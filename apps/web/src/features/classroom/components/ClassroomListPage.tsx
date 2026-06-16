@@ -14,8 +14,7 @@ function ClassroomListPage() {
   const { data: classrooms, isLoading } = useClassrooms()
   const createClassroom = useCreateClassroom()
 
-  const token = useAuthStore((s) => s.accessToken)
-  const role = token ? (JSON.parse(atob(token.split('.')[1])).groups?.[0] ?? 'ALUNO') : 'ALUNO'
+  const role = useAuthStore((s) => s.role)
   const canManage = role === 'ADMIN_ORG' || role === 'GESTOR'
 
   const handleCreate = (data: ClassroomFormData) => {
@@ -78,8 +77,8 @@ function ClassroomListPage() {
                 <td className="px-4 py-3">
                   <span className={`rounded px-2 py-0.5 text-xs font-medium ${
                     c.status === 'ACTIVE'
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-gray-100 text-gray-600'
+                      ? 'bg-primary/10 text-primary'
+                      : 'bg-muted text-muted-foreground'
                   }`}>
                     {c.status === 'ACTIVE' ? 'Ativa' : 'Arquivada'}
                   </span>

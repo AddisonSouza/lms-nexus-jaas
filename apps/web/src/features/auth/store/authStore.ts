@@ -1,7 +1,23 @@
 import { create } from 'zustand'
 
+interface JwtPayload {
+  sub?: string
+  org?: string
+  groups?: string[]
+}
+
+function decodeJwtPayload(token: string): JwtPayload {
+  try {
+    return JSON.parse(atob(token.split('.')[1]))
+  } catch {
+    return {}
+  }
+}
+
 interface AuthState {
   accessToken: string | null
+  role: string | null
+  userId: string | null
   organizationId: string | null
   isAuthenticated: boolean
   setToken: (token: string) => void
@@ -10,24 +26,35 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  accessToken: localStorage.getItem('access_token'),
-  organizationId: localStorage.getItem('organization_id'),
-  isAuthenticated: !!localStorage.getItem('access_token'),
+  accessToken: null,
+  role: null,
+  userId: null,
+  organizationId: null,
+  isAuthenticated: false,
 
   setToken: (token) => {
-    localStorage.setItem('access_token', token)
-    set({ accessToken: token, isAuthenticated: true })
+    const payload = decodeJwtPayload(token)
+    set({
+      accessToken: token,
+      isAuthenticated: true,
+      role: payload.groups?.[0] ?? null,
+      userId: payload.sub ?? null,
+      organizationId: payload.org ?? null,
+    })
   },
 
   setOrganization: (token, organizationId) => {
-    localStorage.setItem('access_token', token)
-    localStorage.setItem('organization_id', organizationId)
-    set({ accessToken: token, organizationId, isAuthenticated: true })
+    const payload = decodeJwtPayload(token)
+    set({
+      accessToken: token,
+      isAuthenticated: true,
+      role: payload.groups?.[0] ?? null,
+      userId: payload.sub ?? null,
+      organizationId: organizationId,
+    })
   },
 
   clearToken: () => {
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('organization_id')
-    set({ accessToken: null, organizationId: null, isAuthenticated: false })
+    set({ accessToken: null, role: null, userId: null, organizationId: null, isAuthenticated: false })
   },
 }))

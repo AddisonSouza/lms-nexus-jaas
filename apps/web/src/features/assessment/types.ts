@@ -1,5 +1,5 @@
 export type TaskStatus = 'DRAFT' | 'PUBLISHED' | 'CLOSED' | 'GRADED'
-export type SubmissionStatus = 'SUBMITTED' | 'EVALUATED'
+export type SubmissionStatus = 'SUBMITTED' | 'LATE' | 'EVALUATED'
 
 export interface TaskAttachment {
   id: string
