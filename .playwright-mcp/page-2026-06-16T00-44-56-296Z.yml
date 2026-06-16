@@ -1,0 +1,53 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - heading "Tarefas" [level=1] [ref=e5]
+    - paragraph [ref=e6]: Tarefas publicadas para entrega
+  - generic [ref=e7]:
+    - generic [ref=e8]:
+      - generic [ref=e9]:
+        - paragraph [ref=e10]: Tarefa Expirada RF12
+        - paragraph [ref=e11]: "Prazo: 01/01/2020, 00:00:00Expirado"
+      - button "Ver Tarefa" [ref=e12] [cursor=pointer]:
+        - img [ref=e13]
+        - text: Ver Tarefa
+    - generic [ref=e16]:
+      - generic [ref=e17]:
+        - paragraph [ref=e18]: Test
+        - paragraph [ref=e19]: "Prazo: 01/01/2027, 00:00:00"
+      - button "Enviar Resposta" [ref=e20] [cursor=pointer]:
+        - img [ref=e21]
+        - text: Enviar Resposta
+    - generic [ref=e24]:
+      - generic [ref=e25]:
+        - paragraph [ref=e26]: Lista de Exercícios 02
+        - paragraph [ref=e27]: "Prazo: 15/02/2027, 23:59:00"
+        - paragraph [ref=e28]: "Pontuação: 10"
+      - button "Enviar Resposta" [ref=e29] [cursor=pointer]:
+        - img [ref=e30]
+        - text: Enviar Resposta
+    - generic [ref=e33]:
+      - generic [ref=e34]:
+        - paragraph [ref=e35]: Lista de Exercícios 03
+        - paragraph [ref=e36]: "Prazo: 15/03/2027, 23:59:00"
+      - button "Enviar Resposta" [ref=e37] [cursor=pointer]:
+        - img [ref=e38]
+        - text: Enviar Resposta
+  - generic [ref=e91]:
+    - generic [ref=e92]:
+      - heading "Enviar Resposta" [level=2] [ref=e93]
+      - button [ref=e94] [cursor=pointer]:
+        - img [ref=e95]
+    - paragraph [ref=e98]: Lista de Exercícios 03
+    - paragraph [ref=e99]: "Prazo: 15/03/2027, 23:59:00"
+    - generic [ref=e100]:
+      - generic [ref=e101]:
+        - text: Resposta em texto
+        - textbox "Digite sua resposta aqui..." [active] [ref=e102]
+        - paragraph [ref=e109]: Informe um texto ou anexe pelo menos um arquivo
+      - generic [ref=e103]:
+        - text: Arquivos (opcional)
+        - button "Choose File" [ref=e104]
+        - paragraph [ref=e105]: PDF, DOC, DOCX, ZIP, JPG, PNG — máx. 50MB cada
+      - generic [ref=e106]:
+        - button "Cancelar" [ref=e107] [cursor=pointer]
+        - button "Enviar Resposta" [ref=e108] [cursor=pointer]
