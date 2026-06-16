@@ -48,6 +48,17 @@ public class SubmissionRepositoryImpl implements SubmissionRepository {
         return q.getResultStream().findFirst().map(this::toDomain);
     }
 
+    @Override
+    @Transactional
+    public List<TaskSubmission> findByTask(String taskId, String organizationId) {
+        TypedQuery<TaskSubmissionJpaEntity> q = em.createQuery(
+                "SELECT s FROM TaskSubmissionJpaEntity s WHERE s.taskId = :taskId AND s.organizationId = :orgId AND s.deletedAt IS NULL",
+                TaskSubmissionJpaEntity.class);
+        q.setParameter("taskId", taskId);
+        q.setParameter("orgId", organizationId);
+        return q.getResultList().stream().map(this::toDomain).toList();
+    }
+
     private TaskSubmissionJpaEntity toEntity(TaskSubmission submission) {
         var entity = new TaskSubmissionJpaEntity();
         entity.setId(submission.getId().getValue());
@@ -56,6 +67,8 @@ public class SubmissionRepositoryImpl implements SubmissionRepository {
         entity.setOrganizationId(submission.getOrganizationId());
         entity.setTextResponse(submission.getTextResponse());
         entity.setStatus(submission.getStatus().name());
+        entity.setGrade(submission.getGrade());
+        entity.setFeedback(submission.getFeedback());
         entity.setCreatedAt(submission.getCreatedAt());
         entity.setUpdatedAt(submission.getUpdatedAt());
         entity.setDeletedAt(submission.getDeletedAt());
@@ -90,6 +103,8 @@ public class SubmissionRepositoryImpl implements SubmissionRepository {
                 .organizationId(e.getOrganizationId())
                 .textResponse(e.getTextResponse())
                 .status(SubmissionStatus.valueOf(e.getStatus()))
+                .grade(e.getGrade())
+                .feedback(e.getFeedback())
                 .attachments(attachments)
                 .createdAt(e.getCreatedAt())
                 .updatedAt(e.getUpdatedAt())
