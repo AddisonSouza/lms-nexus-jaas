@@ -11,4 +11,6 @@ public interface SubmissionRepository {
     Optional<TaskSubmission> findById(SubmissionId id);
     Optional<TaskSubmission> findByTaskAndStudent(String taskId, String studentId);
     List<TaskSubmission> findByTask(String taskId, String organizationId);
+
+    List<TaskSubmission> findByStudentAndOrganization(String studentId, String organizationId);
 }

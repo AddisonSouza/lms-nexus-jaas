@@ -3,6 +3,7 @@ package br.edu.lms.module.assessment.interfaces.rest;
 import br.edu.lms.module.assessment.application.dto.EvaluateSubmissionCommand;
 import br.edu.lms.module.assessment.application.dto.SubmissionResponse;
 import br.edu.lms.module.assessment.domain.port.in.EvaluateSubmissionUseCase;
+import br.edu.lms.module.assessment.domain.port.in.GetSubmissionFeedbackUseCase;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.*;
@@ -23,6 +24,7 @@ import java.math.BigDecimal;
 public class SubmissionResource {
 
     private final EvaluateSubmissionUseCase evaluateSubmissionUseCase;
+    private final GetSubmissionFeedbackUseCase getSubmissionFeedbackUseCase;
     private final JsonWebToken jwt;
 
     @PATCH
@@ -45,6 +47,16 @@ public class SubmissionResource {
                 .build();
 
         return evaluateSubmissionUseCase.execute(command);
+    }
+
+    @GET
+    @Path("/{id}/feedback")
+    @RolesAllowed("ALUNO")
+    @Operation(summary = "Visualizar feedback de uma submissão avaliada (aluno)")
+    public SubmissionResponse getFeedback(@PathParam("id") String submissionId) {
+        String studentId = jwt.getSubject();
+        String orgId = (String) jwt.getClaim("org");
+        return getSubmissionFeedbackUseCase.execute(submissionId, studentId, orgId);
     }
 
     public record EvaluationRequest(BigDecimal grade, String feedback) {}

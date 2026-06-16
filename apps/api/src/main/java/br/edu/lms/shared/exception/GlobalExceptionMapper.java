@@ -1,6 +1,8 @@
 package br.edu.lms.shared.exception;
 
 import br.edu.lms.module.assessment.domain.exception.DeadlineExpiredException;
+import br.edu.lms.module.assessment.domain.exception.GradeExceedsMaxScoreException;
+import br.edu.lms.module.assessment.domain.exception.GradeNotAllowedException;
 import br.edu.lms.module.assessment.domain.exception.InvalidTaskStateException;
 import br.edu.lms.module.assessment.domain.exception.SubmissionAlreadyEvaluatedException;
 import br.edu.lms.module.assessment.domain.exception.SubmissionAlreadyExistsException;
@@ -221,6 +223,18 @@ public class GlobalExceptionMapper implements ExceptionMapper<Exception> {
         if (exception instanceof SubmissionAlreadyEvaluatedException e) {
             return Response.status(422)
                     .entity(Map.of("error", "SUBMISSION_ALREADY_EVALUATED"))
+                    .build();
+        }
+
+        if (exception instanceof GradeNotAllowedException e) {
+            return Response.status(422)
+                    .entity(Map.of("error", "GRADE_NOT_ALLOWED"))
+                    .build();
+        }
+
+        if (exception instanceof GradeExceedsMaxScoreException e) {
+            return Response.status(422)
+                    .entity(Map.of("error", "GRADE_EXCEEDS_MAX_SCORE"))
                     .build();
         }
 
