@@ -34,3 +34,25 @@ export interface UpdateAnnouncementPayload {
   linkTitle?: string
   files?: File[]
 }
+
+export type NotificationType =
+  | 'ANNOUNCEMENT_POSTED'
+  | 'TASK_PUBLISHED'
+  | 'TASK_SUBMITTED'
+  | 'SUBMISSION_EVALUATED'
+
+export interface Notification {
+  id: string
+  type: NotificationType
+  referenceId: string
+  title: string
+  message: string
+  actionLink: string
+  read: boolean
+  createdAt: string
+}
+
+export interface NotificationListResponse {
+  items: Notification[]
+  unreadCount: number
+}

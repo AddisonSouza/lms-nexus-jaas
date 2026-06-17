@@ -26,6 +26,7 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 import lombok.RequiredArgsConstructor;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
@@ -41,6 +42,9 @@ public class AuthResource {
 
     private static final String REFRESH_COOKIE = "__refresh_token";
     private static final int COOKIE_MAX_AGE_SECONDS = (int) Duration.ofDays(7).toSeconds();
+
+    @ConfigProperty(name = "lms.cookie.secure", defaultValue = "true")
+    boolean cookieSecure;
 
     private final RegisterUserUseCase registerUserUseCase;
     private final AuthenticateUseCase authenticateUseCase;
@@ -81,7 +85,7 @@ public class AuthResource {
                 .value(result.refreshToken())
                 .path("/auth")
                 .httpOnly(true)
-                .secure(true)
+                .secure(cookieSecure)
                 .sameSite(NewCookie.SameSite.STRICT)
                 .maxAge(COOKIE_MAX_AGE_SECONDS)
                 .build();
@@ -127,7 +131,7 @@ public class AuthResource {
                 .value(result.refreshToken())
                 .path("/auth")
                 .httpOnly(true)
-                .secure(true)
+                .secure(cookieSecure)
                 .sameSite(NewCookie.SameSite.STRICT)
                 .maxAge(COOKIE_MAX_AGE_SECONDS)
                 .build();
