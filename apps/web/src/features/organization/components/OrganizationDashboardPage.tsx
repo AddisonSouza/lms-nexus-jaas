@@ -1,8 +1,21 @@
 import { Link, useParams } from 'react-router-dom'
 import { BookOpen } from 'lucide-react'
+import { useAuthStore } from '@features/auth/store/authStore'
+import AdminDashboard from '@features/dashboard/components/AdminDashboard'
 
 function OrganizationDashboardPage() {
   const { id } = useParams<{ id: string }>()
+  const role = useAuthStore((s) => s.role)
+
+  if (role === 'ADMIN_ORG' && id) {
+    return (
+      <div className="container mx-auto max-w-6xl p-6 space-y-6">
+        <h1 className="text-2xl font-semibold">Organização</h1>
+        <AdminDashboard organizationId={id} />
+      </div>
+    )
+  }
+
   return (
     <div className="container mx-auto max-w-4xl p-6 space-y-6">
       <h1 className="text-2xl font-semibold">Organização</h1>
@@ -17,8 +30,6 @@ function OrganizationDashboardPage() {
           <span className="font-medium">Turmas</span>
         </Link>
       </nav>
-
-      <p className="text-xs text-muted-foreground">Dashboard completo disponível em RF-17.</p>
     </div>
   )
 }
