@@ -3,6 +3,7 @@ package br.edu.lms.module.identity.application.usecase;
 import br.edu.lms.module.identity.application.dto.RefreshCommand;
 import br.edu.lms.module.identity.domain.exception.TokenNotFoundException;
 import br.edu.lms.module.identity.domain.exception.UserNotMemberOfOrganizationException;
+import br.edu.lms.module.identity.domain.model.OrgMembership;
 import br.edu.lms.module.identity.domain.port.out.OrganizationMemberLookupPort;
 import br.edu.lms.module.identity.domain.port.out.RefreshTokenRepository;
 import br.edu.lms.module.identity.domain.port.out.TokenGeneratorPort;
@@ -12,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -28,8 +30,36 @@ class RefreshTokenServiceTest {
     @InjectMocks RefreshTokenService sut;
 
     @Test
-    void shouldRefreshWithoutOrgContext() {
+    void shouldRefreshWithoutOrgContext_noOrganization() {
         when(refreshTokenRepository.findUserId("rt")).thenReturn(Optional.of("user-1"));
+        when(organizationMemberLookupPort.findOrganizationsByUser("user-1")).thenReturn(List.of());
+        when(jwtTokenService.generateAccessToken("user-1")).thenReturn("new-access");
+
+        var result = sut.execute(new RefreshCommand("rt"));
+
+        assertThat(result.accessToken()).isEqualTo("new-access");
+        verify(jwtTokenService, never()).generateAccessToken(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void shouldRefreshWithoutOrgContext_exactlyOneOrganization_resolvesAutomatically() {
+        when(refreshTokenRepository.findUserId("rt")).thenReturn(Optional.of("user-1"));
+        when(organizationMemberLookupPort.findOrganizationsByUser("user-1"))
+                .thenReturn(List.of(new OrgMembership("org-1", "ADMIN_ORG")));
+        when(jwtTokenService.generateAccessToken("user-1", "org-1", "ADMIN_ORG")).thenReturn("org-scoped-token");
+
+        var result = sut.execute(new RefreshCommand("rt"));
+
+        assertThat(result.accessToken()).isEqualTo("org-scoped-token");
+        verify(jwtTokenService, never()).generateAccessToken(anyString());
+    }
+
+    @Test
+    void shouldRefreshWithoutOrgContext_multipleOrganizations_keepsClaimsAbsent() {
+        when(refreshTokenRepository.findUserId("rt")).thenReturn(Optional.of("user-1"));
+        when(organizationMemberLookupPort.findOrganizationsByUser("user-1")).thenReturn(List.of(
+                new OrgMembership("org-1", "ADMIN_ORG"),
+                new OrgMembership("org-2", "PROFESSOR")));
         when(jwtTokenService.generateAccessToken("user-1")).thenReturn("new-access");
 
         var result = sut.execute(new RefreshCommand("rt"));

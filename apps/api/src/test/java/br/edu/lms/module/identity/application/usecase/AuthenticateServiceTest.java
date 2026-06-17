@@ -4,6 +4,7 @@ import br.edu.lms.module.identity.application.dto.AuthenticateCommand;
 import br.edu.lms.module.identity.application.dto.AuthResult;
 import br.edu.lms.module.identity.domain.exception.InvalidCredentialsException;
 import br.edu.lms.module.identity.domain.model.*;
+import br.edu.lms.module.identity.domain.port.out.OrganizationMemberLookupPort;
 import br.edu.lms.module.identity.domain.port.out.RefreshTokenRepository;
 import br.edu.lms.module.identity.domain.port.out.UserRepository;
 import br.edu.lms.module.identity.infrastructure.security.BcryptPasswordService;
@@ -14,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,6 +30,7 @@ class AuthenticateServiceTest {
     @Mock BcryptPasswordService passwordService;
     @Mock JwtTokenService jwtTokenService;
     @Mock RefreshTokenRepository refreshTokenRepository;
+    @Mock OrganizationMemberLookupPort organizationMemberLookupPort;
 
     @InjectMocks AuthenticateService sut;
 
@@ -42,10 +45,11 @@ class AuthenticateServiceTest {
     }
 
     @Test
-    void execute_validCredentials_returnsTokens() {
+    void execute_validCredentials_noOrganization_returnsTokenWithoutOrgClaims() {
         var user = activeUser();
         when(userRepository.findByEmail(any())).thenReturn(Optional.of(user));
         when(passwordService.verify("secret", "hashed")).thenReturn(true);
+        when(organizationMemberLookupPort.findOrganizationsByUser(anyString())).thenReturn(List.of());
         when(jwtTokenService.generateAccessToken(any())).thenReturn("jwt.token.here");
 
         AuthResult result = sut.execute(new AuthenticateCommand("user@test.com", "secret"));
@@ -53,6 +57,40 @@ class AuthenticateServiceTest {
         assertThat(result.accessToken()).isEqualTo("jwt.token.here");
         assertThat(result.refreshToken()).isNotBlank();
         verify(refreshTokenRepository).save(anyString(), anyString(), any());
+        verify(jwtTokenService, never()).generateAccessToken(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void execute_validCredentials_exactlyOneOrganization_returnsTokenWithOrgClaims() {
+        var user = activeUser();
+        var userId = user.getId().getValue().toString();
+        when(userRepository.findByEmail(any())).thenReturn(Optional.of(user));
+        when(passwordService.verify("secret", "hashed")).thenReturn(true);
+        when(organizationMemberLookupPort.findOrganizationsByUser(userId))
+                .thenReturn(List.of(new OrgMembership("org-1", "ADMIN_ORG")));
+        when(jwtTokenService.generateAccessToken(userId, "org-1", "ADMIN_ORG")).thenReturn("org-scoped-token");
+
+        AuthResult result = sut.execute(new AuthenticateCommand("user@test.com", "secret"));
+
+        assertThat(result.accessToken()).isEqualTo("org-scoped-token");
+        verify(jwtTokenService, never()).generateAccessToken(anyString());
+    }
+
+    @Test
+    void execute_validCredentials_multipleOrganizations_returnsTokenWithoutOrgClaims() {
+        var user = activeUser();
+        var userId = user.getId().getValue().toString();
+        when(userRepository.findByEmail(any())).thenReturn(Optional.of(user));
+        when(passwordService.verify("secret", "hashed")).thenReturn(true);
+        when(organizationMemberLookupPort.findOrganizationsByUser(userId)).thenReturn(List.of(
+                new OrgMembership("org-1", "ADMIN_ORG"),
+                new OrgMembership("org-2", "PROFESSOR")));
+        when(jwtTokenService.generateAccessToken(userId)).thenReturn("jwt.token.here");
+
+        AuthResult result = sut.execute(new AuthenticateCommand("user@test.com", "secret"));
+
+        assertThat(result.accessToken()).isEqualTo("jwt.token.here");
+        verify(jwtTokenService, never()).generateAccessToken(anyString(), anyString(), anyString());
     }
 
     @Test

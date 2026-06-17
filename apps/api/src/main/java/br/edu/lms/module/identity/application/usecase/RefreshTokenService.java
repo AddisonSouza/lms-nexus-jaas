@@ -41,7 +41,10 @@ public class RefreshTokenService implements RefreshTokenUseCase {
                     .orElseThrow(UserNotMemberOfOrganizationException::new);
             newAccessToken = jwtTokenService.generateAccessToken(userId, command.organizationId(), role);
         } else {
-            newAccessToken = jwtTokenService.generateAccessToken(userId);
+            var memberships = organizationMemberLookupPort.findOrganizationsByUser(userId);
+            newAccessToken = memberships.size() == 1
+                    ? jwtTokenService.generateAccessToken(userId, memberships.get(0).organizationId(), memberships.get(0).role())
+                    : jwtTokenService.generateAccessToken(userId);
         }
 
         var newRefreshToken = UUID.randomUUID().toString();
