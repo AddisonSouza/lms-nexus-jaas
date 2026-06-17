@@ -80,6 +80,7 @@ class AnnouncementResourceIT {
     @AfterEach
     void tearDown() throws Exception {
         tx.begin();
+        em.createNativeQuery("DELETE FROM notifications WHERE organization_id = ?").setParameter(1, ORG_ID).executeUpdate();
         em.createNativeQuery("DELETE FROM announcement_attachments WHERE announcement_id IN (SELECT id FROM announcements WHERE classroom_id = ?)")
                 .setParameter(1, CLASSROOM_ID).executeUpdate();
         em.createNativeQuery("DELETE FROM announcements WHERE classroom_id = ?").setParameter(1, CLASSROOM_ID).executeUpdate();

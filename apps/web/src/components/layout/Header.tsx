@@ -1,6 +1,7 @@
 import { LogOut } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@features/auth/store/authStore'
+import NotificationBell from '@features/communication/components/NotificationBell'
 import api from '@lib/axios'
 
 function Header() {
@@ -21,6 +22,7 @@ function Header() {
     <header className="flex h-14 items-center justify-between border-b bg-background px-4">
       <span className="text-sm font-semibold">LMS Nexus</span>
       <div className="flex items-center gap-3">
+        <NotificationBell />
         {userId && <span className="text-xs text-muted-foreground">{userId.slice(0, 8)}…</span>}
         <button
           onClick={handleLogout}
