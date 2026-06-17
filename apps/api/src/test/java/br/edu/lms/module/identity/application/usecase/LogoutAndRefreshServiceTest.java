@@ -2,6 +2,7 @@ package br.edu.lms.module.identity.application.usecase;
 
 import br.edu.lms.module.identity.application.dto.RefreshCommand;
 import br.edu.lms.module.identity.domain.exception.TokenNotFoundException;
+import br.edu.lms.module.identity.domain.port.out.OrganizationMemberLookupPort;
 import br.edu.lms.module.identity.domain.port.out.RefreshTokenRepository;
 import br.edu.lms.module.identity.infrastructure.security.JwtTokenService;
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,6 +24,7 @@ class LogoutAndRefreshServiceTest {
 
     @Mock RefreshTokenRepository refreshTokenRepository;
     @Mock JwtTokenService jwtTokenService;
+    @Mock OrganizationMemberLookupPort organizationMemberLookupPort;
 
     @InjectMocks LogoutService logoutSut;
     @InjectMocks RefreshTokenService refreshSut;
@@ -35,6 +38,7 @@ class LogoutAndRefreshServiceTest {
     @Test
     void refresh_validToken_rotatesAndReturnsNewPair() {
         when(refreshTokenRepository.findUserId("old-token")).thenReturn(Optional.of("user-id-123"));
+        when(organizationMemberLookupPort.findOrganizationsByUser("user-id-123")).thenReturn(List.of());
         when(jwtTokenService.generateAccessToken("user-id-123")).thenReturn("new.jwt.token");
 
         var result = refreshSut.execute(new RefreshCommand("old-token"));

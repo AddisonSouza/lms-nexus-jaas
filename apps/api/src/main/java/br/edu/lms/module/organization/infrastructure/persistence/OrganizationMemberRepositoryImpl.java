@@ -1,14 +1,17 @@
 package br.edu.lms.module.organization.infrastructure.persistence;
 
+import br.edu.lms.module.identity.domain.model.OrgMembership;
 import br.edu.lms.module.identity.domain.port.out.OrganizationMemberLookupPort;
 import br.edu.lms.module.organization.domain.model.MemberRole;
 import br.edu.lms.module.organization.domain.model.OrganizationMember;
 import br.edu.lms.module.organization.domain.port.out.OrganizationMemberRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped
@@ -39,6 +42,20 @@ public class OrganizationMemberRepositoryImpl implements OrganizationMemberRepos
                 .setParameter("orgId", organizationId)
                 .getResultStream()
                 .findFirst();
+    }
+
+    @Override
+    public List<OrgMembership> findOrganizationsByUser(String userId) {
+        List<Tuple> rows = em.createQuery(
+                        "SELECT m.organizationId, m.role FROM OrganizationMemberJpaEntity m " +
+                        "WHERE m.userId = :userId AND m.deletedAt IS NULL",
+                        Tuple.class)
+                .setParameter("userId", userId)
+                .getResultList();
+
+        return rows.stream()
+                .map(row -> new OrgMembership(row.get(0, String.class), row.get(1, String.class)))
+                .toList();
     }
 
     @Override

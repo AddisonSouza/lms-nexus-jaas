@@ -6,6 +6,7 @@ import br.edu.lms.module.identity.domain.exception.InvalidCredentialsException;
 import br.edu.lms.module.identity.domain.model.Email;
 import br.edu.lms.module.identity.domain.model.UserStatus;
 import br.edu.lms.module.identity.domain.port.in.AuthenticateUseCase;
+import br.edu.lms.module.identity.domain.port.out.OrganizationMemberLookupPort;
 import br.edu.lms.module.identity.domain.port.out.PasswordHasher;
 import br.edu.lms.module.identity.domain.port.out.RefreshTokenRepository;
 import br.edu.lms.module.identity.domain.port.out.TokenGeneratorPort;
@@ -28,6 +29,7 @@ public class AuthenticateService implements AuthenticateUseCase {
     private final PasswordHasher passwordService;
     private final TokenGeneratorPort jwtTokenService;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final OrganizationMemberLookupPort organizationMemberLookupPort;
 
     @Override
     public AuthResult execute(AuthenticateCommand command) {
@@ -44,12 +46,16 @@ public class AuthenticateService implements AuthenticateUseCase {
             throw new InvalidCredentialsException();
         }
 
-        var accessToken = jwtTokenService.generateAccessToken(user.getId().getValue().toString());
+        var userId = user.getId().getValue().toString();
+        var memberships = organizationMemberLookupPort.findOrganizationsByUser(userId);
+        var accessToken = memberships.size() == 1
+                ? jwtTokenService.generateAccessToken(userId, memberships.get(0).organizationId(), memberships.get(0).role())
+                : jwtTokenService.generateAccessToken(userId);
         var refreshToken = UUID.randomUUID().toString();
 
-        refreshTokenRepository.save(refreshToken, user.getId().getValue().toString(), REFRESH_TOKEN_TTL);
+        refreshTokenRepository.save(refreshToken, userId, REFRESH_TOKEN_TTL);
 
-        log.info("User authenticated: {}", user.getId().getValue());
+        log.info("User authenticated: {}", userId);
 
         return new AuthResult(accessToken, refreshToken);
     }
