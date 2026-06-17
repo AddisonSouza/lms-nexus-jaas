@@ -30,8 +30,6 @@ import java.util.Map;
 @Tag(name = "Notifications", description = "Notificações in-app")
 public class NotificationResource {
 
-    private static final String[] ALLOWED_ROLES = {"ADMIN_ORG", "GESTOR", "PROFESSOR", "ALUNO"};
-
     private final ListNotificationsUseCase listNotificationsUseCase;
     private final MarkNotificationReadUseCase markNotificationReadUseCase;
     private final MarkAllNotificationsReadUseCase markAllNotificationsReadUseCase;

@@ -124,7 +124,7 @@ describe('NotificationPanel', () => {
     await userEvent.click(screen.getByText('Novo aviso'))
 
     await waitFor(() => {
-      expect(notificationsApi.markNotificationRead).toHaveBeenCalledWith('notif-1', expect.anything())
+      expect(notificationsApi.markNotificationRead).toHaveBeenCalledWith('notif-1')
       expect(mockNavigate).toHaveBeenCalledWith('/classrooms/class-1')
     })
   })
