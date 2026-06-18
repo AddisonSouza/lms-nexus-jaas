@@ -64,3 +64,32 @@ export interface ProfessorDashboardData {
   studentsWithoutSubmission: StudentSummary[]
   averageGradePerStudent: StudentAverageGrade[]
 }
+
+export interface UpcomingTask {
+  taskId: string
+  title: string
+  subjectName: string
+  deadline: string
+}
+
+export interface RecentGrade {
+  taskId: string
+  title: string
+  subjectName: string
+  grade: number
+  feedback: string | null
+}
+
+export interface SubjectAverageGrade {
+  subjectId: string
+  subjectName: string
+  averageGrade: number
+}
+
+export interface StudentDashboardData {
+  upcomingPendingTasks: UpcomingTask[]
+  pendingTasksCount: number
+  submittedTasksCount: number
+  recentGrades: RecentGrade[]
+  averageGradePerSubject: SubjectAverageGrade[]
+}
