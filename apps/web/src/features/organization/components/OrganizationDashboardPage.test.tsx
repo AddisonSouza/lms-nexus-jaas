@@ -15,6 +15,12 @@ vi.mock('@features/dashboard/components/AdminDashboard', () => ({
   ),
 }))
 
+vi.mock('@features/dashboard/components/GestorDashboard', () => ({
+  default: ({ organizationId }: { organizationId: string }) => (
+    <div data-testid="gestor-dashboard">GestorDashboard for {organizationId}</div>
+  ),
+}))
+
 beforeEach(() => {
   vi.clearAllMocks()
   mockRole = 'ADMIN_ORG'
@@ -39,11 +45,20 @@ describe('OrganizationDashboardPage', () => {
     expect(screen.getByText('AdminDashboard for org-1')).toBeTruthy()
   })
 
-  it('renders the generic organization page for non-ADMIN_ORG roles', () => {
+  it('renders the GestorDashboard for GESTOR users', () => {
+    mockRole = 'GESTOR'
+    renderPage('org-1')
+
+    expect(screen.getByTestId('gestor-dashboard')).toBeTruthy()
+    expect(screen.getByText('GestorDashboard for org-1')).toBeTruthy()
+  })
+
+  it('renders the generic organization page for non-ADMIN_ORG/GESTOR roles', () => {
     mockRole = 'PROFESSOR'
     renderPage('org-1')
 
     expect(screen.queryByTestId('admin-dashboard')).toBeNull()
+    expect(screen.queryByTestId('gestor-dashboard')).toBeNull()
     expect(screen.getByText('Turmas')).toBeTruthy()
   })
 })
