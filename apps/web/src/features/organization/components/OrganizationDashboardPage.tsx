@@ -3,6 +3,7 @@ import { BookOpen } from 'lucide-react'
 import { useAuthStore } from '@features/auth/store/authStore'
 import AdminDashboard from '@features/dashboard/components/AdminDashboard'
 import GestorDashboard from '@features/dashboard/components/GestorDashboard'
+import StudentDashboard from '@features/dashboard/components/StudentDashboard'
 
 function OrganizationDashboardPage() {
   const { id } = useParams<{ id: string }>()
@@ -22,6 +23,15 @@ function OrganizationDashboardPage() {
       <div className="container mx-auto max-w-6xl p-6 space-y-6">
         <h1 className="text-2xl font-semibold">Organização</h1>
         <GestorDashboard organizationId={id} />
+      </div>
+    )
+  }
+
+  if (role === 'ALUNO') {
+    return (
+      <div className="container mx-auto max-w-6xl p-6 space-y-6">
+        <h1 className="text-2xl font-semibold">Meu Dashboard</h1>
+        <StudentDashboard />
       </div>
     )
   }

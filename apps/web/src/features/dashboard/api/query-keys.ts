@@ -8,4 +8,5 @@ export const dashboardKeys = {
     [...dashboardKeys.all, 'gestor', organizationId] as const,
   professor: (subjectId: string) =>
     [...dashboardKeys.all, 'professor', subjectId] as const,
+  student: () => [...dashboardKeys.all, 'student'] as const,
 }
