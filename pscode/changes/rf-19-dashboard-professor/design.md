@@ -25,6 +25,8 @@ Diferente de RF-17/RF-18, o controle de acesso aqui não pode ser resolvido só 
 **1. Um único novo Query Port `ProfessorDashboardQueryPort` em `reporting/domain/port/out/`, incluindo o método de verificação de acesso.**
 Mantém o padrão já estabelecido (`GestorDashboardQueryPort` no RF-18): um Port por dashboard, métodos cruzando `curriculum`/`assessment` via JPQL direto por FQN. O método de verificação de vínculo professor↔disciplina entra no mesmo Port (`isProfessorAssignedToSubject`) em vez de reabrir uma dependência direta de `reporting` em `SubjectRepository` (do módulo `curriculum`) — mantém `reporting` consultando apenas via seus próprios Ports, como já é o padrão das outras queries cross-module deste módulo.
 
+**Nota de implementação:** `subject_teachers.member_id` referencia `organization_members.id`, que **não** é o mesmo valor de `users.id` (o `sub` do JWT, usado em todo o resto do projeto como `professorId`/`userId` — ver `TaskResource`, `ContentResource`). `isProfessorAssignedToSubject` recebe `professorId` = `jwt.getSubject()` (`users.id`) e resolve a tradução para `organization_members.id` dentro da própria query (join `SubjectTeacherJpaEntity` + `OrganizationMemberJpaEntity` por `m.userId`), em vez de expor um novo Port de tradução userId→memberId.
+
 Métodos do Port:
 ```java
 public interface ProfessorDashboardQueryPort {
