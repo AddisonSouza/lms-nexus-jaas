@@ -46,3 +46,21 @@ export interface ClassroomHealth {
 export interface GestorDashboardData {
   classrooms: ClassroomHealth[]
 }
+
+export interface StudentSummary {
+  studentId: string
+  studentName: string
+}
+
+export interface StudentAverageGrade {
+  studentId: string
+  studentName: string
+  averageGrade: number
+}
+
+export interface ProfessorDashboardData {
+  pendingEvaluationsCount: number
+  lastTaskGradeDistribution: number[]
+  studentsWithoutSubmission: StudentSummary[]
+  averageGradePerStudent: StudentAverageGrade[]
+}
