@@ -27,3 +27,22 @@ export interface DashboardPeriod {
   from: string
   to: string
 }
+
+export interface AtRiskStudent {
+  studentId: string
+  studentName: string
+  pendingCount: number
+}
+
+export interface ClassroomHealth {
+  classroomId: string
+  classroomName: string
+  status: string
+  deliveryRate: number
+  averageGrade: number | null
+  atRiskStudents: AtRiskStudent[]
+}
+
+export interface GestorDashboardData {
+  classrooms: ClassroomHealth[]
+}

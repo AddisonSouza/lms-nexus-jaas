@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<style>
+  body { font-family: Helvetica, Arial, sans-serif; font-size: 12px; color: #1a1a1a; }
+  h1 { font-size: 18px; margin-bottom: 16px; }
+  h2 { font-size: 14px; margin-top: 24px; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
+  h3 { font-size: 12px; margin-top: 12px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  th, td { text-align: left; padding: 4px 8px; border-bottom: 1px solid #eee; }
+</style>
+</head>
+<body>
+  <h1>Dashboard do Gestor</h1>
+
+  <h2>Saúde das turmas</h2>
+  <table>
+    <tr><th>Turma</th><th>Status</th><th>Taxa de entrega</th><th>Média de notas</th></tr>
+    {#for classroom in dashboard.classrooms}
+    <tr>
+      <td>{classroom.classroomName}</td>
+      <td>{classroom.status}</td>
+      <td>{classroom.deliveryRate}</td>
+      <td>{classroom.averageGrade ?: 'Sem notas ainda'}</td>
+    </tr>
+    {/for}
+  </table>
+
+  <h2>Alunos em risco por turma</h2>
+  {#for classroom in dashboard.classrooms}
+  <h3>{classroom.classroomName}</h3>
+  {#if classroom.atRiskStudents.isEmpty}
+  <p>Nenhum aluno com pendências.</p>
+  {#else}
+  <table>
+    <tr><th>Aluno</th><th>Pendências/atrasos</th></tr>
+    {#for student in classroom.atRiskStudents}
+    <tr><td>{student.studentName}</td><td>{student.pendingCount}</td></tr>
+    {/for}
+  </table>
+  {/if}
+  {/for}
+</body>
+</html>

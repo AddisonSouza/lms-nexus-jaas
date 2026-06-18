@@ -1,6 +1,7 @@
 package br.edu.lms.module.reporting.infrastructure.pdf;
 
 import br.edu.lms.module.reporting.application.dto.AdminDashboardResponse;
+import br.edu.lms.module.reporting.application.dto.GestorDashboardResponse;
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import io.quarkus.qute.Location;
 import io.quarkus.qute.Template;
@@ -16,9 +17,19 @@ public class DashboardPdfRenderer {
     @Location("reporting/dashboard.html")
     Template dashboardTemplate;
 
-    public byte[] render(AdminDashboardResponse dashboard) {
-        String html = dashboardTemplate.data("dashboard", dashboard).render();
+    @Inject
+    @Location("reporting/gestor-dashboard.html")
+    Template gestorDashboardTemplate;
 
+    public byte[] render(AdminDashboardResponse dashboard) {
+        return toPdf(dashboardTemplate.data("dashboard", dashboard).render());
+    }
+
+    public byte[] renderGestorDashboard(GestorDashboardResponse dashboard) {
+        return toPdf(gestorDashboardTemplate.data("dashboard", dashboard).render());
+    }
+
+    private byte[] toPdf(String html) {
         try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
             PdfRendererBuilder builder = new PdfRendererBuilder();
             builder.useFastMode();
