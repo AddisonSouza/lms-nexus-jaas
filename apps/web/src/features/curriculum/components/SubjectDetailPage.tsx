@@ -10,6 +10,7 @@ import { useUpdateTopic } from '../hooks/useUpdateTopic'
 import { useDeleteTopic } from '../hooks/useDeleteTopic'
 import { useCreateContent } from '../hooks/useCreateContent'
 import { useDeleteContent } from '../hooks/useDeleteContent'
+import ProfessorDashboard from '@features/dashboard/components/ProfessorDashboard'
 import TopicList from './TopicList'
 import TopicFormDialog from './TopicFormDialog'
 import ContentFormDialog from './ContentFormDialog'
@@ -108,6 +109,13 @@ function SubjectDetailPage() {
           <h1 className="text-xl font-semibold">Conteúdo da Disciplina</h1>
         </div>
       </div>
+
+      {role === 'PROFESSOR' && (
+        <div>
+          <h2 className="mb-2 text-base font-medium text-muted-foreground">Dashboard da Disciplina</h2>
+          <ProfessorDashboard subjectId={id} />
+        </div>
+      )}
 
       <div className="flex items-center justify-between">
         <h2 className="text-base font-medium text-muted-foreground">Tópicos e Materiais</h2>
