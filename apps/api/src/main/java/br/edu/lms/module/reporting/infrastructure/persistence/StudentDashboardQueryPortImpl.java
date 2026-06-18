@@ -84,7 +84,7 @@ public class StudentDashboardQueryPortImpl implements StudentDashboardQueryPort 
         List<Tuple> rows = em.createQuery(
                         "SELECT s.taskId, t.title, sub.name, s.grade, s.feedback " +
                                 "FROM " + SUBMISSION_ENTITY + " s, " + TASK_ENTITY + " t, " + SUBJECT_ENTITY + " sub " +
-                                "WHERE s.taskId = t.id AND t.subjectId = sub.id " +
+                                "WHERE s.taskId = t.id AND t.subjectId = sub.id AND t.deletedAt IS NULL " +
                                 "AND s.studentId = :studentId AND s.organizationId = :organizationId " +
                                 "AND s.deletedAt IS NULL AND s.status = 'EVALUATED' " +
                                 "ORDER BY s.updatedAt DESC",
@@ -109,7 +109,7 @@ public class StudentDashboardQueryPortImpl implements StudentDashboardQueryPort 
         List<Tuple> rows = em.createQuery(
                         "SELECT t.subjectId, sub.name, AVG(s.grade) " +
                                 "FROM " + SUBMISSION_ENTITY + " s, " + TASK_ENTITY + " t, " + SUBJECT_ENTITY + " sub " +
-                                "WHERE s.taskId = t.id AND t.subjectId = sub.id " +
+                                "WHERE s.taskId = t.id AND t.subjectId = sub.id AND t.deletedAt IS NULL " +
                                 "AND s.studentId = :studentId AND s.organizationId = :organizationId " +
                                 "AND s.deletedAt IS NULL AND s.status = 'EVALUATED' " +
                                 "GROUP BY t.subjectId, sub.name",

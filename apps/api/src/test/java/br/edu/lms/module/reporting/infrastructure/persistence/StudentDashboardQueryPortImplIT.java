@@ -179,6 +179,30 @@ class StudentDashboardQueryPortImplIT {
     }
 
     @Test
+    void getRecentGrades_excludesSubmissionsOfSoftDeletedTasks() throws Exception {
+        tx.begin();
+        em.createNativeQuery("UPDATE tasks SET deleted_at = NOW(6) WHERE id = ?")
+                .setParameter(1, taskEvaluatedBId).executeUpdate();
+        tx.commit();
+
+        var result = sut.getRecentGrades(STUDENT_ID, ORG_ID);
+
+        assertThat(result).extracting("taskId").containsExactly(taskEvaluatedAId);
+    }
+
+    @Test
+    void getAverageGradePerSubject_excludesSubmissionsOfSoftDeletedTasks() throws Exception {
+        tx.begin();
+        em.createNativeQuery("UPDATE tasks SET deleted_at = NOW(6) WHERE id = ?")
+                .setParameter(1, taskEvaluatedBId).executeUpdate();
+        tx.commit();
+
+        var result = sut.getAverageGradePerSubject(STUDENT_ID, ORG_ID);
+
+        assertThat(result).extracting("subjectId").containsExactly(subjectAId);
+    }
+
+    @Test
     void getAverageGradePerSubject_groupsEvaluatedGradesBySubject() {
         var result = sut.getAverageGradePerSubject(STUDENT_ID, ORG_ID);
 
