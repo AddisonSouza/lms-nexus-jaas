@@ -1,8 +1,15 @@
 import { useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2, X } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { submissionSchema, type SubmissionFormData } from '../schemas/submission.schema'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@components/ui/dialog'
 
 interface Props {
   open: boolean
@@ -29,20 +36,15 @@ function SubmissionFormDialog({ open, taskTitle, deadline, onClose, onSubmit, is
     }
   }, [open, reset])
 
-  if (!open) return null
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-lg rounded-lg border bg-background p-6 shadow-lg">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Enviar Resposta</h2>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Enviar Resposta</DialogTitle>
+        </DialogHeader>
 
-        <p className="mb-1 text-sm font-medium">{taskTitle}</p>
-        <p className="mb-4 text-xs text-muted-foreground">
+        <p className="text-sm font-medium">{taskTitle}</p>
+        <p className="text-xs text-muted-foreground">
           Prazo: {new Date(deadline).toLocaleString('pt-BR')}
           {isPastDeadline && (
             <span className="ml-2 font-semibold text-destructive">Prazo expirado</span>
@@ -82,7 +84,7 @@ function SubmissionFormDialog({ open, taskTitle, deadline, onClose, onSubmit, is
               {errors.files && <p className="text-xs text-destructive">{errors.files.message}</p>}
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
+            <DialogFooter>
               <button type="button" onClick={onClose} className="rounded border px-4 py-2 text-sm">
                 Cancelar
               </button>
@@ -94,11 +96,11 @@ function SubmissionFormDialog({ open, taskTitle, deadline, onClose, onSubmit, is
                 {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
                 Enviar Resposta
               </button>
-            </div>
+            </DialogFooter>
           </form>
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }
 

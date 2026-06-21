@@ -1,8 +1,15 @@
 import { useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2, X } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { taskSchema, type TaskFormData } from '../schemas/task.schema'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@components/ui/dialog'
 
 interface Props {
   open: boolean
@@ -27,17 +34,12 @@ function TaskFormDialog({ open, subjectId, onClose, onSubmit, isPending }: Props
     }
   }, [open, subjectId, reset])
 
-  if (!open) return null
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-lg rounded-lg border bg-background p-6 shadow-lg">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Nova Tarefa</h2>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Nova Tarefa</DialogTitle>
+        </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <input type="hidden" {...register('subjectId')} />
@@ -103,7 +105,7 @@ function TaskFormDialog({ open, subjectId, onClose, onSubmit, isPending }: Props
             {errors.files && <p className="text-xs text-destructive">{errors.files.message}</p>}
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
+          <DialogFooter>
             <button type="button" onClick={onClose} className="rounded border px-4 py-2 text-sm">
               Cancelar
             </button>
@@ -115,10 +117,10 @@ function TaskFormDialog({ open, subjectId, onClose, onSubmit, isPending }: Props
               {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
               Criar Tarefa
             </button>
-          </div>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }
 

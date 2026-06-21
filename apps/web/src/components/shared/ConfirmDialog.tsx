@@ -7,7 +7,7 @@ import {
   AlertDialogFooter,
   AlertDialogAction,
   AlertDialogCancel,
-} from '@features/components/ui/alert-dialog'
+} from '@components/ui/alert-dialog'
 
 interface Props {
   open: boolean

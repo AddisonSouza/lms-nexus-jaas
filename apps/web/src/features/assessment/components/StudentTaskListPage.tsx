@@ -20,14 +20,14 @@ function StatusBadge({ task }: { task: TaskWithGrade }) {
   }
   if (submission.status === 'EVALUATED') {
     return (
-      <span className="flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+      <span className="flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
         <CheckCircle className="h-3 w-3" />
         Avaliado
       </span>
     )
   }
   return (
-    <span className="flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700">
+    <span className="flex items-center gap-1 rounded-full bg-warning/10 px-2 py-0.5 text-xs font-medium text-warning">
       <Clock className="h-3 w-3" />
       Aguardando avaliação
     </span>
@@ -80,7 +80,7 @@ function StudentTaskListPage() {
                       <p className="text-xs text-muted-foreground">Pontuação máxima: {task.maxScore}</p>
                     )}
                     {isEvaluated && task.submission?.grade != null && (
-                      <p className="mt-1 text-sm font-medium text-green-700">
+                      <p className="mt-1 text-sm font-medium text-success">
                         Nota: {task.submission.grade}
                         {task.maxScore != null && ` / ${task.maxScore}`}
                       </p>

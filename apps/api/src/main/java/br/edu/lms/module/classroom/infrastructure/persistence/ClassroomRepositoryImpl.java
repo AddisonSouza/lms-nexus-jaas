@@ -3,9 +3,6 @@ package br.edu.lms.module.classroom.infrastructure.persistence;
 import br.edu.lms.module.classroom.domain.model.Classroom;
 import br.edu.lms.module.classroom.domain.model.ClassroomId;
 import br.edu.lms.module.classroom.domain.model.ClassroomMember;
-import br.edu.lms.module.classroom.domain.model.ClassroomMemberRole;
-import br.edu.lms.module.classroom.domain.model.ClassroomStatus;
-import br.edu.lms.module.classroom.domain.model.InviteCode;
 import br.edu.lms.module.classroom.domain.port.out.ClassroomRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
@@ -21,18 +18,12 @@ import java.util.Optional;
 public class ClassroomRepositoryImpl implements ClassroomRepository {
 
     private final EntityManager em;
+    private final ClassroomMapper classroomMapper;
 
     @Override
     @Transactional
     public Classroom save(Classroom classroom) {
-        var entity = new ClassroomJpaEntity();
-        entity.setId(classroom.getId().getValue());
-        entity.setOrganizationId(classroom.getOrganizationId());
-        entity.setName(classroom.getName());
-        entity.setDescription(classroom.getDescription());
-        entity.setAcademicPeriod(classroom.getAcademicPeriod());
-        entity.setStatus(classroom.getStatus().name());
-        entity.setInviteCode(classroom.getInviteCode().getValue());
+        var entity = classroomMapper.toEntity(classroom);
         em.merge(entity);
         return classroom;
     }
@@ -41,7 +32,7 @@ public class ClassroomRepositoryImpl implements ClassroomRepository {
     public Optional<Classroom> findById(ClassroomId id, String organizationId) {
         return Optional.ofNullable(em.find(ClassroomJpaEntity.class, id.getValue()))
                 .filter(e -> e.getDeletedAt() == null && e.getOrganizationId().equals(organizationId))
-                .map(this::toDomain);
+                .map(classroomMapper::toDomain);
     }
 
     @Override
@@ -52,7 +43,7 @@ public class ClassroomRepositoryImpl implements ClassroomRepository {
                 .setParameter("orgId", organizationId)
                 .getResultList()
                 .stream()
-                .map(this::toDomain)
+                .map(classroomMapper::toDomain)
                 .toList();
     }
 
@@ -68,7 +59,7 @@ public class ClassroomRepositoryImpl implements ClassroomRepository {
                 .setParameter("userId", userId)
                 .getResultList()
                 .stream()
-                .map(this::toDomain)
+                .map(classroomMapper::toDomain)
                 .toList();
     }
 
@@ -98,18 +89,13 @@ public class ClassroomRepositoryImpl implements ClassroomRepository {
                 .setParameter("uid", userId)
                 .getResultStream()
                 .findFirst()
-                .map(this::toMemberDomain);
+                .map(classroomMapper::toMemberDomain);
     }
 
     @Override
     @Transactional
     public ClassroomMember saveMember(ClassroomMember member) {
-        var entity = new ClassroomMemberJpaEntity();
-        entity.setId(member.getId());
-        entity.setClassroomId(member.getClassroomId().getValue());
-        entity.setUserId(member.getUserId());
-        entity.setOrganizationId(member.getOrganizationId());
-        entity.setRole(member.getRole().name());
+        var entity = classroomMapper.toMemberEntity(member);
         em.merge(entity);
         return member;
     }
@@ -136,7 +122,7 @@ public class ClassroomRepositoryImpl implements ClassroomRepository {
                 .setParameter("orgId", organizationId)
                 .getResultList()
                 .stream()
-                .map(this::toMemberDomain)
+                .map(classroomMapper::toMemberDomain)
                 .toList();
     }
 
@@ -148,7 +134,7 @@ public class ClassroomRepositoryImpl implements ClassroomRepository {
                 .setParameter("code", code)
                 .getResultStream()
                 .findFirst()
-                .map(this::toDomain);
+                .map(classroomMapper::toDomain);
     }
 
     @Override
@@ -161,32 +147,5 @@ public class ClassroomRepositoryImpl implements ClassroomRepository {
                 .setParameter("orgId", organizationId)
                 .getSingleResult();
         return count > 0;
-    }
-
-    private Classroom toDomain(ClassroomJpaEntity e) {
-        return Classroom.builder()
-                .id(ClassroomId.of(e.getId()))
-                .organizationId(e.getOrganizationId())
-                .name(e.getName())
-                .description(e.getDescription())
-                .academicPeriod(e.getAcademicPeriod())
-                .status(ClassroomStatus.valueOf(e.getStatus()))
-                .inviteCode(InviteCode.of(e.getInviteCode()))
-                .createdAt(e.getCreatedAt())
-                .updatedAt(e.getUpdatedAt())
-                .deletedAt(e.getDeletedAt())
-                .build();
-    }
-
-    private ClassroomMember toMemberDomain(ClassroomMemberJpaEntity e) {
-        return ClassroomMember.builder()
-                .id(e.getId())
-                .classroomId(ClassroomId.of(e.getClassroomId()))
-                .userId(e.getUserId())
-                .organizationId(e.getOrganizationId())
-                .role(ClassroomMemberRole.valueOf(e.getRole()))
-                .joinedAt(e.getJoinedAt())
-                .deletedAt(e.getDeletedAt())
-                .build();
     }
 }

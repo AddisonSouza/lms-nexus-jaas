@@ -21,7 +21,7 @@ function LoginPage() {
         <h1 className="text-2xl font-semibold">Entrar</h1>
 
         {justConfirmed && (
-          <div className="flex items-center gap-2 rounded border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
+          <div className="flex items-center gap-2 rounded border border-success/30 bg-success/10 px-3 py-2 text-sm text-success">
             <CheckCircle className="h-4 w-4 shrink-0" />
             E-mail confirmado com sucesso! Faça login para continuar.
           </div>

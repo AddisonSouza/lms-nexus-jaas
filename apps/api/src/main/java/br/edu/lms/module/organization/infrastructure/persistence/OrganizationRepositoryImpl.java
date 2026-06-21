@@ -15,15 +15,12 @@ import java.util.Optional;
 public class OrganizationRepositoryImpl implements OrganizationRepository {
 
     private final EntityManager em;
+    private final OrganizationMapper organizationMapper;
 
     @Override
     @Transactional
     public Organization save(Organization org) {
-        var entity = new OrganizationJpaEntity();
-        entity.setId(org.getId().getValue());
-        entity.setName(org.getName());
-        entity.setDescription(org.getDescription());
-        entity.setOwnerId(org.getOwnerId());
+        var entity = organizationMapper.toEntity(org);
         em.merge(entity);
         return org;
     }
@@ -38,22 +35,13 @@ public class OrganizationRepositoryImpl implements OrganizationRepository {
                 .setParameter("name", name)
                 .getResultStream()
                 .findFirst()
-                .map(this::toDomain);
+                .map(organizationMapper::toDomain);
     }
 
     @Override
     public Optional<Organization> findById(OrganizationId id) {
         return Optional.ofNullable(em.find(OrganizationJpaEntity.class, id.getValue()))
                 .filter(e -> e.getDeletedAt() == null)
-                .map(this::toDomain);
-    }
-
-    private Organization toDomain(OrganizationJpaEntity e) {
-        return Organization.builder()
-                .id(OrganizationId.of(e.getId()))
-                .name(e.getName())
-                .description(e.getDescription())
-                .ownerId(e.getOwnerId())
-                .build();
+                .map(organizationMapper::toDomain);
     }
 }

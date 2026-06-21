@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@features/components/ui/dialog'
+} from '@components/ui/dialog'
 
 interface Props {
   open: boolean

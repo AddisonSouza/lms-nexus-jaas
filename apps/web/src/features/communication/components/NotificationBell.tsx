@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Bell } from 'lucide-react'
-import { Popover, PopoverTrigger, PopoverContent } from '@features/components/ui/popover'
+import { Popover, PopoverTrigger, PopoverContent } from '@components/ui/popover'
 import { useNotifications } from '../hooks/useNotifications'
 import NotificationPanel from './NotificationPanel'
 

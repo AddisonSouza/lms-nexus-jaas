@@ -5,13 +5,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import CreateOrganizationForm from './CreateOrganizationForm'
 import * as orgApi from '../api/organization-api'
-import * as authApi from '@features/auth/api/auth-api'
+import api from '@lib/axios'
 
 vi.mock('../api/organization-api')
-vi.mock('@features/auth/api/auth-api')
-vi.mock('@features/auth/store/authStore', () => ({
+vi.mock('@lib/axios', () => ({ default: { post: vi.fn() } }))
+vi.mock('@store/authStore', () => ({
   useAuthStore: vi.fn((selector) =>
-    selector({ setOrganization: vi.fn(), organizationId: null, isAuthenticated: true }),
+    selector({ setToken: vi.fn(), organizationId: null, isAuthenticated: true }),
   ),
 }))
 
@@ -50,11 +50,11 @@ describe('CreateOrganizationForm', () => {
     })
   })
 
-  it('creates org and refreshes token on success', async () => {
+  it('creates org and switches organization on success', async () => {
     vi.mocked(orgApi.createOrganization).mockResolvedValue({
       id: 'org-1', name: 'Test Org', description: null, ownerId: 'u1', createdAt: '',
     })
-    vi.mocked(authApi.refreshTokens).mockResolvedValue({ accessToken: 'new-token' })
+    vi.mocked(api.post).mockResolvedValue({ data: { accessToken: 'new-token' } })
 
     render(<CreateOrganizationForm />, { wrapper })
     await userEvent.type(screen.getByLabelText(/nome/i), 'Test Org')
@@ -62,7 +62,11 @@ describe('CreateOrganizationForm', () => {
 
     await waitFor(() => {
       expect(orgApi.createOrganization).toHaveBeenCalledWith(expect.objectContaining({ name: 'Test Org' }))
-      expect(authApi.refreshTokens).toHaveBeenCalledWith('org-1')
+      expect(api.post).toHaveBeenCalledWith(
+        '/auth/switch-organization',
+        { organizationId: 'org-1' },
+        expect.objectContaining({ withCredentials: true }),
+      )
     })
   })
 

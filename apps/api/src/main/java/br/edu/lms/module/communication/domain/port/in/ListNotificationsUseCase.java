@@ -1,9 +1,7 @@
 package br.edu.lms.module.communication.domain.port.in;
 
-import br.edu.lms.module.communication.domain.model.Notification;
-
-import java.util.List;
+import br.edu.lms.module.communication.application.dto.NotificationListResult;
 
 public interface ListNotificationsUseCase {
-    List<Notification> execute(String userId, String organizationId);
+    NotificationListResult execute(String userId, String organizationId);
 }

@@ -13,6 +13,10 @@ apps/api/.quarkus/
 *.nar
 hs_err_pid*
 
+# ── JWT keys (gerar localmente, nunca commitar — ENV-04) ──────
+apps/api/src/main/resources/privateKey.pem
+apps/api/src/main/resources/publicKey.pem
+
 # ── Maven ────────────────────────────────────────────────────
 apps/api/.mvn/wrapper/maven-wrapper.jar
 

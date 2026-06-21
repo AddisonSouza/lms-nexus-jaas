@@ -78,7 +78,7 @@ function TaskListPage() {
                 <p className="font-medium">{task.title}</p>
                 <p className="text-xs text-muted-foreground">
                   Prazo: {new Date(task.deadline).toLocaleString('pt-BR')} · Status:{' '}
-                  <span className={task.status === 'PUBLISHED' ? 'text-green-600' : 'text-yellow-600'}>
+                  <span className={task.status === 'PUBLISHED' ? 'text-success' : 'text-warning'}>
                     {task.status}
                   </span>
                 </p>

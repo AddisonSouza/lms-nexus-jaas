@@ -1,9 +1,16 @@
 import { useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2, X } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { announcementSchema, type AnnouncementFormData } from '../schemas/announcementSchema'
 import type { Announcement } from '../types'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@components/ui/dialog'
 
 interface Props {
   open: boolean
@@ -29,17 +36,12 @@ function AnnouncementForm({ open, announcement, onClose, onSubmit, isPending }: 
     }
   }, [open, announcement, reset])
 
-  if (!open) return null
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-lg rounded-lg border bg-background p-6 shadow-lg">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">{isEditing ? 'Editar Aviso' : 'Publicar Aviso'}</h2>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{isEditing ? 'Editar Aviso' : 'Publicar Aviso'}</DialogTitle>
+        </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-1">
@@ -82,7 +84,7 @@ function AnnouncementForm({ open, announcement, onClose, onSubmit, isPending }: 
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
+          <DialogFooter>
             <button type="button" onClick={onClose} className="rounded border px-4 py-2 text-sm">
               Cancelar
             </button>
@@ -94,10 +96,10 @@ function AnnouncementForm({ open, announcement, onClose, onSubmit, isPending }: 
               {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
               {isEditing ? 'Salvar' : 'Publicar'}
             </button>
-          </div>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }
 

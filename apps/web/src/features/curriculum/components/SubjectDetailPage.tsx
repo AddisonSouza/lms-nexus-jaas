@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, BookOpenCheck, Plus } from 'lucide-react'
-import { useAuthStore } from '@features/auth/store/authStore'
+import { useAuthStore } from '@store/authStore'
 import { API_BASE_URL } from '@lib/axios'
 import { useSubjectContents } from '../hooks/useSubjectContents'
 import { useTopics } from '../hooks/useTopics'
@@ -10,7 +10,6 @@ import { useUpdateTopic } from '../hooks/useUpdateTopic'
 import { useDeleteTopic } from '../hooks/useDeleteTopic'
 import { useCreateContent } from '../hooks/useCreateContent'
 import { useDeleteContent } from '../hooks/useDeleteContent'
-import ProfessorDashboard from '@features/dashboard/components/ProfessorDashboard'
 import TopicList from './TopicList'
 import TopicFormDialog from './TopicFormDialog'
 import ContentFormDialog from './ContentFormDialog'
@@ -22,10 +21,14 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@features/components/ui/dialog'
+} from '@components/ui/dialog'
 import ConfirmDialog from '@components/shared/ConfirmDialog'
 
-function SubjectDetailPage() {
+interface SubjectDetailPageProps {
+  dashboardSlot?: ReactNode
+}
+
+function SubjectDetailPage({ dashboardSlot }: SubjectDetailPageProps) {
   const { subjectId } = useParams<{ subjectId: string }>()
   const id = subjectId!
 
@@ -110,10 +113,10 @@ function SubjectDetailPage() {
         </div>
       </div>
 
-      {role === 'PROFESSOR' && (
+      {dashboardSlot && (
         <div>
           <h2 className="mb-2 text-base font-medium text-muted-foreground">Dashboard da Disciplina</h2>
-          <ProfessorDashboard subjectId={id} />
+          {dashboardSlot}
         </div>
       )}
 

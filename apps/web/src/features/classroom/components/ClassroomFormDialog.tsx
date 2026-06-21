@@ -1,9 +1,16 @@
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2, X } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { classroomSchema, type ClassroomFormData } from '../schemas/classroomSchema'
 import type { Classroom } from '../types'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@components/ui/dialog'
 
 interface Props {
   open: boolean
@@ -34,17 +41,12 @@ function ClassroomFormDialog({ open, onClose, onSubmit, isPending, defaultValues
     })
   }, [open, defaultValues, reset])
 
-  if (!open) return null
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-md rounded-lg border bg-background p-6 shadow-lg">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">{title}</h2>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-1">
@@ -88,7 +90,7 @@ function ClassroomFormDialog({ open, onClose, onSubmit, isPending, defaultValues
             </div>
           )}
 
-          <div className="flex justify-end gap-2 pt-2">
+          <DialogFooter>
             <button type="button" onClick={onClose} className="rounded border px-4 py-2 text-sm">
               Cancelar
             </button>
@@ -100,10 +102,10 @@ function ClassroomFormDialog({ open, onClose, onSubmit, isPending, defaultValues
               {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
               Salvar
             </button>
-          </div>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }
 

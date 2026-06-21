@@ -5,7 +5,7 @@ import { notificationKeys } from '../api/query-keys'
 export function useMarkNotificationRead() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: markNotificationRead,
+    mutationFn: (id: string) => markNotificationRead(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: notificationKeys.all })
     },
@@ -15,7 +15,7 @@ export function useMarkNotificationRead() {
 export function useMarkAllNotificationsRead() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: markAllNotificationsRead,
+    mutationFn: () => markAllNotificationsRead(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: notificationKeys.all })
     },

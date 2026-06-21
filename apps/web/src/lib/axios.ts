@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { useAuthStore } from '@features/auth/store/authStore'
+import { useAuthStore } from '@store/authStore'
 
 export const API_BASE_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:8080') as string
 

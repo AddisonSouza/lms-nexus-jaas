@@ -1,7 +1,6 @@
 package br.edu.lms.module.curriculum.infrastructure.persistence;
 
 import br.edu.lms.module.curriculum.domain.model.Topic;
-import br.edu.lms.module.curriculum.domain.model.TopicId;
 import br.edu.lms.module.curriculum.domain.port.out.TopicRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
@@ -17,17 +16,12 @@ import java.util.Optional;
 public class TopicRepositoryImpl implements TopicRepository {
 
     private final EntityManager em;
+    private final TopicMapper topicMapper;
 
     @Override
     @Transactional
     public Topic save(Topic topic) {
-        var entity = new TopicJpaEntity();
-        entity.setId(topic.getId().getValue());
-        entity.setSubjectId(topic.getSubjectId());
-        entity.setOrganizationId(topic.getOrganizationId());
-        entity.setTitle(topic.getTitle());
-        entity.setPosition(topic.getPosition());
-        entity.setDeletedAt(topic.getDeletedAt());
+        var entity = topicMapper.toEntity(topic);
         em.merge(entity);
         return topic;
     }
@@ -36,7 +30,7 @@ public class TopicRepositoryImpl implements TopicRepository {
     public Optional<Topic> findById(String id, String organizationId) {
         return Optional.ofNullable(em.find(TopicJpaEntity.class, id))
                 .filter(e -> e.getDeletedAt() == null && e.getOrganizationId().equals(organizationId))
-                .map(this::toDomain);
+                .map(topicMapper::toDomain);
     }
 
     @Override
@@ -48,7 +42,7 @@ public class TopicRepositoryImpl implements TopicRepository {
                 .setParameter("orgId", organizationId)
                 .getResultList()
                 .stream()
-                .map(this::toDomain)
+                .map(topicMapper::toDomain)
                 .toList();
     }
 
@@ -72,18 +66,5 @@ public class TopicRepositoryImpl implements TopicRepository {
                 .setParameter("sid", subjectId)
                 .setParameter("orgId", organizationId)
                 .executeUpdate();
-    }
-
-    private Topic toDomain(TopicJpaEntity e) {
-        return Topic.builder()
-                .id(TopicId.of(e.getId()))
-                .subjectId(e.getSubjectId())
-                .organizationId(e.getOrganizationId())
-                .title(e.getTitle())
-                .position(e.getPosition())
-                .createdAt(e.getCreatedAt())
-                .updatedAt(e.getUpdatedAt())
-                .deletedAt(e.getDeletedAt())
-                .build();
     }
 }
