@@ -11,7 +11,7 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
-@Path("/organizations/{id}")
+@Path("/organizations")
 @Produces(MediaType.APPLICATION_JSON)
 @RequiredArgsConstructor
 @Tag(name = "Reporting", description = "Dashboard e relatórios da organização")
@@ -22,7 +22,7 @@ public class GestorDashboardResource {
     private final JsonWebToken jwt;
 
     @GET
-    @Path("/gestor-dashboard")
+    @Path("/{id}/gestor-dashboard")
     @RolesAllowed("GESTOR")
     @Operation(summary = "Dashboard do gestor com saúde das turmas da organização")
     @APIResponse(responseCode = "200", description = "Saúde das turmas da organização")
@@ -37,7 +37,7 @@ public class GestorDashboardResource {
     }
 
     @GET
-    @Path("/gestor-dashboard/pdf")
+    @Path("/{id}/gestor-dashboard/pdf")
     @RolesAllowed("GESTOR")
     @Produces("application/pdf")
     @Operation(summary = "Exportação do dashboard do gestor em PDF")
