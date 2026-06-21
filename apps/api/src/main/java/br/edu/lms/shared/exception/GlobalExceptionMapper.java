@@ -3,15 +3,19 @@ package br.edu.lms.shared.exception;
 import br.edu.lms.module.identity.domain.exception.ResendRateLimitExceededException;
 import br.edu.lms.shared.domain.DomainException;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
+import org.jboss.logging.Logger;
 
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Provider
 public class GlobalExceptionMapper implements ExceptionMapper<Exception> {
+
+    private static final Logger LOG = Logger.getLogger(GlobalExceptionMapper.class);
 
     @Override
     public Response toResponse(Exception exception) {
@@ -49,6 +53,16 @@ public class GlobalExceptionMapper implements ExceptionMapper<Exception> {
                     .build();
         }
 
+        // Preserve JAX-RS framework status codes (404 Not Found, 405, etc.)
+        // instead of collapsing them into a generic 500.
+        if (exception instanceof WebApplicationException e) {
+            var status = e.getResponse().getStatusInfo();
+            return Response.status(status)
+                    .entity(Map.of("error", status.getReasonPhrase()))
+                    .build();
+        }
+
+        LOG.error("Unhandled exception", exception);
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                 .entity(Map.of("error", "Erro interno do servidor"))
                 .build();

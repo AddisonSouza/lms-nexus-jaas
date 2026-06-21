@@ -70,15 +70,6 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
-  {
-    path: '/organizations/:id',
-    element: (
-      <ProtectedRoute>
-        <OrganizationRoute />
-      </ProtectedRoute>
-    ),
-  },
-
   // Protected: with AppShell layout
   {
     element: (
@@ -88,6 +79,7 @@ export const router = createBrowserRouter([
     ),
     children: [
       { path: '/', element: <RootRedirect /> },
+      { path: '/organizations/:id', element: <OrganizationRoute /> },
       { path: '/classrooms', element: <ClassroomListPage /> },
       { path: '/classrooms/:id', element: <ClassroomDetailRoute /> },
       { path: '/curriculum', element: <SubjectListPage /> },
