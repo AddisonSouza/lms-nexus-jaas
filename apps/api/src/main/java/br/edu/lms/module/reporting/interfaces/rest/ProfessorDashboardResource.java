@@ -10,7 +10,7 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
-@Path("/subjects/{id}")
+@Path("/subjects")
 @Produces(MediaType.APPLICATION_JSON)
 @RequiredArgsConstructor
 @Tag(name = "Reporting", description = "Dashboard do professor por disciplina")
@@ -20,7 +20,7 @@ public class ProfessorDashboardResource {
     private final JsonWebToken jwt;
 
     @GET
-    @Path("/dashboard")
+    @Path("/{id}/dashboard")
     @RolesAllowed("PROFESSOR")
     @Operation(summary = "Dashboard do professor com indicadores da disciplina")
     @APIResponse(responseCode = "200", description = "Indicadores da disciplina")

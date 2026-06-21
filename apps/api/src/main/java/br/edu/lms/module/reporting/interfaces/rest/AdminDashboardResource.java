@@ -14,7 +14,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import java.time.LocalDate;
 
-@Path("/organizations/{id}")
+@Path("/organizations")
 @Produces(MediaType.APPLICATION_JSON)
 @RequiredArgsConstructor
 @Tag(name = "Reporting", description = "Dashboard e relatórios da organização")
@@ -25,7 +25,7 @@ public class AdminDashboardResource {
     private final JsonWebToken jwt;
 
     @GET
-    @Path("/dashboard")
+    @Path("/{id}/dashboard")
     @RolesAllowed("ADMIN_ORG")
     @Operation(summary = "Dashboard administrativo da organização")
     @APIResponse(responseCode = "200", description = "Métricas da organização no período")
@@ -43,7 +43,7 @@ public class AdminDashboardResource {
     }
 
     @GET
-    @Path("/reports/pdf")
+    @Path("/{id}/reports/pdf")
     @RolesAllowed("ADMIN_ORG")
     @Produces("application/pdf")
     @Operation(summary = "Exportação do dashboard administrativo em PDF")
