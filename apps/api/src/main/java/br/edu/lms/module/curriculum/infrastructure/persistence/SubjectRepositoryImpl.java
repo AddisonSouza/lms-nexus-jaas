@@ -1,7 +1,6 @@
 package br.edu.lms.module.curriculum.infrastructure.persistence;
 
 import br.edu.lms.module.curriculum.domain.model.Subject;
-import br.edu.lms.module.curriculum.domain.model.SubjectCode;
 import br.edu.lms.module.curriculum.domain.model.SubjectId;
 import br.edu.lms.module.curriculum.domain.port.out.SubjectRepository;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -18,17 +17,12 @@ import java.util.Optional;
 public class SubjectRepositoryImpl implements SubjectRepository {
 
     private final EntityManager em;
+    private final SubjectMapper subjectMapper;
 
     @Override
     @Transactional
     public Subject save(Subject subject) {
-        var entity = new SubjectJpaEntity();
-        entity.setId(subject.getId().getValue());
-        entity.setOrganizationId(subject.getOrganizationId());
-        entity.setName(subject.getName());
-        entity.setCode(subject.getCode() != null ? subject.getCode().getValue() : null);
-        entity.setDescription(subject.getDescription());
-        entity.setWorkloadHours(subject.getWorkloadHours());
+        var entity = subjectMapper.toEntity(subject);
         em.merge(entity);
         return subject;
     }
@@ -37,7 +31,7 @@ public class SubjectRepositoryImpl implements SubjectRepository {
     public Optional<Subject> findById(SubjectId id, String organizationId) {
         return Optional.ofNullable(em.find(SubjectJpaEntity.class, id.getValue()))
                 .filter(e -> e.getDeletedAt() == null && e.getOrganizationId().equals(organizationId))
-                .map(this::toDomain);
+                .map(subjectMapper::toDomain);
     }
 
     @Override
@@ -48,7 +42,7 @@ public class SubjectRepositoryImpl implements SubjectRepository {
                 .setParameter("orgId", organizationId)
                 .getResultList()
                 .stream()
-                .map(this::toDomain)
+                .map(subjectMapper::toDomain)
                 .toList();
     }
 
@@ -137,19 +131,5 @@ public class SubjectRepositoryImpl implements SubjectRepository {
                         String.class)
                 .setParameter("sid", subjectId)
                 .getResultList();
-    }
-
-    private Subject toDomain(SubjectJpaEntity e) {
-        return Subject.builder()
-                .id(SubjectId.of(e.getId()))
-                .organizationId(e.getOrganizationId())
-                .name(e.getName())
-                .code(SubjectCode.of(e.getCode()))
-                .description(e.getDescription())
-                .workloadHours(e.getWorkloadHours())
-                .createdAt(e.getCreatedAt())
-                .updatedAt(e.getUpdatedAt())
-                .deletedAt(e.getDeletedAt())
-                .build();
     }
 }

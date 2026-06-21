@@ -21,7 +21,6 @@ interface AuthState {
   organizationId: string | null
   isAuthenticated: boolean
   setToken: (token: string) => void
-  setOrganization: (token: string, organizationId: string) => void
   clearToken: () => void
 }
 
@@ -40,17 +39,6 @@ export const useAuthStore = create<AuthState>((set) => ({
       role: payload.groups?.[0] ?? null,
       userId: payload.sub ?? null,
       organizationId: payload.org ?? null,
-    })
-  },
-
-  setOrganization: (token, organizationId) => {
-    const payload = decodeJwtPayload(token)
-    set({
-      accessToken: token,
-      isAuthenticated: true,
-      role: payload.groups?.[0] ?? null,
-      userId: payload.sub ?? null,
-      organizationId: organizationId,
     })
   },
 

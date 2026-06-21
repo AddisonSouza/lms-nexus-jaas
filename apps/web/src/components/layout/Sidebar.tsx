@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { BookOpen, BookOpenCheck, ClipboardList, Users } from 'lucide-react'
-import { useAuthStore } from '@features/auth/store/authStore'
+import { useAuthStore } from '@store/authStore'
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   `flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors ${

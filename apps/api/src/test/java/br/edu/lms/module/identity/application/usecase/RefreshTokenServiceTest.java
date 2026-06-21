@@ -2,7 +2,6 @@ package br.edu.lms.module.identity.application.usecase;
 
 import br.edu.lms.module.identity.application.dto.RefreshCommand;
 import br.edu.lms.module.identity.domain.exception.TokenNotFoundException;
-import br.edu.lms.module.identity.domain.exception.UserNotMemberOfOrganizationException;
 import br.edu.lms.module.identity.domain.model.OrgMembership;
 import br.edu.lms.module.identity.domain.port.out.OrganizationMemberLookupPort;
 import br.edu.lms.module.identity.domain.port.out.RefreshTokenRepository;
@@ -66,28 +65,6 @@ class RefreshTokenServiceTest {
 
         assertThat(result.accessToken()).isEqualTo("new-access");
         verify(jwtTokenService, never()).generateAccessToken(anyString(), anyString(), anyString());
-    }
-
-    @Test
-    void shouldRefreshWithOrgContextWhenMember() {
-        when(refreshTokenRepository.findUserId("rt")).thenReturn(Optional.of("user-1"));
-        when(organizationMemberLookupPort.findRoleByUserAndOrg("user-1", "org-1"))
-                .thenReturn(Optional.of("ADMIN_ORG"));
-        when(jwtTokenService.generateAccessToken("user-1", "org-1", "ADMIN_ORG")).thenReturn("org-access");
-
-        var result = sut.execute(new RefreshCommand("rt", "org-1"));
-
-        assertThat(result.accessToken()).isEqualTo("org-access");
-    }
-
-    @Test
-    void shouldThrowWhenUserNotMemberOfOrg() {
-        when(refreshTokenRepository.findUserId("rt")).thenReturn(Optional.of("user-1"));
-        when(organizationMemberLookupPort.findRoleByUserAndOrg("user-1", "org-x"))
-                .thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> sut.execute(new RefreshCommand("rt", "org-x")))
-                .isInstanceOf(UserNotMemberOfOrganizationException.class);
     }
 
     @Test

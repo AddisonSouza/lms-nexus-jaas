@@ -5,7 +5,7 @@ import { classroomKeys } from '../api/query-keys'
 export function useCreateClassroom() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: createClassroom,
+    mutationFn: (data: Parameters<typeof createClassroom>[0]) => createClassroom(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: classroomKeys.lists() })
     },

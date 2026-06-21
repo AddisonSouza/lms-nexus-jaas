@@ -18,7 +18,6 @@ public interface SubjectContentMapper {
     @Mapping(target = "contentType", expression = "java(domain.getContentType().name())")
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "deletedAt", ignore = true)
     SubjectContentJpaEntity toEntity(SubjectContent domain);
 
     @Mapping(target = "id", expression = "java(domain.getId().getValue())")

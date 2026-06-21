@@ -11,7 +11,7 @@ vi.mock('../api/announcements')
 let mockRole: string | null = 'PROFESSOR'
 let mockUserId: string | null = 'prof-1'
 
-vi.mock('@features/auth/store/authStore', () => ({
+vi.mock('@store/authStore', () => ({
   useAuthStore: vi.fn((selector) => selector({ role: mockRole, userId: mockUserId })),
 }))
 

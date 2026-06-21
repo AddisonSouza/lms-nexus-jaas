@@ -8,15 +8,15 @@ import PublicRoute from '@components/shared/PublicRoute'
 import ProtectedRoute from '@components/shared/ProtectedRoute'
 import AppShell from '@components/layout/AppShell'
 import CreateOrganizationPage from '@features/organization/components/CreateOrganizationPage'
-import OrganizationDashboardPage from '@features/organization/components/OrganizationDashboardPage'
 import AcceptInvitePage from '@features/invitation/components/AcceptInvitePage'
 import ClassroomListPage from '@features/classroom/components/ClassroomListPage'
-import ClassroomDetailPage from '@features/classroom/components/ClassroomDetailPage'
 import SubjectListPage from '@features/curriculum/components/SubjectListPage'
-import SubjectDetailPage from '@features/curriculum/components/SubjectDetailPage'
 import TaskListPage from '@features/assessment/components/TaskListPage'
 import StudentTaskListPage from '@features/assessment/components/StudentTaskListPage'
 import RootRedirect from './RootRedirect'
+import OrganizationRoute from './OrganizationRoute'
+import SubjectDetailRoute from './SubjectDetailRoute'
+import ClassroomDetailRoute from './ClassroomDetailRoute'
 
 export const router = createBrowserRouter([
   // Public routes
@@ -74,7 +74,7 @@ export const router = createBrowserRouter([
     path: '/organizations/:id',
     element: (
       <ProtectedRoute>
-        <OrganizationDashboardPage />
+        <OrganizationRoute />
       </ProtectedRoute>
     ),
   },
@@ -89,9 +89,9 @@ export const router = createBrowserRouter([
     children: [
       { path: '/', element: <RootRedirect /> },
       { path: '/classrooms', element: <ClassroomListPage /> },
-      { path: '/classrooms/:id', element: <ClassroomDetailPage /> },
+      { path: '/classrooms/:id', element: <ClassroomDetailRoute /> },
       { path: '/curriculum', element: <SubjectListPage /> },
-      { path: '/curriculum/:subjectId', element: <SubjectDetailPage /> },
+      { path: '/curriculum/:subjectId', element: <SubjectDetailRoute /> },
       {
         path: '/assessment/tasks',
         element: (

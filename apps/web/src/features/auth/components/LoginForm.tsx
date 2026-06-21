@@ -18,7 +18,7 @@ function LoginForm({ onSubmit, isPending }: Props) {
   })
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit((data) => onSubmit(data))} className="space-y-4">
       <div className="space-y-1">
         <label htmlFor="email" className="text-sm font-medium">E-mail</label>
         <input

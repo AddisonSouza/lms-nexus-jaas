@@ -16,7 +16,7 @@ vi.mock('react-router-dom', async (importOriginal) => {
 
 let mockIsAuthenticated = true
 
-vi.mock('@features/auth/store/authStore', () => ({
+vi.mock('@store/authStore', () => ({
   useAuthStore: vi.fn((selector: (s: { isAuthenticated: boolean }) => unknown) =>
     selector({ isAuthenticated: mockIsAuthenticated }),
   ),

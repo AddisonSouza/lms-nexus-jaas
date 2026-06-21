@@ -6,6 +6,7 @@ import br.edu.lms.module.identity.application.dto.RegisterUserCommand;
 import br.edu.lms.module.identity.application.dto.RequestPasswordResetCommand;
 import br.edu.lms.module.identity.application.dto.ResendConfirmationCommand;
 import br.edu.lms.module.identity.application.dto.ResetPasswordCommand;
+import br.edu.lms.module.identity.application.dto.SwitchOrganizationCommand;
 import br.edu.lms.module.identity.domain.port.in.AuthenticateUseCase;
 import br.edu.lms.module.identity.domain.port.in.ConfirmEmailUseCase;
 import br.edu.lms.module.identity.domain.port.in.LogoutUseCase;
@@ -14,14 +15,15 @@ import br.edu.lms.module.identity.domain.port.in.RegisterUserUseCase;
 import br.edu.lms.module.identity.domain.port.in.RequestPasswordResetUseCase;
 import br.edu.lms.module.identity.domain.port.in.ResendConfirmationUseCase;
 import br.edu.lms.module.identity.domain.port.in.ResetPasswordUseCase;
+import br.edu.lms.module.identity.domain.port.in.SwitchOrganizationUseCase;
 import br.edu.lms.module.identity.interfaces.rest.dto.ForgotPasswordRequest;
 import br.edu.lms.module.identity.interfaces.rest.dto.LoginRequest;
 import br.edu.lms.module.identity.interfaces.rest.dto.LoginResponse;
-import br.edu.lms.module.identity.interfaces.rest.dto.RefreshRequest;
 import br.edu.lms.module.identity.interfaces.rest.dto.RegisterRequest;
 import br.edu.lms.module.identity.interfaces.rest.dto.RegisterResponse;
 import br.edu.lms.module.identity.interfaces.rest.dto.ResendConfirmationRequest;
 import br.edu.lms.module.identity.interfaces.rest.dto.ResetPasswordRequest;
+import br.edu.lms.module.identity.interfaces.rest.dto.SwitchOrganizationRequest;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
@@ -50,6 +52,7 @@ public class AuthResource {
     private final AuthenticateUseCase authenticateUseCase;
     private final LogoutUseCase logoutUseCase;
     private final RefreshTokenUseCase refreshTokenUseCase;
+    private final SwitchOrganizationUseCase switchOrganizationUseCase;
     private final RequestPasswordResetUseCase requestPasswordResetUseCase;
     private final ResetPasswordUseCase resetPasswordUseCase;
     private final ConfirmEmailUseCase confirmEmailUseCase;
@@ -119,13 +122,37 @@ public class AuthResource {
     @Operation(summary = "Renova o par de tokens")
     @APIResponse(responseCode = "200", description = "Tokens renovados")
     @APIResponse(responseCode = "401", description = "Refresh token inválido ou expirado")
-    @APIResponse(responseCode = "403", description = "Usuário não é membro da organização informada")
-    public Response refresh(@CookieParam(REFRESH_COOKIE) String refreshToken, RefreshRequest body) {
+    public Response refresh(@CookieParam(REFRESH_COOKIE) String refreshToken) {
         if (refreshToken == null || refreshToken.isBlank()) {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
-        var orgId = body != null ? body.organizationId() : null;
-        var result = refreshTokenUseCase.execute(new RefreshCommand(refreshToken, orgId));
+        var result = refreshTokenUseCase.execute(new RefreshCommand(refreshToken));
+
+        var cookie = new NewCookie.Builder(REFRESH_COOKIE)
+                .value(result.refreshToken())
+                .path("/auth")
+                .httpOnly(true)
+                .secure(cookieSecure)
+                .sameSite(NewCookie.SameSite.STRICT)
+                .maxAge(COOKIE_MAX_AGE_SECONDS)
+                .build();
+
+        return Response.ok(new LoginResponse(result.accessToken())).cookie(cookie).build();
+    }
+
+    @POST
+    @Path("/switch-organization")
+    @Operation(summary = "Troca a organização ativa e emite um novo Access Token escopado a ela")
+    @APIResponse(responseCode = "200", description = "Tokens renovados com a nova organização")
+    @APIResponse(responseCode = "401", description = "Refresh token inválido ou expirado")
+    @APIResponse(responseCode = "403", description = "Usuário não é membro da organização informada")
+    public Response switchOrganization(@CookieParam(REFRESH_COOKIE) String refreshToken,
+                                        @Valid SwitchOrganizationRequest request) {
+        if (refreshToken == null || refreshToken.isBlank()) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+        var result = switchOrganizationUseCase.execute(
+                new SwitchOrganizationCommand(refreshToken, request.organizationId()));
 
         var cookie = new NewCookie.Builder(REFRESH_COOKIE)
                 .value(result.refreshToken())

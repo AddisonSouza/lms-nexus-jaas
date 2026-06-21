@@ -36,12 +36,8 @@ export async function logoutUser(): Promise<void> {
   await api.post('/auth/logout', {}, { withCredentials: true })
 }
 
-export async function refreshTokens(organizationId?: string): Promise<LoginResponse> {
-  const response = await api.post(
-    '/auth/refresh',
-    organizationId ? { organizationId } : {},
-    { withCredentials: true },
-  )
+export async function refreshTokens(): Promise<LoginResponse> {
+  const response = await api.post('/auth/refresh', {}, { withCredentials: true })
   return loginResponseSchema.parse(response.data)
 }
 

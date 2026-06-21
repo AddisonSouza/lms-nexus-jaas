@@ -6,7 +6,6 @@ import br.edu.lms.module.communication.domain.model.Notification;
 import br.edu.lms.module.communication.domain.port.in.ListNotificationsUseCase;
 import br.edu.lms.module.communication.domain.port.in.MarkAllNotificationsReadUseCase;
 import br.edu.lms.module.communication.domain.port.in.MarkNotificationReadUseCase;
-import br.edu.lms.module.communication.domain.port.out.NotificationUnreadCounterPort;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.GET;
@@ -33,7 +32,6 @@ public class NotificationResource {
     private final ListNotificationsUseCase listNotificationsUseCase;
     private final MarkNotificationReadUseCase markNotificationReadUseCase;
     private final MarkAllNotificationsReadUseCase markAllNotificationsReadUseCase;
-    private final NotificationUnreadCounterPort notificationUnreadCounterPort;
     private final JsonWebToken jwt;
 
     @GET
@@ -43,12 +41,11 @@ public class NotificationResource {
         String orgId = (String) jwt.getClaim("org");
         String userId = jwt.getSubject();
 
-        var notifications = listNotificationsUseCase.execute(userId, orgId);
-        long unreadCount = notificationUnreadCounterPort.get(userId);
+        var result = listNotificationsUseCase.execute(userId, orgId);
 
         var response = NotificationListResponse.builder()
-                .items(notifications.stream().map(NotificationResource::toResponse).toList())
-                .unreadCount(unreadCount)
+                .items(result.getNotifications().stream().map(NotificationResource::toResponse).toList())
+                .unreadCount(result.getUnreadCount())
                 .build();
 
         return Response.ok(response).build();
@@ -62,8 +59,8 @@ public class NotificationResource {
         String orgId = (String) jwt.getClaim("org");
         String userId = jwt.getSubject();
 
-        var notification = markNotificationReadUseCase.execute(id, userId, orgId);
-        return Response.ok(toResponse(notification)).build();
+        var result = markNotificationReadUseCase.execute(id, userId, orgId);
+        return Response.ok(toResponse(result.getNotification())).build();
     }
 
     @PATCH
@@ -74,8 +71,7 @@ public class NotificationResource {
         String orgId = (String) jwt.getClaim("org");
         String userId = jwt.getSubject();
 
-        markAllNotificationsReadUseCase.execute(userId, orgId);
-        long unreadCount = notificationUnreadCounterPort.get(userId);
+        long unreadCount = markAllNotificationsReadUseCase.execute(userId, orgId);
 
         return Response.ok(Map.of("unreadCount", unreadCount)).build();
     }

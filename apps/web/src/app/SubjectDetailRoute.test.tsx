@@ -1,11 +1,11 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import SubjectDetailPage from './SubjectDetailPage'
+import SubjectDetailRoute from './SubjectDetailRoute'
 
 let mockRole: string | null = 'PROFESSOR'
 
-vi.mock('@features/auth/store/authStore', () => ({
+vi.mock('@store/authStore', () => ({
   useAuthStore: vi.fn((selector) => selector({ role: mockRole })),
 }))
 
@@ -15,25 +15,25 @@ vi.mock('@features/dashboard/components/ProfessorDashboard', () => ({
   ),
 }))
 
-vi.mock('../hooks/useSubjectContents', () => ({
+vi.mock('@features/curriculum/hooks/useSubjectContents', () => ({
   useSubjectContents: () => ({ data: { topics: [] }, isLoading: false }),
 }))
-vi.mock('../hooks/useTopics', () => ({
+vi.mock('@features/curriculum/hooks/useTopics', () => ({
   useTopics: () => ({ data: [] }),
 }))
-vi.mock('../hooks/useCreateTopic', () => ({
+vi.mock('@features/curriculum/hooks/useCreateTopic', () => ({
   useCreateTopic: () => ({ mutate: vi.fn(), isPending: false }),
 }))
-vi.mock('../hooks/useUpdateTopic', () => ({
+vi.mock('@features/curriculum/hooks/useUpdateTopic', () => ({
   useUpdateTopic: () => ({ mutate: vi.fn(), isPending: false }),
 }))
-vi.mock('../hooks/useDeleteTopic', () => ({
+vi.mock('@features/curriculum/hooks/useDeleteTopic', () => ({
   useDeleteTopic: () => ({ mutate: vi.fn(), isPending: false }),
 }))
-vi.mock('../hooks/useCreateContent', () => ({
+vi.mock('@features/curriculum/hooks/useCreateContent', () => ({
   useCreateContent: () => ({ mutate: vi.fn(), isPending: false }),
 }))
-vi.mock('../hooks/useDeleteContent', () => ({
+vi.mock('@features/curriculum/hooks/useDeleteContent', () => ({
   useDeleteContent: () => ({ mutate: vi.fn(), isPending: false }),
 }))
 
@@ -42,20 +42,20 @@ beforeEach(() => {
   mockRole = 'PROFESSOR'
 })
 
-function renderPage(subjectId = 'subject-1') {
+function renderRoute(subjectId = 'subject-1') {
   return render(
     <MemoryRouter initialEntries={[`/curriculum/${subjectId}`]}>
       <Routes>
-        <Route path="/curriculum/:subjectId" element={<SubjectDetailPage />} />
+        <Route path="/curriculum/:subjectId" element={<SubjectDetailRoute />} />
       </Routes>
     </MemoryRouter>,
   )
 }
 
-describe('SubjectDetailPage', () => {
+describe('SubjectDetailRoute', () => {
   it('renders the ProfessorDashboard for PROFESSOR users', () => {
     mockRole = 'PROFESSOR'
-    renderPage('subject-1')
+    renderRoute('subject-1')
 
     expect(screen.getByTestId('professor-dashboard')).toBeTruthy()
     expect(screen.getByText('ProfessorDashboard for subject-1')).toBeTruthy()
@@ -63,7 +63,7 @@ describe('SubjectDetailPage', () => {
 
   it('does not render the ProfessorDashboard for non-PROFESSOR roles', () => {
     mockRole = 'ALUNO'
-    renderPage('subject-1')
+    renderRoute('subject-1')
 
     expect(screen.queryByTestId('professor-dashboard')).toBeNull()
   })

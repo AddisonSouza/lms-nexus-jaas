@@ -4,17 +4,17 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createElement } from 'react'
 import { useCreateOrganization } from './useCreateOrganization'
 import * as orgApi from '../api/organization-api'
-import * as authApi from '@features/auth/api/auth-api'
+import api from '@lib/axios'
 
 vi.mock('../api/organization-api')
-vi.mock('@features/auth/api/auth-api')
+vi.mock('@lib/axios', () => ({ default: { post: vi.fn() } }))
 
-const mockSetOrganization = vi.fn()
+const mockSetToken = vi.fn()
 const mockNavigate = vi.fn()
 
-vi.mock('@features/auth/store/authStore', () => ({
+vi.mock('@store/authStore', () => ({
   useAuthStore: vi.fn((selector) =>
-    selector({ setOrganization: mockSetOrganization }),
+    selector({ setToken: mockSetToken }),
   ),
 }))
 vi.mock('react-router-dom', () => ({
@@ -29,11 +29,11 @@ function wrapper({ children }: { children: React.ReactNode }) {
 beforeEach(() => vi.clearAllMocks())
 
 describe('useCreateOrganization', () => {
-  it('creates org, calls refresh with orgId, updates store and navigates', async () => {
+  it('creates org, switches organization, updates store and navigates', async () => {
     vi.mocked(orgApi.createOrganization).mockResolvedValue({
       id: 'org-42', name: 'My Org', description: null, ownerId: 'u1', createdAt: '',
     })
-    vi.mocked(authApi.refreshTokens).mockResolvedValue({ accessToken: 'fresh-token' })
+    vi.mocked(api.post).mockResolvedValue({ data: { accessToken: 'fresh-token' } })
 
     const { result } = renderHook(() => useCreateOrganization(), { wrapper })
 
@@ -41,8 +41,12 @@ describe('useCreateOrganization', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(authApi.refreshTokens).toHaveBeenCalledWith('org-42')
-    expect(mockSetOrganization).toHaveBeenCalledWith('fresh-token', 'org-42')
+    expect(api.post).toHaveBeenCalledWith(
+      '/auth/switch-organization',
+      { organizationId: 'org-42' },
+      expect.objectContaining({ withCredentials: true }),
+    )
+    expect(mockSetToken).toHaveBeenCalledWith('fresh-token')
     expect(mockNavigate).toHaveBeenCalledWith('/organizations/org-42')
   })
 
