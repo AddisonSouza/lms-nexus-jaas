@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Loader2, UserPlus, XCircle } from 'lucide-react'
-import { useAuthStore } from '@features/auth/store/authStore'
+import { useAuthStore } from '@store/authStore'
 import { getInvitationInfo } from '../api/invitation-api'
 import { useAcceptInvitation } from '../hooks/useAcceptInvitation'
 

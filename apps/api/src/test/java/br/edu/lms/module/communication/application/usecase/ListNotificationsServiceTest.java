@@ -4,6 +4,7 @@ import br.edu.lms.module.communication.domain.model.Notification;
 import br.edu.lms.module.communication.domain.model.NotificationId;
 import br.edu.lms.module.communication.domain.model.NotificationType;
 import br.edu.lms.module.communication.domain.port.out.NotificationRepository;
+import br.edu.lms.module.communication.domain.port.out.NotificationUnreadCounterPort;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,6 +21,7 @@ import static org.mockito.Mockito.when;
 class ListNotificationsServiceTest {
 
     @Mock NotificationRepository notificationRepository;
+    @Mock NotificationUnreadCounterPort notificationUnreadCounterPort;
     @InjectMocks ListNotificationsService service;
 
     private static final String ORG_ID = "org-1";
@@ -39,19 +41,23 @@ class ListNotificationsServiceTest {
                 .createdAt(LocalDateTime.now())
                 .build();
         when(notificationRepository.findByUser(USER_ID, ORG_ID)).thenReturn(List.of(notification));
+        when(notificationUnreadCounterPort.get(USER_ID)).thenReturn(1L);
 
         var result = service.execute(USER_ID, ORG_ID);
 
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getTitle()).isEqualTo("Novo aviso");
+        assertThat(result.getNotifications()).hasSize(1);
+        assertThat(result.getNotifications().get(0).getTitle()).isEqualTo("Novo aviso");
+        assertThat(result.getUnreadCount()).isEqualTo(1L);
     }
 
     @Test
     void execute_noNotifications_returnsEmptyList() {
         when(notificationRepository.findByUser(USER_ID, ORG_ID)).thenReturn(List.of());
+        when(notificationUnreadCounterPort.get(USER_ID)).thenReturn(0L);
 
         var result = service.execute(USER_ID, ORG_ID);
 
-        assertThat(result).isEmpty();
+        assertThat(result.getNotifications()).isEmpty();
+        assertThat(result.getUnreadCount()).isZero();
     }
 }

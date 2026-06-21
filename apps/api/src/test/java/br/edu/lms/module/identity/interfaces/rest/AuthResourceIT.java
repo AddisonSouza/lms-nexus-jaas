@@ -154,4 +154,61 @@ class AuthResourceIT {
         assertThat(claims.get("org").asText()).isEqualTo(ORG_ID);
         assertThat(claims.get("groups").get(0).asText()).isEqualTo("PROFESSOR");
     }
+
+    @Test
+    void switchOrganization_whenMember_returnsTokenWithOrgClaims() throws Exception {
+        seedActiveUser();
+        seedSoleOrganizationMembership("ADMIN_ORG");
+
+        var loginResponse = given()
+                .contentType(ContentType.JSON)
+                .body("{\"email\":\"" + EMAIL + "\",\"password\":\"" + RAW_PASSWORD + "\"}")
+                .when().post("/auth/login")
+                .then().statusCode(200)
+                .extract().response();
+
+        var refreshCookie = loginResponse.getCookie("__refresh_token");
+
+        var accessToken = given()
+                .contentType(ContentType.JSON)
+                .cookie("__refresh_token", refreshCookie)
+                .body("{\"organizationId\":\"" + ORG_ID + "\"}")
+                .when().post("/auth/switch-organization")
+                .then().statusCode(200)
+                .extract().path("accessToken").toString();
+
+        var claims = decodeClaims(accessToken);
+        assertThat(claims.get("org").asText()).isEqualTo(ORG_ID);
+        assertThat(claims.get("groups").get(0).asText()).isEqualTo("ADMIN_ORG");
+    }
+
+    @Test
+    void switchOrganization_whenNotMember_returns403() throws Exception {
+        seedActiveUser();
+
+        var loginResponse = given()
+                .contentType(ContentType.JSON)
+                .body("{\"email\":\"" + EMAIL + "\",\"password\":\"" + RAW_PASSWORD + "\"}")
+                .when().post("/auth/login")
+                .then().statusCode(200)
+                .extract().response();
+
+        var refreshCookie = loginResponse.getCookie("__refresh_token");
+
+        given()
+                .contentType(ContentType.JSON)
+                .cookie("__refresh_token", refreshCookie)
+                .body("{\"organizationId\":\"" + ORG_ID + "\"}")
+                .when().post("/auth/switch-organization")
+                .then().statusCode(403);
+    }
+
+    @Test
+    void switchOrganization_withoutCookie_returns401() {
+        given()
+                .contentType(ContentType.JSON)
+                .body("{\"organizationId\":\"" + ORG_ID + "\"}")
+                .when().post("/auth/switch-organization")
+                .then().statusCode(401);
+    }
 }

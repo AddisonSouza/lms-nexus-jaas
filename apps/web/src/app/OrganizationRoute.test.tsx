@@ -1,11 +1,11 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import OrganizationDashboardPage from './OrganizationDashboardPage'
+import OrganizationRoute from './OrganizationRoute'
 
 let mockRole: string | null = 'ADMIN_ORG'
 
-vi.mock('@features/auth/store/authStore', () => ({
+vi.mock('@store/authStore', () => ({
   useAuthStore: vi.fn((selector) => selector({ role: mockRole })),
 }))
 
@@ -30,20 +30,20 @@ beforeEach(() => {
   mockRole = 'ADMIN_ORG'
 })
 
-function renderPage(organizationId = 'org-1') {
+function renderRoute(organizationId = 'org-1') {
   return render(
     <MemoryRouter initialEntries={[`/organizations/${organizationId}`]}>
       <Routes>
-        <Route path="/organizations/:id" element={<OrganizationDashboardPage />} />
+        <Route path="/organizations/:id" element={<OrganizationRoute />} />
       </Routes>
     </MemoryRouter>,
   )
 }
 
-describe('OrganizationDashboardPage', () => {
+describe('OrganizationRoute', () => {
   it('renders the AdminDashboard for ADMIN_ORG users', () => {
     mockRole = 'ADMIN_ORG'
-    renderPage('org-1')
+    renderRoute('org-1')
 
     expect(screen.getByTestId('admin-dashboard')).toBeTruthy()
     expect(screen.getByText('AdminDashboard for org-1')).toBeTruthy()
@@ -51,7 +51,7 @@ describe('OrganizationDashboardPage', () => {
 
   it('renders the GestorDashboard for GESTOR users', () => {
     mockRole = 'GESTOR'
-    renderPage('org-1')
+    renderRoute('org-1')
 
     expect(screen.getByTestId('gestor-dashboard')).toBeTruthy()
     expect(screen.getByText('GestorDashboard for org-1')).toBeTruthy()
@@ -59,14 +59,14 @@ describe('OrganizationDashboardPage', () => {
 
   it('renders the StudentDashboard for ALUNO users', () => {
     mockRole = 'ALUNO'
-    renderPage('org-1')
+    renderRoute('org-1')
 
     expect(screen.getByTestId('student-dashboard')).toBeTruthy()
   })
 
   it('renders the generic organization page for non-ADMIN_ORG/GESTOR/ALUNO roles', () => {
     mockRole = 'PROFESSOR'
-    renderPage('org-1')
+    renderRoute('org-1')
 
     expect(screen.queryByTestId('admin-dashboard')).toBeNull()
     expect(screen.queryByTestId('gestor-dashboard')).toBeNull()

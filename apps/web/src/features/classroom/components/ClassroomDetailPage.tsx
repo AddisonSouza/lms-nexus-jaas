@@ -1,18 +1,21 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Pencil, Trash2, Copy, RefreshCw } from 'lucide-react'
 import { useClassroom } from '../hooks/useClassroom'
 import { useUpdateClassroom } from '../hooks/useUpdateClassroom'
 import { useDeleteClassroom } from '../hooks/useDeleteClassroom'
 import { useRegenerateInviteCode } from '../hooks/useRegenerateInviteCode'
-import { useAuthStore } from '@features/auth/store/authStore'
+import { useAuthStore } from '@store/authStore'
 import ClassroomFormDialog from './ClassroomFormDialog'
 import ClassroomMembersPanel from './ClassroomMembersPanel'
-import AnnouncementFeed from '@features/communication/components/AnnouncementFeed'
 import ConfirmDialog from '@components/shared/ConfirmDialog'
 import type { ClassroomFormData } from '../schemas/classroomSchema'
 
-function ClassroomDetailPage() {
+interface ClassroomDetailPageProps {
+  announcementFeedSlot?: ReactNode
+}
+
+function ClassroomDetailPage({ announcementFeedSlot }: ClassroomDetailPageProps) {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [showEdit, setShowEdit] = useState(false)
@@ -126,7 +129,7 @@ function ClassroomDetailPage() {
 
       <div className="rounded-lg border p-4 space-y-3">
         <h2 className="text-lg font-semibold">Mural de Avisos</h2>
-        <AnnouncementFeed classroomId={id!} />
+        {announcementFeedSlot}
       </div>
 
       <ClassroomFormDialog

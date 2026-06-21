@@ -15,7 +15,6 @@ public interface TopicMapper {
     @Mapping(target = "id", expression = "java(domain.getId().getValue())")
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "deletedAt", ignore = true)
     TopicJpaEntity toEntity(Topic domain);
 
     @Mapping(target = "id", expression = "java(domain.getId().getValue())")

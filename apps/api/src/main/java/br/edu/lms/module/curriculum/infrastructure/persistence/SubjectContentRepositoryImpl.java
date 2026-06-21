@@ -1,8 +1,6 @@
 package br.edu.lms.module.curriculum.infrastructure.persistence;
 
-import br.edu.lms.module.curriculum.domain.model.ContentType;
 import br.edu.lms.module.curriculum.domain.model.SubjectContent;
-import br.edu.lms.module.curriculum.domain.model.SubjectContentId;
 import br.edu.lms.module.curriculum.domain.port.out.ContentRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
@@ -18,21 +16,12 @@ import java.util.Optional;
 public class SubjectContentRepositoryImpl implements ContentRepository {
 
     private final EntityManager em;
+    private final SubjectContentMapper subjectContentMapper;
 
     @Override
     @Transactional
     public SubjectContent save(SubjectContent content) {
-        var entity = new SubjectContentJpaEntity();
-        entity.setId(content.getId().getValue());
-        entity.setTopicId(content.getTopicId());
-        entity.setOrganizationId(content.getOrganizationId());
-        entity.setTitle(content.getTitle());
-        entity.setContentType(content.getContentType().name());
-        entity.setExternalUrl(content.getExternalUrl());
-        entity.setFileKey(content.getFileKey());
-        entity.setDescription(content.getDescription());
-        entity.setPosition(content.getPosition());
-        entity.setDeletedAt(content.getDeletedAt());
+        var entity = subjectContentMapper.toEntity(content);
         em.merge(entity);
         return content;
     }
@@ -41,7 +30,7 @@ public class SubjectContentRepositoryImpl implements ContentRepository {
     public Optional<SubjectContent> findById(String id, String organizationId) {
         return Optional.ofNullable(em.find(SubjectContentJpaEntity.class, id))
                 .filter(e -> e.getDeletedAt() == null && e.getOrganizationId().equals(organizationId))
-                .map(this::toDomain);
+                .map(subjectContentMapper::toDomain);
     }
 
     @Override
@@ -53,7 +42,7 @@ public class SubjectContentRepositoryImpl implements ContentRepository {
                 .setParameter("orgId", organizationId)
                 .getResultList()
                 .stream()
-                .map(this::toDomain)
+                .map(subjectContentMapper::toDomain)
                 .toList();
     }
 
@@ -66,7 +55,7 @@ public class SubjectContentRepositoryImpl implements ContentRepository {
                 .setParameter("orgId", organizationId)
                 .getResultList()
                 .stream()
-                .map(this::toDomain)
+                .map(subjectContentMapper::toDomain)
                 .toList();
     }
 
@@ -90,22 +79,5 @@ public class SubjectContentRepositoryImpl implements ContentRepository {
                 .setParameter("tid", topicId)
                 .setParameter("orgId", organizationId)
                 .executeUpdate();
-    }
-
-    private SubjectContent toDomain(SubjectContentJpaEntity e) {
-        return SubjectContent.builder()
-                .id(SubjectContentId.of(e.getId()))
-                .topicId(e.getTopicId())
-                .organizationId(e.getOrganizationId())
-                .title(e.getTitle())
-                .contentType(ContentType.valueOf(e.getContentType()))
-                .externalUrl(e.getExternalUrl())
-                .fileKey(e.getFileKey())
-                .description(e.getDescription())
-                .position(e.getPosition())
-                .createdAt(e.getCreatedAt())
-                .updatedAt(e.getUpdatedAt())
-                .deletedAt(e.getDeletedAt())
-                .build();
     }
 }

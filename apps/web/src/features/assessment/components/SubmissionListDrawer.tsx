@@ -11,7 +11,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetDescription,
-} from '@features/components/ui/sheet'
+} from '@components/ui/sheet'
 
 interface Props {
   open: boolean

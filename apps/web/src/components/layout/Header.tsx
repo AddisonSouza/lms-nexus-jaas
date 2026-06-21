@@ -1,6 +1,6 @@
 import { LogOut } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { useAuthStore } from '@features/auth/store/authStore'
+import { useAuthStore } from '@store/authStore'
 import NotificationBell from '@features/communication/components/NotificationBell'
 import api from '@lib/axios'
 

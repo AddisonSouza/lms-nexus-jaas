@@ -145,7 +145,7 @@ npm run dev
 | `MAIL_FROM` | `noreply@lms.local` | Remetente dos e-mails |
 | `VITE_API_URL` | `http://localhost:8080` | URL da API para o front |
 
-> No perfil `dev` do Quarkus: JWT usa os arquivos `publicKey.pem`/`privateKey.pem` já presentes em `apps/api/src/main/resources/` e e-mails são mockados (sem necessidade de SMTP real).
+> No perfil `dev` do Quarkus: JWT usa os arquivos `publicKey.pem`/`privateKey.pem` em `apps/api/src/main/resources/` (não versionados — gere o par localmente, veja `.env.example`) e e-mails são mockados (sem necessidade de SMTP real).
 
 ---
 

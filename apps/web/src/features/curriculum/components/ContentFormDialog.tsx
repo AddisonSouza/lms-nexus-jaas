@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@features/components/ui/dialog'
+} from '@components/ui/dialog'
 
 const CONTENT_TYPES: { value: ContentType; label: string }[] = [
   { value: 'VIDEO', label: 'Vídeo' },

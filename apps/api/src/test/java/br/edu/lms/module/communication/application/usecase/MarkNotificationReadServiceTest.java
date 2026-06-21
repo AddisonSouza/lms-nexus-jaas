@@ -60,7 +60,7 @@ class MarkNotificationReadServiceTest {
 
         var result = service.execute(NOTIFICATION_ID, USER_ID, ORG_ID);
 
-        assertThat(result.isRead()).isTrue();
+        assertThat(result.getNotification().isRead()).isTrue();
         verify(notificationUnreadCounterPort, times(1)).decrement(USER_ID);
     }
 
@@ -97,7 +97,7 @@ class MarkNotificationReadServiceTest {
 
         var result = service.execute(NOTIFICATION_ID, USER_ID, ORG_ID);
 
-        assertThat(result.isRead()).isTrue();
+        assertThat(result.getNotification().isRead()).isTrue();
         verify(notificationRepository, never()).markRead(any());
         verify(notificationUnreadCounterPort, never()).decrement(any());
     }

@@ -14,8 +14,9 @@ public class MarkAllNotificationsReadService implements MarkAllNotificationsRead
     private final NotificationUnreadCounterPort notificationUnreadCounterPort;
 
     @Override
-    public void execute(String userId, String organizationId) {
+    public long execute(String userId, String organizationId) {
         notificationRepository.markAllReadByUser(userId, organizationId);
         notificationUnreadCounterPort.reset(userId);
+        return notificationUnreadCounterPort.get(userId);
     }
 }

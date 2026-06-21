@@ -12,7 +12,7 @@ function ResendConfirmationForm({ initialEmail = '' }: ResendConfirmationFormPro
 
   if (isSuccess) {
     return (
-      <div className="mt-4 rounded border border-green-200 bg-green-50 p-3 text-center text-sm text-green-700">
+      <div className="mt-4 rounded border border-success/30 bg-success/10 p-3 text-center text-sm text-success">
         <Mail className="mx-auto mb-1 h-4 w-4" />
         E-mail de confirmação reenviado. Verifique sua caixa de entrada.
       </div>

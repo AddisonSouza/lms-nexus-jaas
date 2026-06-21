@@ -28,7 +28,10 @@ function ConfirmEmailCallbackPage() {
 
   const { isLoading, isSuccess, isError, error } = useQuery({
     queryKey: ['confirm-email', token],
-    queryFn: () => confirmEmail(token!),
+    queryFn: async () => {
+      await confirmEmail(token!)
+      return true
+    },
     enabled: !!token,
     retry: false,
     staleTime: Infinity,
