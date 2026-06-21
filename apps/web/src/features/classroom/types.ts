@@ -17,6 +17,7 @@ export interface ClassroomMember {
   id: string
   classroomId: string
   userId: string
+  userName?: string
   role: ClassroomMemberRole
   joinedAt: string
 }

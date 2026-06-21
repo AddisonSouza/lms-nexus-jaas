@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { BookOpen, BookOpenCheck, ClipboardList, Users } from 'lucide-react'
+import { BookOpen, BookOpenCheck, ClipboardList, LayoutDashboard } from 'lucide-react'
 import { useAuthStore } from '@store/authStore'
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
@@ -9,10 +9,18 @@ const linkClass = ({ isActive }: { isActive: boolean }) =>
 
 function Sidebar() {
   const role = useAuthStore((s) => s.role)
+  const organizationId = useAuthStore((s) => s.organizationId)
 
   return (
     <aside className="w-56 shrink-0 border-r bg-background">
       <nav className="flex flex-col gap-1 p-3">
+        {organizationId && (
+          <NavLink to={`/organizations/${organizationId}`} className={linkClass} end>
+            <LayoutDashboard className="h-4 w-4" />
+            Painel
+          </NavLink>
+        )}
+
         <NavLink to="/classrooms" className={linkClass}>
           <BookOpen className="h-4 w-4" />
           Turmas
@@ -39,19 +47,6 @@ function Sidebar() {
           </NavLink>
         )}
 
-        {(role === 'ADMIN_ORG' || role === 'GESTOR') && (
-          <NavLink to="/assessment/tasks" className={linkClass}>
-            <ClipboardList className="h-4 w-4" />
-            Tarefas
-          </NavLink>
-        )}
-
-        {(role === 'ADMIN_ORG' || role === 'GESTOR') && (
-          <NavLink to="/members" className={linkClass}>
-            <Users className="h-4 w-4" />
-            Membros
-          </NavLink>
-        )}
       </nav>
     </aside>
   )
