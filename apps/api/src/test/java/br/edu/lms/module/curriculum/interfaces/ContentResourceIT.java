@@ -19,6 +19,7 @@ class ContentResourceIT {
     @Test
     void createContent_withoutToken_returns401() {
         given()
+                .contentType("multipart/form-data")
                 .when().post("/subjects/any-id/contents")
                 .then()
                 .statusCode(401);

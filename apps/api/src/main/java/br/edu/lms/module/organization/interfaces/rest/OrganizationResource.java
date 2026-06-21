@@ -8,6 +8,7 @@ import br.edu.lms.module.organization.domain.port.in.InviteMemberUseCase;
 import br.edu.lms.module.organization.domain.port.in.RemoveMemberUseCase;
 import br.edu.lms.module.organization.interfaces.rest.dto.CreateOrganizationRequest;
 import br.edu.lms.module.organization.interfaces.rest.dto.InviteMemberRequest;
+import io.quarkus.security.Authenticated;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
@@ -33,6 +34,7 @@ public class OrganizationResource {
     private final JsonWebToken jwt;
 
     @POST
+    @Authenticated
     @Operation(summary = "Criar organização")
     @APIResponse(responseCode = "201", description = "Organização criada com sucesso")
     @APIResponse(responseCode = "409", description = "Nome já utilizado por este usuário")

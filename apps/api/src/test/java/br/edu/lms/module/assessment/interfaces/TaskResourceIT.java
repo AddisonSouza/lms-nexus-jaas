@@ -11,6 +11,7 @@ class TaskResourceIT {
     @Test
     void createTask_withoutToken_returns401() {
         given()
+                .contentType("multipart/form-data")
                 .when().post("/tasks")
                 .then()
                 .statusCode(401);
