@@ -100,6 +100,7 @@ public class AuthResource {
 
     @POST
     @Path("/logout")
+    @Consumes(MediaType.WILDCARD)
     @Operation(summary = "Logout — invalida o refresh token")
     @APIResponse(responseCode = "204", description = "Logout realizado")
     @APIResponse(responseCode = "401", description = "Token ausente ou inválido")
@@ -119,6 +120,7 @@ public class AuthResource {
 
     @POST
     @Path("/refresh")
+    @Consumes(MediaType.WILDCARD)
     @Operation(summary = "Renova o par de tokens")
     @APIResponse(responseCode = "200", description = "Tokens renovados")
     @APIResponse(responseCode = "401", description = "Refresh token inválido ou expirado")
