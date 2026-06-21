@@ -12,6 +12,7 @@ public class ClassroomMemberResponse {
     private String id;
     private String classroomId;
     private String userId;
+    private String userName;
     private ClassroomMemberRole role;
     private LocalDateTime joinedAt;
 }

@@ -60,7 +60,7 @@ public class ClassroomAnnouncementResource {
 
     @GET
     @Path("/{classroomId}/announcements")
-    @RolesAllowed({"PROFESSOR", "ALUNO"})
+    @RolesAllowed({"PROFESSOR", "ALUNO", "ADMIN_ORG", "GESTOR"})
     @Operation(summary = "Listar avisos da turma em ordem cronológica decrescente")
     public List<AnnouncementResponse> list(@PathParam("classroomId") String classroomId) {
         String orgId = (String) jwt.getClaim("org");

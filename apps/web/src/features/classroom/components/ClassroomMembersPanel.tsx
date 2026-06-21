@@ -59,7 +59,7 @@ function ClassroomMembersPanel({ classroomId, canManage }: Props) {
           <tbody>
             {members?.map((m) => (
               <tr key={m.id} className="border-b last:border-0">
-                <td className="py-2 font-mono text-xs">{m.userId}</td>
+                <td className="py-2">{m.userName ?? <span className="font-mono text-xs">{m.userId}</span>}</td>
                 <td className="py-2">
                   <span className={`rounded px-2 py-0.5 text-xs font-medium ${
                     m.role === 'PROFESSOR'

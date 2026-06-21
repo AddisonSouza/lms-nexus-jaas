@@ -20,6 +20,9 @@ interface AuthState {
   userId: string | null
   organizationId: string | null
   isAuthenticated: boolean
+  // True until the initial silent-refresh on app boot resolves, so guards can
+  // wait instead of bouncing a still-logged-in user to /login on a page reload.
+  isBootstrapping: boolean
   setToken: (token: string) => void
   clearToken: () => void
 }
@@ -30,12 +33,14 @@ export const useAuthStore = create<AuthState>((set) => ({
   userId: null,
   organizationId: null,
   isAuthenticated: false,
+  isBootstrapping: true,
 
   setToken: (token) => {
     const payload = decodeJwtPayload(token)
     set({
       accessToken: token,
       isAuthenticated: true,
+      isBootstrapping: false,
       role: payload.groups?.[0] ?? null,
       userId: payload.sub ?? null,
       organizationId: payload.org ?? null,
@@ -43,6 +48,13 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   clearToken: () => {
-    set({ accessToken: null, role: null, userId: null, organizationId: null, isAuthenticated: false })
+    set({
+      accessToken: null,
+      role: null,
+      userId: null,
+      organizationId: null,
+      isAuthenticated: false,
+      isBootstrapping: false,
+    })
   },
 }))

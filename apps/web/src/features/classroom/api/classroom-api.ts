@@ -21,6 +21,7 @@ const classroomMemberSchema = z.object({
   id: z.string(),
   classroomId: z.string(),
   userId: z.string(),
+  userName: z.string().nullish().transform((v) => v ?? undefined),
   role: z.enum(['PROFESSOR', 'ALUNO']),
   joinedAt: z.string(),
 })

@@ -18,7 +18,7 @@ function AnnouncementFeed({ classroomId }: Props) {
   const role = useAuthStore((s) => s.role)
   const canPost = role === 'PROFESSOR'
 
-  const { data: announcements = [], isLoading } = useAnnouncements(classroomId)
+  const { data: announcements = [], isLoading, isError } = useAnnouncements(classroomId)
   const createAnnouncement = useCreateAnnouncement(classroomId)
   const updateAnnouncement = useUpdateAnnouncement(classroomId)
   const deleteAnnouncement = useDeleteAnnouncement(classroomId)
@@ -56,7 +56,11 @@ function AnnouncementFeed({ classroomId }: Props) {
 
       {isLoading && <p className="text-sm text-muted-foreground">Carregando avisos...</p>}
 
-      {!isLoading && announcements.length === 0 && (
+      {isError && (
+        <p className="text-sm text-muted-foreground">Não foi possível carregar os avisos desta turma.</p>
+      )}
+
+      {!isLoading && !isError && announcements.length === 0 && (
         <p className="text-sm text-muted-foreground">Nenhum aviso publicado ainda.</p>
       )}
 

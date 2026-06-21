@@ -112,7 +112,7 @@ Cookie `refresh_token` no request. Rotaciona o par Access + Refresh Token.
 { "email": "string" }
 ```
 
-Sempre retorna `200` (não revela se o e-mail existe). Envia link com token de 1h.
+Sempre retorna `204` (não revela se o e-mail existe). Envia link com token de 1h.
 
 ---
 
@@ -135,7 +135,7 @@ Sempre retorna `200` (não revela se o e-mail existe). Envia link com token de 1
 
 | Código | Descrição |
 |---|---|
-| `200` | Status do usuário alterado para `ACTIVE`. |
+| `204` | Status do usuário alterado para `ACTIVE`. |
 | `400` | Token inválido ou expirado. |
 
 ---
