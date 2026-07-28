@@ -10,6 +10,8 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@components/ui/dialog'
+import { Input } from '@components/ui/input'
+import { Button } from '@components/ui/button'
 
 interface Props {
   open: boolean
@@ -44,28 +46,19 @@ function TopicFormDialog({ open, onClose, onSubmit, isPending, defaultValues, ti
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-1">
-            <label className="text-sm font-medium">Título *</label>
-            <input
-              {...register('title')}
-              className="w-full rounded border px-3 py-2 text-sm"
-              placeholder="Ex: Introdução"
-              autoFocus
-            />
+            <label className="text-xs text-muted-foreground">Título *</label>
+            <Input {...register('title')} placeholder="Ex: Introdução" autoFocus />
             {errors.title && <p className="text-xs text-destructive">{errors.title.message}</p>}
           </div>
 
           <DialogFooter>
-            <button type="button" onClick={onClose} className="rounded border px-4 py-2 text-sm">
+            <Button type="button" variant="secondary" onClick={onClose}>
               Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={isPending}
-              className="flex items-center gap-2 rounded bg-primary px-4 py-2 text-sm text-primary-foreground disabled:opacity-50"
-            >
+            </Button>
+            <Button type="submit" disabled={isPending}>
               {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
               Salvar
-            </button>
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

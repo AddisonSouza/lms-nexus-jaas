@@ -9,6 +9,8 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@components/ui/dialog'
+import { Input } from '@components/ui/input'
+import { Button } from '@components/ui/button'
 
 const schema = z.object({
   memberId: z.string().uuid('ID de membro inválido'),
@@ -39,27 +41,19 @@ function AssignTeacherDialog({ open, onClose, onSubmit, isPending }: Props) {
 
         <form onSubmit={handleSubmit((d) => onSubmit(d.memberId))} className="space-y-4">
           <div className="space-y-1">
-            <label className="text-sm font-medium">ID do Membro *</label>
-            <input
-              {...register('memberId')}
-              className="w-full rounded border px-3 py-2 text-sm"
-              placeholder="UUID do membro (PROFESSOR)"
-            />
+            <label className="text-xs text-muted-foreground">ID do Membro *</label>
+            <Input {...register('memberId')} placeholder="UUID do membro (PROFESSOR)" />
             {errors.memberId && <p className="text-xs text-destructive">{errors.memberId.message}</p>}
           </div>
 
           <DialogFooter>
-            <button type="button" onClick={handleClose} className="rounded border px-4 py-2 text-sm">
+            <Button type="button" variant="secondary" onClick={handleClose}>
               Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={isPending}
-              className="flex items-center gap-2 rounded bg-primary px-4 py-2 text-sm text-primary-foreground disabled:opacity-50"
-            >
+            </Button>
+            <Button type="submit" disabled={isPending}>
               {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
               Atribuir
-            </button>
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
