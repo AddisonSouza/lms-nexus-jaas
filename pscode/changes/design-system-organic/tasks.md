@@ -40,11 +40,11 @@
 
 ## 5. Dashboards por papel
 
-- [ ] 5.1 [FE] Reskin `StudentDashboard.tsx` + `UpcomingTasksList`/`RecentGradesList`/`SubjectAverageGradesList`/`SubmissionStatusSummary`
-- [ ] 5.2 [FE] Reskin `GestorDashboard.tsx` + `ClassroomHealthCards`/`AtRiskStudentsList`/`PeriodSelector`
-- [ ] 5.3 [FE] Reskin `AdminDashboard.tsx` + `MetricsCards`/`ActivityFeed`
-- [ ] 5.4 [FE] Reskin `DashboardCharts.tsx`/`LastTaskGradeChart.tsx`, trocando cores fixas pelos tokens `--color-accent`/`--color-accent-2`
-- [ ] 5.5 [FE] Reskin `OrganizationDashboardPage.tsx` (fallback sem papel específico)
+- [x] 5.1 [FE] Reskin `StudentDashboard.tsx` + `UpcomingTasksList`/`RecentGradesList`/`SubjectAverageGradesList`/`SubmissionStatusSummary` (cada lista ganha `Card` próprio; also inclui `PendingEvaluationsBadge`, `StudentAverageGradesList`, `StudentsWithoutSubmissionList` do Professor)
+- [x] 5.2 [FE] Reskin `GestorDashboard.tsx` + `ClassroomHealthCards`/`AtRiskStudentsList`/`PeriodSelector`
+- [x] 5.3 [FE] Reskin `AdminDashboard.tsx` + `MetricsCards`/`ActivityFeed`
+- [x] 5.4 [FE] Reskin `DashboardCharts.tsx`/`LastTaskGradeChart.tsx`, trocando cores fixas (`#2563eb`/`#16a34a`) pelos tokens `--color-accent`/`--color-accent-2`
+- [x] 5.5 [FE] Reskin `OrganizationDashboardPage.tsx` (fallback sem papel específico)
 
 ## 6. Turmas e disciplinas
 

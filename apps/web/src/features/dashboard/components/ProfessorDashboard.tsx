@@ -3,6 +3,7 @@ import LastTaskGradeChart from './LastTaskGradeChart'
 import StudentsWithoutSubmissionList from './StudentsWithoutSubmissionList'
 import StudentAverageGradesList from './StudentAverageGradesList'
 import { useProfessorDashboard } from '../hooks/useProfessorDashboard'
+import { Card, CardKicker } from '@components/ui/card'
 
 interface Props {
   subjectId: string
@@ -22,18 +23,19 @@ function ProfessorDashboard({ subjectId }: Props) {
     <div className="space-y-6">
       <PendingEvaluationsBadge count={data.pendingEvaluationsCount} />
 
-      <div>
-        <h3 className="mb-2 text-sm font-medium">Distribuição de notas da última tarefa</h3>
+      <Card elevation="sm">
+        <CardKicker>Distribuição de notas</CardKicker>
+        <h4 className="mt-0.5">Última tarefa</h4>
         <LastTaskGradeChart grades={data.lastTaskGradeDistribution} />
-      </div>
+      </Card>
 
       <div>
-        <h3 className="mb-2 text-sm font-medium">Alunos sem entrega na última tarefa</h3>
+        <h4 className="mb-2">Alunos sem entrega na última tarefa</h4>
         <StudentsWithoutSubmissionList students={data.studentsWithoutSubmission} />
       </div>
 
       <div>
-        <h3 className="mb-2 text-sm font-medium">Média de notas por aluno</h3>
+        <h4 className="mb-2">Média de notas por aluno</h4>
         <StudentAverageGradesList students={data.averageGradePerStudent} />
       </div>
     </div>

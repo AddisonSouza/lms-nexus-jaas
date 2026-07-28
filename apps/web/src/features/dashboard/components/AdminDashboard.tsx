@@ -7,6 +7,7 @@ import ActivityFeed from './ActivityFeed'
 import { useAdminDashboard } from '../hooks/useAdminDashboard'
 import { exportAdminDashboardPdf } from '../api/dashboard'
 import type { DashboardPeriod } from '../types'
+import { Button } from '@components/ui/button'
 
 interface Props {
   organizationId: string
@@ -40,14 +41,10 @@ function AdminDashboard({ organizationId }: Props) {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <PeriodSelector value={period} onChange={setPeriod} />
-        <button
-          onClick={handleExportPdf}
-          disabled={isExporting || !data}
-          className="flex items-center gap-2 rounded border px-3 py-1.5 text-sm hover:bg-muted disabled:opacity-50"
-        >
+        <Button variant="secondary" onClick={handleExportPdf} disabled={isExporting || !data}>
           {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
           Exportar PDF
-        </button>
+        </Button>
       </div>
 
       {isLoading && <p className="text-sm text-muted-foreground">Carregando dashboard...</p>}
@@ -58,7 +55,7 @@ function AdminDashboard({ organizationId }: Props) {
           <MetricsCards dashboard={data} />
           <DashboardCharts dashboard={data} />
           <div>
-            <h2 className="mb-2 text-sm font-medium">Últimas atividades</h2>
+            <h4 className="mb-2">Últimas atividades</h4>
             <ActivityFeed activity={data.activity} />
           </div>
         </>

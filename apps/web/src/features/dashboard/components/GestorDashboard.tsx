@@ -4,6 +4,7 @@ import ClassroomHealthCards from './ClassroomHealthCards'
 import AtRiskStudentsList from './AtRiskStudentsList'
 import { useGestorDashboard } from '../hooks/useGestorDashboard'
 import { exportGestorDashboardPdf } from '../api/gestor-dashboard'
+import { Button } from '@components/ui/button'
 
 interface Props {
   organizationId: string
@@ -28,14 +29,10 @@ function GestorDashboard({ organizationId }: Props) {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-end gap-4">
-        <button
-          onClick={handleExportPdf}
-          disabled={isExporting || !data}
-          className="flex items-center gap-2 rounded border px-3 py-1.5 text-sm hover:bg-muted disabled:opacity-50"
-        >
+        <Button variant="secondary" onClick={handleExportPdf} disabled={isExporting || !data}>
           {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
           Exportar PDF
-        </button>
+        </Button>
       </div>
 
       {isLoading && <p className="text-sm text-muted-foreground">Carregando dashboard...</p>}
@@ -44,11 +41,11 @@ function GestorDashboard({ organizationId }: Props) {
       {data && (
         <>
           <div>
-            <h2 className="mb-2 text-sm font-medium">Saúde das turmas</h2>
+            <h4 className="mb-2">Saúde das turmas</h4>
             <ClassroomHealthCards classrooms={data.classrooms} />
           </div>
           <div>
-            <h2 className="mb-2 text-sm font-medium">Alunos em risco</h2>
+            <h4 className="mb-2">Alunos em risco</h4>
             <AtRiskStudentsList classrooms={data.classrooms} />
           </div>
         </>
