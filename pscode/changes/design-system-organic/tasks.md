@@ -11,16 +11,16 @@
 
 ## 2. Primitivos de UI
 
-- [ ] 2.1 [FE] Restilizar `components/ui/button.tsx` para pill (`rounded-full`), mantendo variantes/props existentes
-- [ ] 2.2 [FE] Criar `components/ui/card.tsx` (`Card`, `CardKicker`, `CardTitle`, `CardBody`, `CardMeta`, variantes de elevação `sm/md/lg`)
-- [ ] 2.3 [FE] Criar `components/ui/badge.tsx` (variantes accent/accent-2/neutral/outline)
-- [ ] 2.4 [FE] Criar `components/ui/input.tsx` (pill) e `components/ui/textarea.tsx` (radius-md, sem pill, replicando a exceção do protótipo)
-- [ ] 2.5 [FE] Criar `components/ui/table.tsx`
-- [ ] 2.6 [FE] Criar `components/ui/segmented.tsx` (`Segmented`/`SegmentedOption`, usado como filtro em várias telas)
-- [ ] 2.7 [FE] Restilizar `dialog.tsx` e `alert-dialog.tsx` para o visual soft-shadow/cantos grandes do Organic
-- [ ] 2.8 [FE] Restilizar `sheet.tsx` (drawer lateral) para cantos grandes do lado interno e sombra do Organic
-- [ ] 2.9 [FE] Restilizar `popover.tsx` (usado pelo dropdown de notificações)
-- [ ] 2.10 [FE] Testes unitários de render dos novos/restilizados primitivos (Vitest + Testing Library)
+- [x] 2.1 [FE] Restilizar `components/ui/button.tsx` para pill (`rounded-full`), mantendo variantes/props existentes
+- [x] 2.2 [FE] Criar `components/ui/card.tsx` (`Card`, `CardKicker`, `CardTitle`, `CardBody`, `CardMeta`, variantes de elevação `sm/md/lg`)
+- [x] 2.3 [FE] Criar `components/ui/badge.tsx` (variantes accent/accent-2/neutral/outline)
+- [x] 2.4 [FE] Criar `components/ui/input.tsx` (pill) e `components/ui/textarea.tsx` (radius-md, sem pill, replicando a exceção do protótipo)
+- [x] 2.5 [FE] Criar `components/ui/table.tsx`
+- [x] 2.6 [FE] Criar `components/ui/segmented.tsx` (`Segmented`/`SegmentedOption`, usado como filtro em várias telas)
+- [x] 2.7 [FE] Restilizar `dialog.tsx` e `alert-dialog.tsx` para o visual soft-shadow/cantos grandes do Organic
+- [x] 2.8 [FE] Restilizar `sheet.tsx` (drawer lateral) para cantos grandes do lado interno e sombra do Organic
+- [x] 2.9 [FE] Restilizar `popover.tsx` (usado pelo dropdown de notificações)
+- [x] 2.10 [FE] Testes unitários de render dos novos/restilizados primitivos (Vitest + Testing Library)
 
 ## 3. Shell de navegação
 
