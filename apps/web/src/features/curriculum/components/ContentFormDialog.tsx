@@ -11,6 +11,10 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@components/ui/dialog'
+import { Input } from '@components/ui/input'
+import { Textarea } from '@components/ui/textarea'
+import { Button } from '@components/ui/button'
+import { Segmented } from '@components/ui/segmented'
 
 const CONTENT_TYPES: { value: ContentType; label: string }[] = [
   { value: 'VIDEO', label: 'Vídeo' },
@@ -88,8 +92,11 @@ function ContentFormDialog({ open, onClose, onSubmit, isPending, topics, default
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-1">
-            <label className="text-sm font-medium">Tópico *</label>
-            <select {...register('topicId')} className="w-full rounded border px-3 py-2 text-sm">
+            <label className="text-xs text-muted-foreground">Tópico *</label>
+            <select
+              {...register('topicId')}
+              className="h-9 w-full rounded-full border border-border bg-surface px-3.5 text-sm text-foreground outline-none focus-visible:border-accent"
+            >
               {topics.map((t) => (
                 <option key={t.id} value={t.id}>
                   {t.title}
@@ -100,55 +107,31 @@ function ContentFormDialog({ open, onClose, onSubmit, isPending, topics, default
           </div>
 
           <div className="space-y-1">
-            <label className="text-sm font-medium">Título *</label>
-            <input
-              {...register('title')}
-              className="w-full rounded border px-3 py-2 text-sm"
-              placeholder="Ex: Aula 1 — Introdução"
-            />
+            <label className="text-xs text-muted-foreground">Título *</label>
+            <Input {...register('title')} placeholder="Ex: Aula 1 — Introdução" />
             {errors.title && <p className="text-xs text-destructive">{errors.title.message}</p>}
           </div>
 
           <div className="space-y-1">
-            <label className="text-sm font-medium">Tipo *</label>
+            <label className="text-xs text-muted-foreground">Tipo *</label>
             <Controller
               name="contentType"
               control={control}
               render={({ field }) => (
-                <div className="flex flex-wrap gap-2">
-                  {CONTENT_TYPES.map((ct) => (
-                    <button
-                      key={ct.value}
-                      type="button"
-                      onClick={() => field.onChange(ct.value)}
-                      className={`rounded border px-3 py-1.5 text-sm ${
-                        field.value === ct.value
-                          ? 'border-primary bg-primary text-primary-foreground'
-                          : 'hover:bg-muted'
-                      }`}
-                    >
-                      {ct.label}
-                    </button>
-                  ))}
-                </div>
+                <Segmented value={field.value} onValueChange={field.onChange} options={CONTENT_TYPES} />
               )}
             />
           </div>
 
           {isUrlBased ? (
             <div className="space-y-1">
-              <label className="text-sm font-medium">URL *</label>
-              <input
-                {...register('externalUrl')}
-                type="url"
-                className="w-full rounded border px-3 py-2 text-sm"
-                placeholder="https://..."
-              />
+              <label className="text-xs text-muted-foreground">URL *</label>
+              <Input {...register('externalUrl')} type="url" placeholder="https://..." />
               {urlError && <p className="text-xs text-destructive">{urlError.message}</p>}
             </div>
           ) : (
             <div className="space-y-1">
-              <label className="text-sm font-medium">Arquivo *</label>
+              <label className="text-xs text-muted-foreground">Arquivo *</label>
               <Controller
                 name={'file' as never}
                 control={control}
@@ -156,7 +139,7 @@ function ContentFormDialog({ open, onClose, onSubmit, isPending, topics, default
                   <input
                     ref={fileInputRef}
                     type="file"
-                    className="w-full rounded border px-3 py-2 text-sm file:mr-2 file:rounded file:border-0 file:bg-muted file:px-2 file:py-1 file:text-sm"
+                    className="w-full rounded-[var(--radius-md)] border border-border bg-surface px-3 py-2 text-sm file:mr-2 file:rounded-full file:border-0 file:bg-accent-100 file:px-3 file:py-1 file:text-accent-800"
                     onChange={(e) => onChange(e.target.files?.[0])}
                   />
                 )}
@@ -166,27 +149,18 @@ function ContentFormDialog({ open, onClose, onSubmit, isPending, topics, default
           )}
 
           <div className="space-y-1">
-            <label className="text-sm font-medium">Descrição</label>
-            <textarea
-              {...register('description')}
-              rows={2}
-              className="w-full rounded border px-3 py-2 text-sm"
-              placeholder="Descrição opcional"
-            />
+            <label className="text-xs text-muted-foreground">Descrição</label>
+            <Textarea {...register('description')} rows={2} placeholder="Descrição opcional" />
           </div>
 
           <DialogFooter>
-            <button type="button" onClick={onClose} className="rounded border px-4 py-2 text-sm">
+            <Button type="button" variant="secondary" onClick={onClose}>
               Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={isPending}
-              className="flex items-center gap-2 rounded bg-primary px-4 py-2 text-sm text-primary-foreground disabled:opacity-50"
-            >
+            </Button>
+            <Button type="submit" disabled={isPending}>
               {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
               Salvar
-            </button>
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

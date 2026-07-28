@@ -1,5 +1,6 @@
 import { Pencil, Trash2, Paperclip, Link as LinkIcon } from 'lucide-react'
 import type { Announcement } from '../types'
+import { Card } from '@components/ui/card'
 
 interface Props {
   announcement: Announcement
@@ -10,7 +11,7 @@ interface Props {
 
 function AnnouncementCard({ announcement, canManage, onEdit, onDelete }: Props) {
   return (
-    <div className="rounded-lg border p-4 space-y-2">
+    <Card elevation="sm">
       <div className="flex items-start justify-between gap-2">
         <p className="whitespace-pre-wrap text-sm">{announcement.content}</p>
         {canManage && (
@@ -50,7 +51,7 @@ function AnnouncementCard({ announcement, canManage, onEdit, onDelete }: Props) 
       <p className="text-xs text-muted-foreground">
         {new Date(announcement.createdAt).toLocaleString('pt-BR')}
       </p>
-    </div>
+    </Card>
   )
 }
 

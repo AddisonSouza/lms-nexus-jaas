@@ -9,6 +9,8 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@components/ui/dialog'
+import { Input } from '@components/ui/input'
+import { Button } from '@components/ui/button'
 
 interface Props {
   open: boolean
@@ -33,18 +35,17 @@ function AddMemberDialog({ open, onClose, onSubmit, isPending }: Props) {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-1">
-            <label className="text-sm font-medium">ID do usuário *</label>
-            <input
-              {...register('userId')}
-              className="w-full rounded border px-3 py-2 text-sm"
-              placeholder="UUID do membro"
-            />
+            <label className="text-xs text-muted-foreground">ID do usuário *</label>
+            <Input {...register('userId')} placeholder="UUID do membro" />
             {errors.userId && <p className="text-xs text-destructive">{errors.userId.message}</p>}
           </div>
 
           <div className="space-y-1">
-            <label className="text-sm font-medium">Papel *</label>
-            <select {...register('role')} className="w-full rounded border px-3 py-2 text-sm">
+            <label className="text-xs text-muted-foreground">Papel *</label>
+            <select
+              {...register('role')}
+              className="h-9 w-full rounded-full border border-border bg-surface px-3.5 text-sm text-foreground outline-none focus-visible:border-accent"
+            >
               <option value="">Selecione...</option>
               <option value="PROFESSOR">Professor</option>
               <option value="ALUNO">Aluno</option>
@@ -53,17 +54,13 @@ function AddMemberDialog({ open, onClose, onSubmit, isPending }: Props) {
           </div>
 
           <DialogFooter>
-            <button type="button" onClick={handleClose} className="rounded border px-4 py-2 text-sm">
+            <Button type="button" variant="secondary" onClick={handleClose}>
               Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={isPending}
-              className="flex items-center gap-2 rounded bg-primary px-4 py-2 text-sm text-primary-foreground disabled:opacity-50"
-            >
+            </Button>
+            <Button type="submit" disabled={isPending}>
               {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
               Adicionar
-            </button>
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

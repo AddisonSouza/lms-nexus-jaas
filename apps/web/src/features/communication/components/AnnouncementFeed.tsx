@@ -8,6 +8,7 @@ import AnnouncementForm from './AnnouncementForm'
 import ConfirmDialog from '@components/shared/ConfirmDialog'
 import type { Announcement } from '../types'
 import type { AnnouncementFormData } from '../schemas/announcementSchema'
+import { Button } from '@components/ui/button'
 
 interface Props {
   classroomId: string
@@ -45,12 +46,9 @@ function AnnouncementFeed({ classroomId }: Props) {
     <div className="space-y-4">
       {canPost && (
         <div className="flex justify-end">
-          <button
-            onClick={() => setShowForm(true)}
-            className="flex items-center gap-1 rounded bg-primary px-3 py-1.5 text-sm text-primary-foreground hover:opacity-90"
-          >
+          <Button onClick={() => setShowForm(true)}>
             <Plus className="h-4 w-4" /> Novo Aviso
-          </button>
+          </Button>
         </div>
       )}
 

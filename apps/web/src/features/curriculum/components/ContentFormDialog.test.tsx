@@ -56,7 +56,7 @@ describe('ContentFormDialog', () => {
         title="Novo Conteúdo"
       />,
     )
-    await userEvent.click(screen.getByRole('button', { name: /documento/i }))
+    await userEvent.click(screen.getByRole('radio', { name: /documento/i }))
     await waitFor(() => {
       expect(screen.queryByPlaceholderText(/https/i)).toBeNull()
       expect(document.querySelector('input[type="file"]')).toBeTruthy()

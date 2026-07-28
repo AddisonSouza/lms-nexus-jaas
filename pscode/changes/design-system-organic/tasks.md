@@ -48,13 +48,13 @@
 
 ## 6. Turmas e disciplinas
 
-- [ ] 6.1 [FE] Reskin `ClassroomListPage.tsx` (tabela + ações "Nova turma"/"Entrar via código")
-- [ ] 6.2 [FE] Reskin `JoinClassroomForm.tsx`
-- [ ] 6.3 [FE] Reskin `ClassroomDetailPage.tsx` + `AnnouncementFeed`/`AnnouncementCard`/`AnnouncementForm` (mural)
-- [ ] 6.4 [FE] Reskin `ClassroomMembersPanel.tsx`/`AddMemberDialog.tsx`
-- [ ] 6.5 [FE] Reskin `ClassroomFormDialog.tsx`
-- [ ] 6.6 [FE] Reskin `SubjectDetailPage.tsx` + `TopicList.tsx`/`ContentCard.tsx` (acordeão de tópicos com ícone por tipo de conteúdo)
-- [ ] 6.7 [FE] Reskin `SubjectFormDialog.tsx`/`TopicFormDialog.tsx`/`ContentFormDialog.tsx`/`AssignTeacherDialog.tsx`/`LinkClassroomDialog.tsx`
+- [x] 6.1 [FE] Reskin `ClassroomListPage.tsx` (tabela + ações "Nova turma"/"Entrar via código")
+- [x] 6.2 [FE] Reskin `JoinClassroomForm.tsx`
+- [x] 6.3 [FE] Reskin `ClassroomDetailPage.tsx` + `AnnouncementFeed`/`AnnouncementCard`/`AnnouncementForm` (mural)
+- [x] 6.4 [FE] Reskin `ClassroomMembersPanel.tsx`/`AddMemberDialog.tsx`
+- [x] 6.5 [FE] Reskin `ClassroomFormDialog.tsx`
+- [x] 6.6 [FE] Reskin `SubjectDetailPage.tsx`/`SubjectListPage.tsx` + `TopicList.tsx`/`ContentCard.tsx` (acordeão de tópicos com ícone por tipo de conteúdo)
+- [x] 6.7 [FE] Reskin `SubjectFormDialog.tsx`/`TopicFormDialog.tsx`/`ContentFormDialog.tsx` (toggle de tipo vira `Segmented`)/`AssignTeacherDialog.tsx`/`LinkClassroomDialog.tsx`
 
 ## 7. Tarefas e avaliação
 

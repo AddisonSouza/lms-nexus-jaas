@@ -23,6 +23,7 @@ import {
   DialogTitle,
 } from '@components/ui/dialog'
 import ConfirmDialog from '@components/shared/ConfirmDialog'
+import { Button } from '@components/ui/button'
 
 interface SubjectDetailPageProps {
   dashboardSlot?: ReactNode
@@ -102,33 +103,30 @@ function SubjectDetailPage({ dashboardSlot }: SubjectDetailPageProps) {
   }
 
   return (
-    <div className="container mx-auto max-w-4xl p-6 space-y-6">
+    <div className="mx-auto max-w-4xl space-y-6">
       <div className="flex items-center gap-3">
         <Link to="/curriculum" className="text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div className="flex items-center gap-2">
-          <BookOpenCheck className="h-5 w-5" />
-          <h1 className="text-xl font-semibold">Conteúdo da Disciplina</h1>
+          <BookOpenCheck className="h-5 w-5 text-accent" />
+          <h2 className="mb-0">Conteúdo da Disciplina</h2>
         </div>
       </div>
 
       {dashboardSlot && (
         <div>
-          <h2 className="mb-2 text-base font-medium text-muted-foreground">Dashboard da Disciplina</h2>
+          <h4 className="mb-2 text-muted-foreground">Dashboard da Disciplina</h4>
           {dashboardSlot}
         </div>
       )}
 
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-medium text-muted-foreground">Tópicos e Materiais</h2>
+        <h4 className="mb-0 text-muted-foreground">Tópicos e Materiais</h4>
         {canManage && (
-          <button
-            onClick={() => setShowCreateTopic(true)}
-            className="flex items-center gap-2 rounded bg-primary px-4 py-2 text-sm text-primary-foreground"
-          >
+          <Button onClick={() => setShowCreateTopic(true)}>
             <Plus className="h-4 w-4" /> Novo Tópico
-          </button>
+          </Button>
         )}
       </div>
 
@@ -201,9 +199,9 @@ function SubjectDetailPage({ dashboardSlot }: SubjectDetailPageProps) {
             Edição de conteúdo não disponível para arquivos. Exclua e recrie.
           </p>
           <div className="flex justify-end">
-            <button onClick={() => setEditContent(null)} className="rounded border px-4 py-2 text-sm">
+            <Button variant="secondary" onClick={() => setEditContent(null)}>
               Fechar
-            </button>
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
