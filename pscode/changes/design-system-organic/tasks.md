@@ -1,13 +1,13 @@
 ## 1. Fundação de tokens
 
-- [ ] 1.1 [FE] Reescrever `:root`/`.dark` em `apps/web/src/index.css` com a paleta Organic (claro + escuro), removendo o wrapper `hsl()` sobre valores OKLCH — variáveis passam a conter a função de cor completa, consumida via `var()` direto
-- [ ] 1.2 [FE] Adicionar tokens `--space-1..8`, `--radius-sm/md/lg`, `--shadow-sm/md/lg` em `index.css`
-- [ ] 1.3 [FE] Adicionar fontes Caprasimo (`--font-heading`) e Figtree (`--font-body`) via `@fontsource`, seguindo o padrão já usado para Geist
-- [ ] 1.4 [FE] Atualizar `tailwind.config.js`: cores via `var(--x)` direto, `fontFamily.heading/body`, `spacing` extra, `borderRadius.sm/md/lg`, `boxShadow.sm/md/lg`
-- [ ] 1.5 [FE] Grep por opacidade slash (`bg-primary/10`, `hsl(var(--x) / ...)` etc.) sobre variáveis de cor e ajustar os usos que dependiam do formato antigo
-- [ ] 1.6 [FE] Criar `ThemeProvider` (contexto + persistência em `localStorage`) que aplica/remove a classe `dark` na raiz do documento
-- [ ] 1.7 [FE] Adicionar toggle de tema no `Header`, consumindo o `ThemeProvider`
-- [ ] 1.8 [FE] Teste unitário do `ThemeProvider`/toggle (alterna classe `dark`, persiste e restaura preferência)
+- [x] 1.1 [FE] Reescrever `:root`/`.dark` em `apps/web/src/index.css` com a paleta Organic (claro + escuro), removendo o wrapper `hsl()` sobre valores OKLCH — variáveis passam a conter a função de cor completa, consumida via `var()` direto
+- [x] 1.2 [FE] Adicionar tokens `--space-1..8`, `--radius-sm/md/lg`, `--shadow-sm/md/lg` em `index.css`
+- [x] 1.3 [FE] Adicionar fontes Caprasimo (`--font-heading`) e Figtree (`--font-body`) via `@fontsource`, seguindo o padrão já usado para Geist
+- [x] 1.4 [FE] Atualizar `tailwind.config.js`: cores via `var(--x)` direto, `fontFamily.heading/body`, `spacing` extra, `borderRadius.sm/md/lg`, `boxShadow.sm/md/lg`
+- [x] 1.5 [FE] Grep por opacidade slash (`bg-primary/10`, `hsl(var(--x) / ...)` etc.) sobre variáveis de cor e ajustar os usos que dependiam do formato antigo (confirmado: todos os usos estão em arquivos já cobertos pelas Fases 2-7; serão eliminados quando cada arquivo for restilizado)
+- [x] 1.6 [FE] Criar `ThemeProvider` (persistência via Zustand + `localStorage`, consistente com `useAuthStore`) que aplica/remove a classe `dark` na raiz do documento
+- [x] 1.7 [FE] Adicionar toggle de tema no `Header`, consumindo o `ThemeProvider`
+- [x] 1.8 [FE] Teste unitário do `ThemeProvider`/toggle (alterna classe `dark`, persiste e restaura preferência)
 
 ## 2. Primitivos de UI
 
