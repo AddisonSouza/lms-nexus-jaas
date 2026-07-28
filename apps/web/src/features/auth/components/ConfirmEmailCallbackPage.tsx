@@ -4,20 +4,31 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { CheckCircle, Loader2, Mail, XCircle } from 'lucide-react'
 import { confirmEmail } from '../api/auth-api'
 import ResendConfirmationForm from './ResendConfirmationForm'
+import { Card } from '@components/ui/card'
+
+function StatusCard({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background">
+      <Card elevation="md" className="w-full max-w-md items-center p-8 text-center">
+        {children}
+      </Card>
+    </div>
+  )
+}
 
 function StaticPendingPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="w-full max-w-md rounded-lg border p-8 shadow-sm text-center">
-        <Mail className="mx-auto mb-4 h-12 w-12 text-primary" />
-        <h1 className="text-2xl font-semibold mb-2">Confirme seu e-mail</h1>
-        <p className="text-sm text-muted-foreground">
-          Enviamos um link de confirmação para o seu e-mail. Verifique sua caixa de entrada e clique
-          no link para ativar sua conta.
-        </p>
-        <p className="mt-4 text-xs text-muted-foreground">O link expira em 24 horas.</p>
+    <StatusCard>
+      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent-100 text-accent-800">
+        <Mail className="h-6 w-6" />
       </div>
-    </div>
+      <h2 className="font-heading text-2xl">Confirme seu e-mail</h2>
+      <p className="text-sm text-muted-foreground">
+        Enviamos um link de confirmação para o seu e-mail. Verifique sua caixa de entrada e clique
+        no link para ativar sua conta.
+      </p>
+      <p className="text-xs text-muted-foreground">O link expira em 24 horas.</p>
+    </StatusCard>
   )
 }
 
@@ -50,26 +61,24 @@ function ConfirmEmailCallbackPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="w-full max-w-md rounded-lg border p-8 shadow-sm text-center">
-          <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Confirmando seu e-mail...</p>
-        </div>
-      </div>
+      <StatusCard>
+        <Loader2 className="h-10 w-10 animate-spin text-accent" />
+        <p className="text-sm text-muted-foreground">Confirmando seu e-mail...</p>
+      </StatusCard>
     )
   }
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="w-full max-w-md rounded-lg border p-8 shadow-sm text-center">
-          <CheckCircle className="mx-auto mb-4 h-12 w-12 text-primary" />
-          <h1 className="text-2xl font-semibold mb-2">E-mail confirmado!</h1>
-          <p className="text-sm text-muted-foreground">
-            Sua conta está ativa. Redirecionando para o login...
-          </p>
+      <StatusCard>
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent-2-100 text-accent-2-800">
+          <CheckCircle className="h-6 w-6" />
         </div>
-      </div>
+        <h2 className="font-heading text-2xl">E-mail confirmado!</h2>
+        <p className="text-sm text-muted-foreground">
+          Sua conta está ativa. Redirecionando para o login...
+        </p>
+      </StatusCard>
     )
   }
 
@@ -78,20 +87,20 @@ function ConfirmEmailCallbackPage() {
     const isAlreadyConfirmed = status === 409
 
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="w-full max-w-md rounded-lg border p-8 shadow-sm text-center">
-          <XCircle className="mx-auto mb-4 h-12 w-12 text-destructive" />
-          <h1 className="text-2xl font-semibold mb-2">
-            {isAlreadyConfirmed ? 'E-mail já confirmado' : 'Link inválido ou expirado'}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {isAlreadyConfirmed
-              ? 'Sua conta já está ativa. Acesse o login.'
-              : 'O link de confirmação é inválido ou expirou.'}
-          </p>
-          {!isAlreadyConfirmed && <ResendConfirmationForm />}
+      <StatusCard>
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent-100 text-accent-800">
+          <XCircle className="h-6 w-6" />
         </div>
-      </div>
+        <h2 className="font-heading text-2xl">
+          {isAlreadyConfirmed ? 'E-mail já confirmado' : 'Link inválido ou expirado'}
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          {isAlreadyConfirmed
+            ? 'Sua conta já está ativa. Acesse o login.'
+            : 'O link de confirmação é inválido ou expirou.'}
+        </p>
+        {!isAlreadyConfirmed && <ResendConfirmationForm />}
+      </StatusCard>
     )
   }
 
