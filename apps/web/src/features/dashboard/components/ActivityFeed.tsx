@@ -1,5 +1,6 @@
 import { Archive, BookOpen, CheckCircle, ClipboardList, UserPlus } from 'lucide-react'
 import type { ActivityItem, ActivityType } from '../types'
+import { Card } from '@components/ui/card'
 
 interface Props {
   activity: ActivityItem[]
@@ -19,20 +20,22 @@ function ActivityFeed({ activity }: Props) {
   }
 
   return (
-    <ul className="space-y-2">
+    <Card elevation="sm" className="gap-3">
       {activity.map((item, index) => {
         const Icon = ICONS[item.type]
         return (
-          <li key={`${item.type}-${item.referenceId}-${index}`} className="flex items-start gap-2 border-b pb-2 text-sm">
-            <Icon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+          <div key={`${item.type}-${item.referenceId}-${index}`} className="flex items-start gap-2.5 text-sm">
+            <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent-2-100 text-accent-2-800">
+              <Icon className="h-3.5 w-3.5" />
+            </div>
             <div>
               <p>{item.description}</p>
               <p className="text-xs text-muted-foreground">{new Date(item.occurredAt).toLocaleString('pt-BR')}</p>
             </div>
-          </li>
+          </div>
         )
       })}
-    </ul>
+    </Card>
   )
 }
 

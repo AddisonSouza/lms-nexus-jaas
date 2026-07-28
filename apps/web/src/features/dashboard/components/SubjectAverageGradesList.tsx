@@ -1,4 +1,5 @@
 import type { SubjectAverageGrade } from '../types'
+import { Card } from '@components/ui/card'
 
 interface Props {
   subjects: SubjectAverageGrade[]
@@ -10,14 +11,16 @@ function SubjectAverageGradesList({ subjects }: Props) {
   }
 
   return (
-    <ul className="space-y-1">
-      {subjects.map((subject) => (
-        <li key={subject.subjectId} className="flex items-center justify-between border-b pb-1 text-sm">
-          <span>{subject.subjectName}</span>
-          <span className="text-muted-foreground">{subject.averageGrade}</span>
-        </li>
-      ))}
-    </ul>
+    <Card elevation="sm" className="gap-1 p-2">
+      <ul className="flex flex-col gap-0.5">
+        {subjects.map((subject) => (
+          <li key={subject.subjectId} className="flex items-center justify-between rounded-full px-3 py-1.5 text-sm">
+            <span>{subject.subjectName}</span>
+            <span className="text-muted-foreground">{subject.averageGrade}</span>
+          </li>
+        ))}
+      </ul>
+    </Card>
   )
 }
 

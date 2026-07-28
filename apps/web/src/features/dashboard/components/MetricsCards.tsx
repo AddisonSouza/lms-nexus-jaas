@@ -1,4 +1,5 @@
 import type { AdminDashboardData } from '../types'
+import { Card, CardKicker } from '@components/ui/card'
 
 interface Props {
   dashboard: AdminDashboardData
@@ -15,34 +16,37 @@ function MetricsCards({ dashboard }: Props) {
   const deliveryRatePercent = Math.round(dashboard.averageDeliveryRate * 100)
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-      <div className="rounded-lg border p-4">
-        <p className="text-xs text-muted-foreground">Turmas ativas / arquivadas</p>
-        <p className="text-2xl font-semibold">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <Card elevation="sm">
+        <CardKicker>Turmas ativas / arquivadas</CardKicker>
+        <p className="font-heading text-3xl leading-none">
           {activeClassrooms} / {archivedClassrooms}
         </p>
-      </div>
+      </Card>
 
-      <div className="rounded-lg border p-4">
-        <p className="text-xs text-muted-foreground">Membros ({totalMembers})</p>
+      <Card elevation="sm">
+        <CardKicker>Membros ({totalMembers})</CardKicker>
         <p className="text-sm">
           {Object.entries(dashboard.membersByRole)
             .map(([role, count]) => `${role}: ${count}`)
             .join(' · ') || 'Sem membros no período'}
         </p>
-      </div>
+      </Card>
 
-      <div className="rounded-lg border p-4">
-        <p className="text-xs text-muted-foreground">Tarefas criadas / avaliadas</p>
-        <p className="text-2xl font-semibold">
+      <Card elevation="sm">
+        <CardKicker>Tarefas criadas / avaliadas</CardKicker>
+        <p className="font-heading text-3xl leading-none">
           {dashboard.tasksCreated} / {dashboard.tasksEvaluated}
         </p>
-      </div>
+      </Card>
 
-      <div className="rounded-lg border p-4" title="Média das taxas de entrega (submissões / alunos elegíveis) por tarefa criada no período">
-        <p className="text-xs text-muted-foreground">Taxa média de entrega</p>
-        <p className="text-2xl font-semibold">{deliveryRatePercent}%</p>
-      </div>
+      <Card
+        elevation="sm"
+        title="Média das taxas de entrega (submissões / alunos elegíveis) por tarefa criada no período"
+      >
+        <CardKicker>Taxa média de entrega</CardKicker>
+        <p className="font-heading text-3xl leading-none">{deliveryRatePercent}%</p>
+      </Card>
     </div>
   )
 }

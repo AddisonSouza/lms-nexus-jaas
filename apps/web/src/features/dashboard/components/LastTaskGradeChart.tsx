@@ -25,11 +25,11 @@ function LastTaskGradeChart({ grades }: Props) {
   return (
     <ResponsiveContainer width="100%" height={220}>
       <BarChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="label" fontSize={12} />
-        <YAxis allowDecimals={false} fontSize={12} />
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--color-divider)" />
+        <XAxis dataKey="label" fontSize={12} stroke="var(--color-text)" />
+        <YAxis allowDecimals={false} fontSize={12} stroke="var(--color-text)" />
         <Tooltip />
-        <Bar dataKey="count" fill="#2563eb" />
+        <Bar dataKey="count" fill="var(--color-accent)" radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   )

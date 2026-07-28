@@ -1,4 +1,5 @@
 import { ClipboardList } from 'lucide-react'
+import { Card, CardKicker } from '@components/ui/card'
 
 interface Props {
   count: number
@@ -6,13 +7,15 @@ interface Props {
 
 function PendingEvaluationsBadge({ count }: Props) {
   return (
-    <div className="flex items-center gap-3 rounded-lg border p-4">
-      <ClipboardList className="h-5 w-5 text-muted-foreground" />
-      <div>
-        <p className="text-xs text-muted-foreground">Submissões pendentes de avaliação</p>
-        <p className="text-lg font-semibold">{count}</p>
+    <Card elevation="sm" className="w-fit flex-row items-center gap-3">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground">
+        <ClipboardList className="h-5 w-5" />
       </div>
-    </div>
+      <div>
+        <CardKicker>Submissões pendentes de avaliação</CardKicker>
+        <div className="font-heading text-3xl leading-none">{count}</div>
+      </div>
+    </Card>
   )
 }
 
