@@ -1,8 +1,9 @@
-import { CheckCheck } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useNotifications } from '../hooks/useNotifications'
 import { useMarkNotificationRead, useMarkAllNotificationsRead } from '../hooks/useNotificationMutations'
 import type { Notification } from '../types'
+import { Button } from '@components/ui/button'
+import { CardKicker } from '@components/ui/card'
 
 interface Props {
   onClose: () => void
@@ -30,45 +31,48 @@ function NotificationPanel({ onClose }: Props) {
   }
 
   return (
-    <div className="flex max-h-96 flex-col">
-      <div className="flex items-center justify-between border-b px-3 py-2">
-        <span className="text-sm font-semibold">Notificações</span>
+    <div className="flex max-h-96 flex-col gap-[var(--space-2)] p-[var(--space-2)]">
+      <div className="flex items-center justify-between px-2 pt-1">
+        <CardKicker>Notificações</CardKicker>
         {unreadCount > 0 && (
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={handleMarkAllRead}
             disabled={markAllRead.isPending}
-            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground disabled:opacity-50"
+            className="text-xs"
           >
-            <CheckCheck className="h-3.5 w-3.5" />
             Marcar todas como lidas
-          </button>
+          </Button>
         )}
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {isLoading && <p className="px-3 py-4 text-sm text-muted-foreground">Carregando notificações...</p>}
+        {isLoading && <p className="px-2 py-4 text-sm text-muted-foreground">Carregando notificações...</p>}
 
         {!isLoading && notifications.length === 0 && (
-          <p className="px-3 py-4 text-sm text-muted-foreground">Nenhuma notificação.</p>
+          <p className="px-2 py-4 text-sm text-muted-foreground">Nenhuma notificação.</p>
         )}
 
-        <ul>
+        <ul className="flex flex-col gap-0.5">
           {notifications.map((notification) => (
             <li key={notification.id}>
               <button
                 onClick={() => handleSelect(notification)}
-                className="flex w-full flex-col gap-0.5 border-b px-3 py-2 text-left hover:bg-muted"
+                className="flex w-full gap-2.5 rounded-[var(--radius-md)] px-2 py-2 text-left hover:bg-muted"
               >
-                <div className="flex items-center gap-1.5">
-                  {!notification.read && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />}
-                  <span className={notification.read ? 'text-sm' : 'text-sm font-semibold'}>
+                <span
+                  className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${notification.read ? 'bg-transparent' : 'bg-accent'}`}
+                />
+                <span className="flex-1">
+                  <span className={notification.read ? 'block text-sm' : 'block text-sm font-semibold'}>
                     {notification.title}
                   </span>
-                </div>
-                <p className="text-xs text-muted-foreground">{notification.message}</p>
-                <p className="text-[11px] text-muted-foreground">
-                  {new Date(notification.createdAt).toLocaleString('pt-BR')}
-                </p>
+                  <span className="block text-xs text-muted-foreground">{notification.message}</span>
+                  <span className="mt-0.5 block text-[11px] text-muted-foreground">
+                    {new Date(notification.createdAt).toLocaleString('pt-BR')}
+                  </span>
+                </span>
               </button>
             </li>
           ))}

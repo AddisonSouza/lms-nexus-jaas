@@ -1,52 +1,56 @@
 import { NavLink } from 'react-router-dom'
 import { BookOpen, BookOpenCheck, ClipboardList, LayoutDashboard } from 'lucide-react'
 import { useAuthStore } from '@store/authStore'
+import { CardKicker } from '@components/ui/card'
+import { cn } from '@features/lib/utils'
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
-  `flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors ${
-    isActive ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-  }`
+  cn(
+    'flex items-center gap-2.5 rounded-full px-3 py-2 text-sm font-medium transition-colors',
+    isActive ? 'bg-accent text-accent-foreground' : 'text-foreground hover:bg-muted',
+  )
 
 function Sidebar() {
   const role = useAuthStore((s) => s.role)
   const organizationId = useAuthStore((s) => s.organizationId)
 
   return (
-    <aside className="w-56 shrink-0 border-r bg-background">
-      <nav className="flex flex-col gap-1 p-3">
+    <aside className="w-56 shrink-0 p-4">
+      <nav className="flex flex-col gap-1">
+        <CardKicker className="px-3 pb-1">Ensino</CardKicker>
+
         {organizationId && (
           <NavLink to={`/organizations/${organizationId}`} className={linkClass} end>
-            <LayoutDashboard className="h-4 w-4" />
+            <LayoutDashboard className="h-[19px] w-[19px] shrink-0" />
             Painel
           </NavLink>
         )}
 
         <NavLink to="/classrooms" className={linkClass}>
-          <BookOpen className="h-4 w-4" />
+          <BookOpen className="h-[19px] w-[19px] shrink-0" />
           Turmas
         </NavLink>
 
         {(role === 'PROFESSOR' || role === 'ADMIN_ORG' || role === 'GESTOR') && (
           <NavLink to="/curriculum" className={linkClass}>
-            <BookOpenCheck className="h-4 w-4" />
+            <BookOpenCheck className="h-[19px] w-[19px] shrink-0" />
             Disciplinas
           </NavLink>
         )}
 
         {role === 'PROFESSOR' && (
           <NavLink to="/assessment/tasks" className={linkClass}>
-            <ClipboardList className="h-4 w-4" />
+            <ClipboardList className="h-[19px] w-[19px] shrink-0" />
             Tarefas
           </NavLink>
         )}
 
         {role === 'ALUNO' && (
           <NavLink to="/assessment/student-tasks" className={linkClass}>
-            <ClipboardList className="h-4 w-4" />
+            <ClipboardList className="h-[19px] w-[19px] shrink-0" />
             Minhas Tarefas
           </NavLink>
         )}
-
       </nav>
     </aside>
   )

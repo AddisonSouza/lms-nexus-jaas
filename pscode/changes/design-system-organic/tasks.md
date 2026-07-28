@@ -24,10 +24,10 @@
 
 ## 3. Shell de navegação
 
-- [ ] 3.1 [FE] Reskin `Sidebar.tsx`: agrupar nav em seções por papel (ex.: "Ensino"/"Convivência"), pill no item ativo, ícones Lucide equivalentes aos do protótipo
-- [ ] 3.2 [FE] Reskin `Header.tsx`: breadcrumb + título de página + sino de notificação + toggle de tema + logout
-- [ ] 3.3 [FE] Reskin `AppShell.tsx`: painel principal com cantos arredondados grandes sobre `--color-surface`
-- [ ] 3.4 [FE] Restilizar `NotificationBell.tsx`/`NotificationPanel.tsx` para o popover no novo visual
+- [x] 3.1 [FE] Reskin `Sidebar.tsx`: kicker "Ensino" acima do nav, pill no item ativo, ícones Lucide maiores (sem inventar seção "Convivência" — não existe item de nav equivalente hoje; sem org-switcher — JWT só tem uma organizationId)
+- [x] 3.2 [FE] Reskin `Header.tsx`: mantido como barra global (marca + notificações + tema + logout); breadcrumb/título dinâmico por rota não implementado — exigiria mecanismo novo de estado cross-page, fora do escopo de reskin visual. Títulos de página já herdam `font-heading` globalmente via `index.css`
+- [x] 3.3 [FE] Reskin `AppShell.tsx`: painel principal com cantos arredondados grandes sobre `--color-surface`
+- [x] 3.4 [FE] Restilizar `NotificationBell.tsx`/`NotificationPanel.tsx` para o popover no novo visual
 
 ## 4. Autenticação e organização
 
