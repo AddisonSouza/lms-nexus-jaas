@@ -31,12 +31,12 @@
 
 ## 4. Autenticação e organização
 
-- [ ] 4.1 [FE] Reskin `LoginPage.tsx`/`LoginForm.tsx` (layout split-screen do protótipo)
-- [ ] 4.2 [FE] Reskin `RegisterPage.tsx`/`RegisterForm.tsx`
-- [ ] 4.3 [FE] Reskin `ForgotPasswordPage.tsx` e `ResetPasswordPage.tsx`
-- [ ] 4.4 [FE] Reskin `EmailConfirmationPage.tsx`/`ConfirmEmailCallbackPage.tsx`/`ResendConfirmationForm.tsx`
-- [ ] 4.5 [FE] Reskin `AcceptInvitePage.tsx` (cartão de convite do protótipo)
-- [ ] 4.6 [FE] Reskin `CreateOrganizationPage.tsx`/`CreateOrganizationForm.tsx`
+- [x] 4.1 [FE] Reskin `LoginPage.tsx`/`LoginForm.tsx` (layout split-screen do protótipo) — novo `components/layout/AuthLayout.tsx` compartilhado; validado visualmente via Playwright
+- [x] 4.2 [FE] Reskin `RegisterPage.tsx`/`RegisterForm.tsx` (mesmo `AuthLayout`); validado visualmente via Playwright
+- [x] 4.3 [FE] Reskin `ForgotPasswordPage.tsx` e `ResetPasswordPage.tsx`
+- [x] 4.4 [FE] Reskin `EmailConfirmationPage.tsx`/`ConfirmEmailCallbackPage.tsx`/`ResendConfirmationForm.tsx`
+- [x] 4.5 [FE] Reskin `AcceptInvitePage.tsx` (cartão de convite do protótipo)
+- [x] 4.6 [FE] Reskin `CreateOrganizationPage.tsx`/`CreateOrganizationForm.tsx`
 
 ## 5. Dashboards por papel
 

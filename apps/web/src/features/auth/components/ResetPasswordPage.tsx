@@ -4,6 +4,9 @@ import { Loader2 } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import { resetPasswordSchema, type ResetPasswordFormData } from '../schemas/resetPasswordSchema'
 import { useResetPassword } from '../hooks/useResetPassword'
+import AuthLayout from '@components/layout/AuthLayout'
+import { Input } from '@components/ui/input'
+import { Button } from '@components/ui/button'
 
 function ResetPasswordPage() {
   const [searchParams] = useSearchParams()
@@ -31,62 +34,39 @@ function ResetPasswordPage() {
 
   if (!token) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="w-full max-w-sm rounded-lg border p-6 shadow-sm text-center">
-          <p className="text-sm text-destructive">Link de redefinição inválido.</p>
-        </div>
-      </div>
+      <AuthLayout>
+        <p className="text-center text-sm text-destructive">Link de redefinição inválido.</p>
+      </AuthLayout>
     )
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="w-full max-w-sm space-y-4 rounded-lg border p-6 shadow-sm"
-      >
-        <h1 className="text-2xl font-semibold">Redefinir senha</h1>
+    <AuthLayout>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <h2 className="font-heading text-2xl">Redefinir senha</h2>
 
-        {errorMessage && (
-          <p className="text-sm text-destructive">{errorMessage}</p>
-        )}
+        {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
 
         <div className="space-y-1">
-          <label className="text-sm font-medium">Nova senha</label>
-          <input
-            {...register('newPassword')}
-            type="password"
-            autoComplete="new-password"
-            className="w-full rounded border px-3 py-2 text-sm"
-          />
-          {errors.newPassword && (
-            <p className="text-xs text-destructive">{errors.newPassword.message}</p>
-          )}
+          <label htmlFor="newPassword" className="text-xs text-muted-foreground">Nova senha</label>
+          <Input {...register('newPassword')} id="newPassword" type="password" autoComplete="new-password" />
+          {errors.newPassword && <p className="text-xs text-destructive">{errors.newPassword.message}</p>}
         </div>
 
         <div className="space-y-1">
-          <label className="text-sm font-medium">Confirmar nova senha</label>
-          <input
-            {...register('confirmPassword')}
-            type="password"
-            autoComplete="new-password"
-            className="w-full rounded border px-3 py-2 text-sm"
-          />
+          <label htmlFor="confirmPassword" className="text-xs text-muted-foreground">Confirmar nova senha</label>
+          <Input {...register('confirmPassword')} id="confirmPassword" type="password" autoComplete="new-password" />
           {errors.confirmPassword && (
             <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>
           )}
         </div>
 
-        <button
-          type="submit"
-          disabled={isPending}
-          className="flex w-full items-center justify-center gap-2 rounded bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
-        >
+        <Button type="submit" disabled={isPending} className="w-full">
           {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
           Redefinir senha
-        </button>
+        </Button>
       </form>
-    </div>
+    </AuthLayout>
   )
 }
 
