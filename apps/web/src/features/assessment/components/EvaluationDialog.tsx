@@ -11,6 +11,10 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@components/ui/dialog'
+import { Input } from '@components/ui/input'
+import { Textarea } from '@components/ui/textarea'
+import { Button } from '@components/ui/button'
+import { CardKicker } from '@components/ui/card'
 
 interface Props {
   open: boolean
@@ -51,18 +55,18 @@ function EvaluationDialog({ open, submission, task, onClose, onSubmit, isPending
         {submission && (
           <>
             {submission.textResponse && (
-              <div className="rounded border bg-muted/40 p-3 text-sm">
-                <p className="mb-1 font-medium text-muted-foreground">Resposta do aluno:</p>
-                <p className="whitespace-pre-wrap">{submission.textResponse}</p>
+              <div className="rounded-[var(--radius-md)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] p-3 text-sm max-h-[150px] overflow-auto">
+                <CardKicker>Resposta do aluno</CardKicker>
+                <p className="mt-1 whitespace-pre-wrap">{submission.textResponse}</p>
               </div>
             )}
 
             {submission.attachments.length > 0 && (
               <div>
-                <p className="mb-1 text-xs font-medium text-muted-foreground">Anexos:</p>
-                <ul className="space-y-1">
+                <CardKicker>Anexos</CardKicker>
+                <ul className="mt-1 space-y-1">
                   {submission.attachments.map((a) => (
-                    <li key={a.id} className="text-xs text-primary">
+                    <li key={a.id} className="text-xs text-accent">
                       {a.originalName}
                     </li>
                   ))}
@@ -74,54 +78,39 @@ function EvaluationDialog({ open, submission, task, onClose, onSubmit, isPending
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {task.maxScore != null && (
-            <div>
-              <label className="mb-1 block text-sm font-medium">
-                Nota (máx. {task.maxScore})
-              </label>
-              <input
+            <div className="space-y-1">
+              <label className="text-xs text-muted-foreground">Nota (máx. {task.maxScore})</label>
+              <Input
                 type="number"
                 step="0.01"
                 min="0"
                 max={task.maxScore}
                 {...register('grade', { valueAsNumber: true })}
-                className="w-full rounded border px-3 py-2 text-sm"
+                className="w-32"
                 placeholder="Ex: 8.5"
               />
-              {errors.grade && (
-                <p className="mt-1 text-xs text-destructive">{errors.grade.message}</p>
-              )}
+              {errors.grade && <p className="text-xs text-destructive">{errors.grade.message}</p>}
             </div>
           )}
 
-          <div>
-            <label className="mb-1 block text-sm font-medium">Feedback *</label>
-            <textarea
-              {...register('feedback')}
-              rows={4}
-              className="w-full rounded border px-3 py-2 text-sm"
-              placeholder="Escreva o feedback para o aluno..."
-            />
-            {errors.feedback && (
-              <p className="mt-1 text-xs text-destructive">{errors.feedback.message}</p>
-            )}
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground">Feedback *</label>
+            <Textarea {...register('feedback')} rows={4} placeholder="Escreva o feedback para o aluno..." />
+            {errors.feedback && <p className="text-xs text-destructive">{errors.feedback.message}</p>}
+          </div>
+
+          <div className="flex items-center gap-2 rounded-[var(--radius-md)] bg-accent-100 p-2.5 text-xs text-accent-800">
+            A correção é definitiva — não há reabertura depois de salvar.
           </div>
 
           <DialogFooter>
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded border px-4 py-2 text-sm hover:bg-accent"
-            >
+            <Button type="button" variant="secondary" onClick={onClose}>
               Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={isPending}
-              className="flex items-center gap-2 rounded bg-primary px-4 py-2 text-sm text-primary-foreground disabled:opacity-50"
-            >
+            </Button>
+            <Button type="submit" disabled={isPending}>
               {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
               Salvar Avaliação
-            </button>
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
