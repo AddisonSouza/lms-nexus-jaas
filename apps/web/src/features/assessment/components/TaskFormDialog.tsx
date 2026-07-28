@@ -10,6 +10,9 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@components/ui/dialog'
+import { Input } from '@components/ui/input'
+import { Textarea } from '@components/ui/textarea'
+import { Button } from '@components/ui/button'
 
 interface Props {
   open: boolean
@@ -45,78 +48,53 @@ function TaskFormDialog({ open, subjectId, onClose, onSubmit, isPending }: Props
           <input type="hidden" {...register('subjectId')} />
 
           <div className="space-y-1">
-            <label className="text-sm font-medium">Título *</label>
-            <input
-              {...register('title')}
-              className="w-full rounded border px-3 py-2 text-sm"
-              placeholder="Ex: Lista de exercícios 01"
-            />
+            <label className="text-xs text-muted-foreground">Título *</label>
+            <Input {...register('title')} placeholder="Ex: Lista de exercícios 01" />
             {errors.title && <p className="text-xs text-destructive">{errors.title.message}</p>}
           </div>
 
           <div className="space-y-1">
-            <label className="text-sm font-medium">Enunciado * (Markdown suportado)</label>
-            <textarea
-              {...register('description')}
-              rows={5}
-              className="w-full rounded border px-3 py-2 text-sm font-mono"
-              placeholder="Descreva a tarefa em Markdown..."
-            />
+            <label className="text-xs text-muted-foreground">Enunciado * (Markdown suportado)</label>
+            <Textarea {...register('description')} rows={5} className="font-mono" placeholder="Descreva a tarefa em Markdown..." />
             {errors.description && <p className="text-xs text-destructive">{errors.description.message}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label htmlFor="deadline" className="text-sm font-medium">Prazo *</label>
-              <input
-                id="deadline"
-                {...register('deadline')}
-                type="datetime-local"
-                className="w-full rounded border px-3 py-2 text-sm"
-              />
+              <label htmlFor="deadline" className="text-xs text-muted-foreground">Prazo *</label>
+              <Input id="deadline" {...register('deadline')} type="datetime-local" />
               {errors.deadline && <p className="text-xs text-destructive">{errors.deadline.message}</p>}
             </div>
 
             <div className="space-y-1">
-              <label className="text-sm font-medium">Pontuação máxima</label>
-              <input
-                {...register('maxScore', { valueAsNumber: true })}
-                type="number"
-                min={0}
-                step={0.5}
-                className="w-full rounded border px-3 py-2 text-sm"
-                placeholder="Ex: 10"
-              />
+              <label className="text-xs text-muted-foreground">Pontuação máxima</label>
+              <Input {...register('maxScore', { valueAsNumber: true })} type="number" min={0} step={0.5} placeholder="Ex: 10" />
               {errors.maxScore && <p className="text-xs text-destructive">{errors.maxScore.message}</p>}
             </div>
           </div>
 
           <div className="space-y-1">
-            <label className="text-sm font-medium">Materiais de apoio</label>
+            <label className="text-xs text-muted-foreground">Materiais de apoio</label>
             <input
               ref={fileInputRef}
               type="file"
               multiple
               accept=".pdf,.doc,.docx,.zip,.jpg,.jpeg,.png"
               onChange={(e) => setValue('files', Array.from(e.target.files ?? []))}
-              className="w-full rounded border px-3 py-2 text-sm"
+              className="w-full rounded-[var(--radius-md)] border border-border bg-surface px-3 py-2 text-sm file:mr-2 file:rounded-full file:border-0 file:bg-accent-100 file:px-3 file:py-1 file:text-accent-800"
             />
             <p className="text-xs text-muted-foreground">PDF, DOC, DOCX, ZIP, JPG, PNG — máx. 50MB cada</p>
             {errors.files && <p className="text-xs text-destructive">{errors.files.message}</p>}
           </div>
 
           <DialogFooter>
-            <button type="button" onClick={onClose} className="rounded border px-4 py-2 text-sm">
+            <Button type="button" variant="secondary" onClick={onClose}>
               Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={isPending}
-              className="flex items-center gap-2 rounded bg-primary px-4 py-2 text-sm text-primary-foreground disabled:opacity-50"
-            >
+            </Button>
+            <Button type="submit" disabled={isPending}>
               {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
               Criar Tarefa
-            </button>
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

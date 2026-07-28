@@ -58,13 +58,13 @@
 
 ## 7. Tarefas e avaliação
 
-- [ ] 7.1 [FE] Reskin `TaskListPage.tsx` (staff) usando `Segmented` para o filtro rascunho/publicada/encerrada
-- [ ] 7.2 [FE] Reskin `StudentTaskListPage.tsx` (com contagem regressiva de prazo)
-- [ ] 7.3 [FE] Reskin `TaskFormDialog.tsx`
-- [ ] 7.4 [FE] Reskin `SubmissionFormDialog.tsx`
-- [ ] 7.5 [FE] Reskin `SubmissionListDrawer.tsx`
-- [ ] 7.6 [FE] Reskin `EvaluationDialog.tsx`/`GradeFeedbackDrawer.tsx`
-- [ ] 7.7 [FE] Reskin `PendingEvaluationsBadge.tsx`
+- [x] 7.1 [FE] Reskin `TaskListPage.tsx` (staff) — a app real não tem filtro rascunho/publicada/encerrada (só um select de disciplina), então não há onde encaixar um `Segmented` de filtro sem inventar funcionalidade nova; mantido o comportamento existente com Card/Badge/Button
+- [x] 7.2 [FE] Reskin `StudentTaskListPage.tsx` — contagem regressiva ao vivo do protótipo não implementada (seria um comportamento novo com re-render por `setInterval`, fora do escopo de reskin); mantido o prazo estático já exibido, com `Badge` de status
+- [x] 7.3 [FE] Reskin `TaskFormDialog.tsx`
+- [x] 7.4 [FE] Reskin `SubmissionFormDialog.tsx`
+- [x] 7.5 [FE] Reskin `SubmissionListDrawer.tsx`
+- [x] 7.6 [FE] Reskin `EvaluationDialog.tsx`/`GradeFeedbackDrawer.tsx` (drawer manual convertido para o primitivo `Sheet`)
+- [x] 7.7 [FE] Reskin `PendingEvaluationsBadge.tsx` — já feito na Fase 5 (consumido pelo `ProfessorDashboard`)
 
 ## 8. Verificação final
 
