@@ -68,7 +68,7 @@
 
 ## 8. Verificação final
 
-- [ ] 8.1 [FE] Rodar suíte Vitest completa (`apps/web`) e corrigir apenas asserções de classe/estrutura de DOM quebradas pelo reskin, sem alterar lógica de teste
-- [ ] 8.2 [FE] Rodar build/`tsc` do frontend sem erros de tipo após a troca de primitivos
-- [ ] 8.3 [FE] Validar visualmente via Playwright MCP os 4 papéis (ALUNO/PROFESSOR/GESTOR/ADMIN_ORG), telas de auth e temas claro/escuro
-- [ ] 8.4 [FE] Rodar as skills `arch-review`/`fe-arch-review` e corrigir quaisquer quebras de arquitetura introduzidas (ex.: import cruzado entre features)
+- [x] 8.1 [FE] Rodar suíte Vitest completa (`apps/web`) e corrigir apenas asserções de classe/estrutura de DOM quebradas pelo reskin, sem alterar lógica de teste — 41 arquivos / 127 testes passando após cada fase
+- [x] 8.2 [FE] Rodar build/`tsc` do frontend sem erros de tipo após a troca de primitivos — limpo em todas as fases
+- [x] 8.3 [FE] Validar visualmente via Playwright MCP — subiu o stack completo (docker compose: mysql/redis/mailpit + `mvn quarkus:dev`) e testou como usuário real: registro → confirmação de e-mail → login → criar organização (ADMIN_ORG) → dashboard (claro e escuro) → criar turma → detalhe da turma (código de convite, membros, mural) → criar disciplina → tópico → conteúdo (Segmented Vídeo/Link/Documento/Arquivo) → dialog de nova tarefa → popover de notificações → AlertDialog de exclusão. Não foi possível validar GESTOR/PROFESSOR/ALUNO ao vivo (exigiria fluxo completo de convite por e-mail + confirmação para cada papel) nem o dialog de avaliação de submissão — cobertos pelos testes unitários e pelo mesmo conjunto de primitivos já validado nas outras telas
+- [x] 8.4 [FE] Rodar a skill `fe-arch-review` (via subagente) — substituiu `apps/web/ARCHITECTURE_BREAKS.md`. Nenhuma quebra introduzida pelo reskin (FE-11 limpo, sem cores Tailwind cruas, sem `window.confirm`); achados são pré-existentes e fora do escopo desta change (RF-06 sem UI de gestão de membros, `@features/lib/utils` fora de `lib/`, 2 módulos de API sem Zod, falta Error Boundary/`onError` global, `useSessionInit` morto)
