@@ -10,6 +10,9 @@ import TaskFormDialog from './TaskFormDialog'
 import SubmissionListDrawer from './SubmissionListDrawer'
 import type { Task } from '../types'
 import type { TaskFormData } from '../schemas/task.schema'
+import { Card } from '@components/ui/card'
+import { Badge } from '@components/ui/badge'
+import { Button } from '@components/ui/button'
 
 function TaskListPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -41,14 +44,14 @@ function TaskListPage() {
   }
 
   return (
-    <div className="p-6">
+    <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Tarefas</h1>
+        <h2 className="mb-0">Tarefas</h2>
         <div className="flex items-center gap-3">
           <select
             value={selectedSubjectId}
             onChange={(e) => setSelectedSubjectId(e.target.value)}
-            className="rounded border px-3 py-2 text-sm"
+            className="h-9 rounded-full border border-border bg-surface px-3.5 text-sm text-foreground outline-none focus-visible:border-accent"
           >
             <option value="">Selecione uma disciplina</option>
             {subjects.map((s) => (
@@ -57,54 +60,48 @@ function TaskListPage() {
               </option>
             ))}
           </select>
-          <button
-            onClick={() => setDialogOpen(true)}
-            disabled={!selectedSubjectId}
-            className="flex items-center gap-2 rounded bg-primary px-4 py-2 text-sm text-primary-foreground disabled:opacity-50"
-          >
+          <Button onClick={() => setDialogOpen(true)} disabled={!selectedSubjectId}>
             <Plus className="h-4 w-4" />
             Nova Tarefa
-          </button>
+          </Button>
         </div>
       </div>
 
       {tasks.length === 0 ? (
         <p className="text-muted-foreground">Nenhuma tarefa criada ainda.</p>
       ) : (
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           {tasks.map((task) => (
-            <div key={task.id} className="flex items-center justify-between rounded border p-4">
+            <Card key={task.id} elevation="sm" className="flex-row items-center justify-between">
               <div>
-                <p className="font-medium">{task.title}</p>
-                <p className="text-xs text-muted-foreground">
-                  Prazo: {new Date(task.deadline).toLocaleString('pt-BR')} · Status:{' '}
-                  <span className={task.status === 'PUBLISHED' ? 'text-success' : 'text-warning'}>
+                <p className="font-semibold">{task.title}</p>
+                <p className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
+                  Prazo: {new Date(task.deadline).toLocaleString('pt-BR')}
+                  <Badge variant={task.status === 'PUBLISHED' ? 'accent-2' : 'neutral'}>
                     {task.status}
-                  </span>
+                  </Badge>
                 </p>
               </div>
               <div className="flex items-center gap-2">
                 {task.status === 'PUBLISHED' && (
-                  <button
-                    onClick={() => setSubmissionsTask(task)}
-                    className="flex items-center gap-1 rounded border px-3 py-1 text-xs hover:bg-accent"
-                  >
-                    <Users className="h-3 w-3" />
+                  <Button size="sm" variant="secondary" onClick={() => setSubmissionsTask(task)}>
+                    <Users className="h-3.5 w-3.5" />
                     Ver Submissões
-                  </button>
+                  </Button>
                 )}
                 {task.status === 'DRAFT' && (
-                  <button
+                  <Button
+                    size="sm"
+                    variant="secondary"
                     onClick={() => publishTask.mutate(task.id)}
                     disabled={publishTask.isPending}
-                    className="flex items-center gap-1 rounded border px-3 py-1 text-xs hover:bg-accent disabled:opacity-50"
                   >
-                    <Send className="h-3 w-3" />
+                    <Send className="h-3.5 w-3.5" />
                     Publicar
-                  </button>
+                  </Button>
                 )}
               </div>
-            </div>
+            </Card>
           ))}
         </div>
       )}

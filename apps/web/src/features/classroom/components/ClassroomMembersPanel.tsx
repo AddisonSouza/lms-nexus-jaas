@@ -6,6 +6,9 @@ import { useRemoveClassroomMember } from '../hooks/useRemoveClassroomMember'
 import AddMemberDialog from './AddMemberDialog'
 import ConfirmDialog from '@components/shared/ConfirmDialog'
 import type { AddMemberFormData } from '../schemas/addMemberSchema'
+import { Button } from '@components/ui/button'
+import { Badge } from '@components/ui/badge'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@components/ui/table'
 
 interface Props {
   classroomId: string
@@ -31,14 +34,11 @@ function ClassroomMembersPanel({ classroomId, canManage }: Props) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="font-medium">Membros</h3>
+        <h4 className="mb-0">Membros</h4>
         {canManage && (
-          <button
-            onClick={() => setShowAdd(true)}
-            className="flex items-center gap-1 rounded bg-primary px-3 py-1.5 text-xs text-primary-foreground"
-          >
-            <UserPlus className="h-3 w-3" /> Adicionar
-          </button>
+          <Button size="sm" onClick={() => setShowAdd(true)}>
+            <UserPlus className="h-3.5 w-3.5" /> Adicionar
+          </Button>
         )}
       </div>
 
@@ -47,45 +47,41 @@ function ClassroomMembersPanel({ classroomId, canManage }: Props) {
       ) : members?.length === 0 ? (
         <p className="text-sm text-muted-foreground">Nenhum membro cadastrado.</p>
       ) : (
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b text-left text-muted-foreground">
-              <th className="pb-2 font-medium">Usuário</th>
-              <th className="pb-2 font-medium">Papel</th>
-              <th className="pb-2 font-medium">Ingresso</th>
-              {canManage && <th className="pb-2" />}
-            </tr>
-          </thead>
-          <tbody>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Usuário</TableHead>
+              <TableHead>Papel</TableHead>
+              <TableHead>Ingresso</TableHead>
+              {canManage && <TableHead />}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {members?.map((m) => (
-              <tr key={m.id} className="border-b last:border-0">
-                <td className="py-2">{m.userName ?? <span className="font-mono text-xs">{m.userId}</span>}</td>
-                <td className="py-2">
-                  <span className={`rounded px-2 py-0.5 text-xs font-medium ${
-                    m.role === 'PROFESSOR'
-                      ? 'bg-primary/10 text-primary'
-                      : 'bg-muted text-muted-foreground'
-                  }`}>
+              <TableRow key={m.id}>
+                <TableCell>{m.userName ?? <span className="font-mono text-xs">{m.userId}</span>}</TableCell>
+                <TableCell>
+                  <Badge variant={m.role === 'PROFESSOR' ? 'accent' : 'neutral'}>
                     {m.role === 'PROFESSOR' ? 'Professor' : 'Aluno'}
-                  </span>
-                </td>
-                <td className="py-2 text-muted-foreground">
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-muted-foreground">
                   {new Date(m.joinedAt).toLocaleDateString('pt-BR')}
-                </td>
+                </TableCell>
                 {canManage && (
-                  <td className="py-2 text-right">
+                  <TableCell className="text-right">
                     <button
                       onClick={() => setRemoveTarget(m.userId)}
                       className="text-destructive hover:opacity-70"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
-                  </td>
+                  </TableCell>
                 )}
-              </tr>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       )}
 
       <AddMemberDialog

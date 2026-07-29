@@ -10,6 +10,9 @@ import SubjectFormDialog from './SubjectFormDialog'
 import ConfirmDialog from '@components/shared/ConfirmDialog'
 import type { SubjectFormData } from '../schemas/subjectSchema'
 import type { Subject } from '../types'
+import { Card } from '@components/ui/card'
+import { Button } from '@components/ui/button'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@components/ui/table'
 
 function SubjectListPage() {
   const [showCreate, setShowCreate] = useState(false)
@@ -55,19 +58,16 @@ function SubjectListPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-4xl p-6 space-y-6">
+    <div className="mx-auto max-w-4xl space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <BookOpenCheck className="h-6 w-6" />
-          <h1 className="text-2xl font-semibold">Disciplinas</h1>
+          <BookOpenCheck className="h-6 w-6 text-accent" />
+          <h2 className="mb-0">Disciplinas</h2>
         </div>
         {canManage && (
-          <button
-            onClick={() => setShowCreate(true)}
-            className="flex items-center gap-2 rounded bg-primary px-4 py-2 text-sm text-primary-foreground"
-          >
+          <Button onClick={() => setShowCreate(true)}>
             <Plus className="h-4 w-4" /> Nova Disciplina
-          </button>
+          </Button>
         )}
       </div>
 
@@ -76,51 +76,53 @@ function SubjectListPage() {
       ) : subjects?.length === 0 ? (
         <p className="text-muted-foreground">Nenhuma disciplina encontrada.</p>
       ) : (
-        <table className="w-full text-sm border rounded-lg overflow-hidden">
-          <thead className="bg-muted">
-            <tr>
-              <th className="px-4 py-3 text-left font-medium">Nome</th>
-              <th className="px-4 py-3 text-left font-medium">Código</th>
-              <th className="px-4 py-3 text-left font-medium">Carga Horária</th>
-              {canManage && <th className="px-4 py-3 text-right font-medium">Ações</th>}
-            </tr>
-          </thead>
-          <tbody>
-            {subjects?.map((s) => (
-              <tr key={s.id} className="border-t hover:bg-muted/50">
-                <td className="px-4 py-3">
-                  <Link to={`/curriculum/${s.id}`} className="font-medium hover:underline">
-                    {s.name}
-                  </Link>
-                </td>
-                <td className="px-4 py-3 text-muted-foreground">{s.code ?? '—'}</td>
-                <td className="px-4 py-3 text-muted-foreground">
-                  {s.workloadHours != null ? `${s.workloadHours}h` : '—'}
-                </td>
-                {canManage && (
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() => setEditTarget(s)}
-                        className="text-muted-foreground hover:text-foreground"
-                        title="Editar"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => setDeleteTarget(s)}
-                        className="text-muted-foreground hover:text-destructive"
-                        title="Excluir"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <Card elevation="sm" className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nome</TableHead>
+                <TableHead>Código</TableHead>
+                <TableHead>Carga Horária</TableHead>
+                {canManage && <TableHead className="text-right">Ações</TableHead>}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {subjects?.map((s) => (
+                <TableRow key={s.id}>
+                  <TableCell>
+                    <Link to={`/curriculum/${s.id}`} className="font-medium hover:underline">
+                      {s.name}
+                    </Link>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">{s.code ?? '—'}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {s.workloadHours != null ? `${s.workloadHours}h` : '—'}
+                  </TableCell>
+                  {canManage && (
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => setEditTarget(s)}
+                          className="text-muted-foreground hover:text-foreground"
+                          title="Editar"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => setDeleteTarget(s)}
+                          className="text-muted-foreground hover:text-destructive"
+                          title="Excluir"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </TableCell>
+                  )}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Card>
       )}
 
       <SubjectFormDialog

@@ -3,6 +3,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { periodSchema, type PeriodFormValues } from '../schemas/periodSchema'
 import type { DashboardPeriod } from '../types'
+import { Input } from '@components/ui/input'
+import { Button } from '@components/ui/button'
 
 interface Props {
   value: DashboardPeriod
@@ -37,41 +39,27 @@ function PeriodSelector({ value, onChange }: Props) {
   return (
     <div className="flex flex-wrap items-end gap-3">
       <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={() => onChange(shortcutRange(7))}
-          className="rounded border px-3 py-1.5 text-sm hover:bg-muted"
-        >
+        <Button type="button" variant="secondary" size="sm" onClick={() => onChange(shortcutRange(7))}>
           7 dias
-        </button>
-        <button
-          type="button"
-          onClick={() => onChange(shortcutRange(30))}
-          className="rounded border px-3 py-1.5 text-sm hover:bg-muted"
-        >
+        </Button>
+        <Button type="button" variant="secondary" size="sm" onClick={() => onChange(shortcutRange(30))}>
           30 dias
-        </button>
-        <button
-          type="button"
-          onClick={() => onChange(shortcutRange(90))}
-          className="rounded border px-3 py-1.5 text-sm hover:bg-muted"
-        >
+        </Button>
+        <Button type="button" variant="secondary" size="sm" onClick={() => onChange(shortcutRange(90))}>
           90 dias
-        </button>
+        </Button>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex items-end gap-2">
         <div className="space-y-1">
           <label htmlFor="period-from" className="text-xs text-muted-foreground">De</label>
-          <input id="period-from" type="date" {...register('from')} className="rounded border px-2 py-1.5 text-sm" />
+          <Input id="period-from" type="date" {...register('from')} className="h-8" />
         </div>
         <div className="space-y-1">
           <label htmlFor="period-to" className="text-xs text-muted-foreground">Até</label>
-          <input id="period-to" type="date" {...register('to')} className="rounded border px-2 py-1.5 text-sm" />
+          <Input id="period-to" type="date" {...register('to')} className="h-8" />
         </div>
-        <button type="submit" className="rounded bg-primary px-3 py-1.5 text-sm text-primary-foreground">
-          Aplicar
-        </button>
+        <Button type="submit" size="sm">Aplicar</Button>
       </form>
       {(errors.from || errors.to) && (
         <p className="w-full text-xs text-destructive">{errors.from?.message ?? errors.to?.message}</p>

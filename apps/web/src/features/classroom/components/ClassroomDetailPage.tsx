@@ -10,6 +10,9 @@ import ClassroomFormDialog from './ClassroomFormDialog'
 import ClassroomMembersPanel from './ClassroomMembersPanel'
 import ConfirmDialog from '@components/shared/ConfirmDialog'
 import type { ClassroomFormData } from '../schemas/classroomSchema'
+import { Card, CardKicker } from '@components/ui/card'
+import { Badge } from '@components/ui/badge'
+import { Button } from '@components/ui/button'
 
 interface ClassroomDetailPageProps {
   announcementFeedSlot?: ReactNode
@@ -41,58 +44,50 @@ function ClassroomDetailPage({ announcementFeedSlot }: ClassroomDetailPageProps)
   }
 
   if (isLoading) {
-    return <div className="p-6 text-muted-foreground">Carregando...</div>
+    return <div className="text-muted-foreground">Carregando...</div>
   }
 
   if (!classroom) {
-    return <div className="p-6 text-destructive">Turma não encontrada.</div>
+    return <div className="text-destructive">Turma não encontrada.</div>
   }
 
   return (
-    <div className="container mx-auto max-w-4xl p-6 space-y-6">
+    <div className="mx-auto max-w-4xl space-y-6">
       <div className="flex items-center gap-2">
         <button onClick={() => navigate('/classrooms')} className="text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="text-2xl font-semibold flex-1">{classroom.name}</h1>
+        <h2 className="mb-0 flex-1">{classroom.name}</h2>
         {canManage && (
           <div className="flex gap-2">
-            <button
-              onClick={() => setShowEdit(true)}
-              className="flex items-center gap-1 rounded border px-3 py-1.5 text-sm hover:bg-muted"
-            >
+            <Button variant="secondary" onClick={() => setShowEdit(true)}>
               <Pencil className="h-4 w-4" /> Editar
-            </button>
-            <button
-              onClick={() => setShowDeleteConfirm(true)}
-              className="flex items-center gap-1 rounded border border-destructive px-3 py-1.5 text-sm text-destructive hover:bg-destructive/10"
-            >
+            </Button>
+            <Button variant="destructive" onClick={() => setShowDeleteConfirm(true)}>
               <Trash2 className="h-4 w-4" /> Excluir
-            </button>
+            </Button>
           </div>
         )}
       </div>
 
-      <div className="rounded-lg border p-4 space-y-3">
+      <Card elevation="sm">
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <p className="text-muted-foreground">Período Letivo</p>
-            <p className="font-medium">{classroom.academicPeriod}</p>
+            <CardKicker>Período Letivo</CardKicker>
+            <p className="mt-0.5 font-medium">{classroom.academicPeriod}</p>
           </div>
           <div>
-            <p className="text-muted-foreground">Status</p>
-            <span className={`inline-block rounded px-2 py-0.5 text-xs font-medium ${
-              classroom.status === 'ACTIVE'
-                ? 'bg-primary/10 text-primary'
-                : 'bg-muted text-muted-foreground'
-            }`}>
-              {classroom.status === 'ACTIVE' ? 'Ativa' : 'Arquivada'}
-            </span>
+            <CardKicker>Status</CardKicker>
+            <div className="mt-0.5">
+              <Badge variant={classroom.status === 'ACTIVE' ? 'accent-2' : 'neutral'}>
+                {classroom.status === 'ACTIVE' ? 'Ativa' : 'Arquivada'}
+              </Badge>
+            </div>
           </div>
           {classroom.inviteCode && (
             <div>
-              <p className="text-muted-foreground">Código de Convite</p>
-              <div className="flex items-center gap-2">
+              <CardKicker>Código de Convite</CardKicker>
+              <div className="mt-0.5 flex items-center gap-2">
                 <span className="font-mono font-medium tracking-widest">{classroom.inviteCode}</span>
                 <button
                   onClick={() => navigator.clipboard.writeText(classroom.inviteCode!)}
@@ -116,19 +111,19 @@ function ClassroomDetailPage({ announcementFeedSlot }: ClassroomDetailPageProps)
           )}
           {classroom.description && (
             <div className="col-span-2">
-              <p className="text-muted-foreground">Descrição</p>
-              <p>{classroom.description}</p>
+              <CardKicker>Descrição</CardKicker>
+              <p className="mt-0.5">{classroom.description}</p>
             </div>
           )}
         </div>
-      </div>
+      </Card>
 
-      <div className="rounded-lg border p-4">
+      <Card elevation="sm">
         <ClassroomMembersPanel classroomId={id!} canManage={canManage} />
-      </div>
+      </Card>
 
-      <div className="rounded-lg border p-4 space-y-3">
-        <h2 className="text-lg font-semibold">Mural de Avisos</h2>
+      <div className="space-y-3">
+        <h4 className="mb-0">Mural de Avisos</h4>
         {announcementFeedSlot}
       </div>
 

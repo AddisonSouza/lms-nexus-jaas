@@ -7,6 +7,10 @@ import { useAuthStore } from '@store/authStore'
 import ClassroomFormDialog from './ClassroomFormDialog'
 import JoinClassroomForm from './JoinClassroomForm'
 import type { ClassroomFormData } from '../schemas/classroomSchema'
+import { Card } from '@components/ui/card'
+import { Badge } from '@components/ui/badge'
+import { Button } from '@components/ui/button'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@components/ui/table'
 
 function ClassroomListPage() {
   const [showCreate, setShowCreate] = useState(false)
@@ -22,34 +26,28 @@ function ClassroomListPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-4xl p-6 space-y-6">
+    <div className="mx-auto max-w-4xl space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <BookOpen className="h-6 w-6" />
-          <h1 className="text-2xl font-semibold">Turmas</h1>
+          <BookOpen className="h-6 w-6 text-accent" />
+          <h2 className="mb-0">Turmas</h2>
         </div>
         <div className="flex gap-2">
-          <button
-            onClick={() => setShowJoin((v) => !v)}
-            className="flex items-center gap-2 rounded border px-4 py-2 text-sm hover:bg-muted"
-          >
+          <Button variant="secondary" onClick={() => setShowJoin((v) => !v)}>
             <LogIn className="h-4 w-4" /> Entrar via código
-          </button>
+          </Button>
           {canManage && (
-            <button
-              onClick={() => setShowCreate(true)}
-              className="flex items-center gap-2 rounded bg-primary px-4 py-2 text-sm text-primary-foreground"
-            >
+            <Button onClick={() => setShowCreate(true)}>
               <Plus className="h-4 w-4" /> Nova Turma
-            </button>
+            </Button>
           )}
         </div>
       </div>
 
       {showJoin && (
-        <div className="rounded-lg border p-4">
+        <Card elevation="sm">
           <JoinClassroomForm />
-        </div>
+        </Card>
       )}
 
       {isLoading ? (
@@ -57,36 +55,34 @@ function ClassroomListPage() {
       ) : classrooms?.length === 0 ? (
         <p className="text-muted-foreground">Nenhuma turma encontrada.</p>
       ) : (
-        <table className="w-full text-sm border rounded-lg overflow-hidden">
-          <thead className="bg-muted">
-            <tr>
-              <th className="px-4 py-3 text-left font-medium">Nome</th>
-              <th className="px-4 py-3 text-left font-medium">Período</th>
-              <th className="px-4 py-3 text-left font-medium">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {classrooms?.map((c) => (
-              <tr key={c.id} className="border-t hover:bg-muted/50">
-                <td className="px-4 py-3">
-                  <Link to={`/classrooms/${c.id}`} className="font-medium hover:underline">
-                    {c.name}
-                  </Link>
-                </td>
-                <td className="px-4 py-3 text-muted-foreground">{c.academicPeriod}</td>
-                <td className="px-4 py-3">
-                  <span className={`rounded px-2 py-0.5 text-xs font-medium ${
-                    c.status === 'ACTIVE'
-                      ? 'bg-primary/10 text-primary'
-                      : 'bg-muted text-muted-foreground'
-                  }`}>
-                    {c.status === 'ACTIVE' ? 'Ativa' : 'Arquivada'}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <Card elevation="sm" className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nome</TableHead>
+                <TableHead>Período</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {classrooms?.map((c) => (
+                <TableRow key={c.id}>
+                  <TableCell>
+                    <Link to={`/classrooms/${c.id}`} className="font-medium hover:underline">
+                      {c.name}
+                    </Link>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">{c.academicPeriod}</TableCell>
+                  <TableCell>
+                    <Badge variant={c.status === 'ACTIVE' ? 'accent-2' : 'neutral'}>
+                      {c.status === 'ACTIVE' ? 'Ativa' : 'Arquivada'}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Card>
       )}
 
       <ClassroomFormDialog

@@ -1,5 +1,6 @@
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import type { AdminDashboardData } from '../types'
+import { Card, CardKicker } from '@components/ui/card'
 
 interface Props {
   dashboard: AdminDashboardData
@@ -13,32 +14,32 @@ function DashboardCharts({ dashboard }: Props) {
   ]
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-      <div className="rounded-lg border p-4">
-        <p className="mb-2 text-sm font-medium">Membros por papel</p>
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <Card elevation="sm">
+        <CardKicker>Membros por papel</CardKicker>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={membersData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="role" fontSize={12} />
-            <YAxis allowDecimals={false} fontSize={12} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-divider)" />
+            <XAxis dataKey="role" fontSize={12} stroke="var(--color-text)" />
+            <YAxis allowDecimals={false} fontSize={12} stroke="var(--color-text)" />
             <Tooltip />
-            <Bar dataKey="count" fill="#2563eb" />
+            <Bar dataKey="count" fill="var(--color-accent)" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
-      </div>
+      </Card>
 
-      <div className="rounded-lg border p-4">
-        <p className="mb-2 text-sm font-medium">Tarefas criadas vs. avaliadas</p>
+      <Card elevation="sm">
+        <CardKicker>Tarefas criadas vs. avaliadas</CardKicker>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={tasksData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="label" fontSize={12} />
-            <YAxis allowDecimals={false} fontSize={12} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-divider)" />
+            <XAxis dataKey="label" fontSize={12} stroke="var(--color-text)" />
+            <YAxis allowDecimals={false} fontSize={12} stroke="var(--color-text)" />
             <Tooltip />
-            <Bar dataKey="value" fill="#16a34a" />
+            <Bar dataKey="value" fill="var(--color-accent-2)" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
-      </div>
+      </Card>
     </div>
   )
 }

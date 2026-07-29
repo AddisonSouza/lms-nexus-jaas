@@ -2,6 +2,7 @@ import { CheckCircle } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useLogin } from '../hooks/useLogin'
 import LoginForm from './LoginForm'
+import AuthLayout from '@components/layout/AuthLayout'
 
 function LoginPage() {
   const [searchParams] = useSearchParams()
@@ -16,12 +17,15 @@ function LoginPage() {
         : null
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="w-full max-w-sm space-y-4 rounded-lg border p-6 shadow-sm">
-        <h1 className="text-2xl font-semibold">Entrar</h1>
+    <AuthLayout>
+      <div className="space-y-4">
+        <div>
+          <h2 className="mb-2 font-heading text-2xl">Entrar</h2>
+          <p className="text-sm text-muted-foreground">Use o e-mail cadastrado na sua organização.</p>
+        </div>
 
         {justConfirmed && (
-          <div className="flex items-center gap-2 rounded border border-success/30 bg-success/10 px-3 py-2 text-sm text-success">
+          <div className="flex items-center gap-2 rounded-[var(--radius-md)] bg-accent-2-100 px-3 py-2 text-sm text-accent-2-800">
             <CheckCircle className="h-4 w-4 shrink-0" />
             E-mail confirmado com sucesso! Faça login para continuar.
           </div>
@@ -31,13 +35,22 @@ function LoginPage() {
 
         <LoginForm onSubmit={login} isPending={isPending} />
 
+        <hr className="border-border" />
+
         <p className="text-center text-sm text-muted-foreground">
-          <Link to="/forgot-password" className="underline underline-offset-4 hover:text-primary">
+          <Link to="/forgot-password" className="text-accent hover:underline">
             Esqueci minha senha
           </Link>
         </p>
+        <p className="text-center text-[13px] text-muted-foreground">
+          Ainda não tem conta?{' '}
+          <Link to="/register" className="text-accent hover:underline">
+            Criar conta
+          </Link>{' '}
+          — você poderá fundar sua própria organização.
+        </p>
       </div>
-    </div>
+    </AuthLayout>
   )
 }
 
