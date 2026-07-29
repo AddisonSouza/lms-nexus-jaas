@@ -6,9 +6,6 @@ interface ProvidersProps {
   children: React.ReactNode
 }
 
-// No ThemeProvider: the app doesn't offer light/dark switching yet, only the
-// static :root tokens in index.css. Auth/org state lives in useAuthStore (@store)
-// rather than a React Context.
 function Providers({ children }: ProvidersProps) {
   return (
     <QueryClientProvider client={queryClient}>
