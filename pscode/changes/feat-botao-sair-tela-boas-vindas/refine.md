@@ -45,7 +45,7 @@ enxuta com a logo, a identificação do usuário e a ação de sair.
 
 - [x] Extrair `useLogout` em `features/auth/hooks/` sobre o `logoutUser()`
       existente e migrar o `Header` do `AppShell` para ele, sem mudança visual.
-- [ ] Criar `MinimalHeader` (logo, identificação do usuário e "Sair", com a
+- [x] Criar `MinimalHeader` (logo, identificação do usuário e "Sair", com a
       ação de sair condicionada à sessão) e o layout route `SetupShell` que o
       aplica e centraliza o conteúdo.
 - [ ] Colocar `/welcome`, `/organizations/new` e `/invitations/:token/accept`
