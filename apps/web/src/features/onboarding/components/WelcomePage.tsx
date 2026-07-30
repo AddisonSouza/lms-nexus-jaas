@@ -25,7 +25,7 @@ function WelcomePage() {
             <CardBody>
               Monte a sua organização e convide gestores, professores e alunos.
             </CardBody>
-            <Button render={<Link to="/organizations/new" />} className="w-full">
+            <Button render={<Link to="/organizations/new" />} nativeButton={false} className="w-full">
               Criar organização
             </Button>
           </Card>

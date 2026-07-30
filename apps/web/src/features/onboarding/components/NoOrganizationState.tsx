@@ -16,8 +16,10 @@ function NoOrganizationState() {
         existente pelo convite que o administrador ou gestor enviar por e-mail.
       </p>
       <div className="flex flex-wrap justify-center gap-2">
-        <Button render={<Link to="/organizations/new" />}>Criar organização</Button>
-        <Button variant="secondary" render={<Link to="/welcome" />}>
+        <Button render={<Link to="/organizations/new" />} nativeButton={false}>
+          Criar organização
+        </Button>
+        <Button variant="secondary" render={<Link to="/welcome" />} nativeButton={false}>
           Entrar por convite
         </Button>
       </div>

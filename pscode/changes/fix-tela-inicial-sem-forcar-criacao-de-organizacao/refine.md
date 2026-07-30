@@ -69,5 +69,5 @@ aviso explicando a situação, em vez de uma tela quebrada.
 - [x] Criar `NoOrganizationState` em `onboarding` e o guard
       `app/RequireOrganization.tsx`, aplicando-o às rotas do `AppShell` que
       dependem de organização.
-- [ ] Cobrir com testes: redirect do `RootRedirect`, parsing do link de convite
+- [x] Cobrir com testes: redirect do `RootRedirect`, parsing do link de convite
       (válido e inválido) e o guard renderizando o estado vazio.
