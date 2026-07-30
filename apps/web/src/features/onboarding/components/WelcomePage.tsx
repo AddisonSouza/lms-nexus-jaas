@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { Building2, Mail, TicketCheck } from 'lucide-react'
 import { Card, CardBody, CardKicker, CardTitle } from '@components/ui/card'
 import { Button } from '@components/ui/button'
+import InviteLinkForm from './InviteLinkForm'
 
 function WelcomePage() {
   return (
@@ -38,6 +39,7 @@ function WelcomePage() {
             <CardBody>
               Já recebeu um convite? Use o link enviado para entrar na organização.
             </CardBody>
+            <InviteLinkForm />
             <div className="flex items-start gap-2 rounded-[var(--radius-md)] bg-muted px-3 py-2 text-[13px] text-muted-foreground">
               <Mail className="mt-0.5 h-4 w-4 shrink-0" />
               <span>

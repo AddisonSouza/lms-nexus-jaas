@@ -63,7 +63,7 @@ aviso explicando a situação, em vez de uma tela quebrada.
       convite) e o aviso de que o admin/gestor de uma organização existente pode
       convidar por e-mail; registrar a rota `/welcome` fora do `AppShell` e
       apontar o `RootRedirect` para ela.
-- [ ] Adicionar ao `WelcomePage` o campo de link de convite: schema Zod que
+- [x] Adicionar ao `WelcomePage` o campo de link de convite: schema Zod que
       aceita link completo ou token, extração do token e navegação para
       `/invitations/:token/accept`, com erro de validação visível.
 - [ ] Criar `NoOrganizationState` em `onboarding` e o guard
