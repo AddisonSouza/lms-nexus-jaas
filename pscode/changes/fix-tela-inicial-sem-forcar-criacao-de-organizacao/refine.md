@@ -66,7 +66,7 @@ aviso explicando a situação, em vez de uma tela quebrada.
 - [x] Adicionar ao `WelcomePage` o campo de link de convite: schema Zod que
       aceita link completo ou token, extração do token e navegação para
       `/invitations/:token/accept`, com erro de validação visível.
-- [ ] Criar `NoOrganizationState` em `onboarding` e o guard
+- [x] Criar `NoOrganizationState` em `onboarding` e o guard
       `app/RequireOrganization.tsx`, aplicando-o às rotas do `AppShell` que
       dependem de organização.
 - [ ] Cobrir com testes: redirect do `RootRedirect`, parsing do link de convite

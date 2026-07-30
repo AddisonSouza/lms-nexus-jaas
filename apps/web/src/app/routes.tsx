@@ -15,6 +15,7 @@ import SubjectListPage from '@features/curriculum/components/SubjectListPage'
 import TaskListPage from '@features/assessment/components/TaskListPage'
 import StudentTaskListPage from '@features/assessment/components/StudentTaskListPage'
 import RootRedirect from './RootRedirect'
+import RequireOrganization from './RequireOrganization'
 import OrganizationRoute from './OrganizationRoute'
 import SubjectDetailRoute from './SubjectDetailRoute'
 import ClassroomDetailRoute from './ClassroomDetailRoute'
@@ -88,26 +89,33 @@ export const router = createBrowserRouter([
     ),
     children: [
       { path: '/', element: <RootRedirect /> },
-      { path: '/organizations/:id', element: <OrganizationRoute /> },
-      { path: '/classrooms', element: <ClassroomListPage /> },
-      { path: '/classrooms/:id', element: <ClassroomDetailRoute /> },
-      { path: '/curriculum', element: <SubjectListPage /> },
-      { path: '/curriculum/:subjectId', element: <SubjectDetailRoute /> },
+      // Tudo daqui para baixo depende de uma organização: sem ela, o guard
+      // mostra o estado vazio em vez da tela quebrada.
       {
-        path: '/assessment/tasks',
-        element: (
-          <ProtectedRoute roles={['PROFESSOR', 'ADMIN_ORG', 'GESTOR']}>
-            <TaskListPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '/assessment/student-tasks',
-        element: (
-          <ProtectedRoute roles={['ALUNO']}>
-            <StudentTaskListPage />
-          </ProtectedRoute>
-        ),
+        element: <RequireOrganization />,
+        children: [
+          { path: '/organizations/:id', element: <OrganizationRoute /> },
+          { path: '/classrooms', element: <ClassroomListPage /> },
+          { path: '/classrooms/:id', element: <ClassroomDetailRoute /> },
+          { path: '/curriculum', element: <SubjectListPage /> },
+          { path: '/curriculum/:subjectId', element: <SubjectDetailRoute /> },
+          {
+            path: '/assessment/tasks',
+            element: (
+              <ProtectedRoute roles={['PROFESSOR', 'ADMIN_ORG', 'GESTOR']}>
+                <TaskListPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: '/assessment/student-tasks',
+            element: (
+              <ProtectedRoute roles={['ALUNO']}>
+                <StudentTaskListPage />
+              </ProtectedRoute>
+            ),
+          },
+        ],
       },
     ],
   },
