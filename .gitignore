@@ -44,3 +44,10 @@ data/uploads/
 # ── Logs ─────────────────────────────────────────────────────
 *.log
 logs/
+
+# ── Artefatos de teste de UI (Playwright MCP) ────────────────
+.playwright-mcp/
+/rf*.png
+
+# ── Relatórios regerados pelo /arch-review ───────────────────
+ARCHITECTURE_BREAKS.md

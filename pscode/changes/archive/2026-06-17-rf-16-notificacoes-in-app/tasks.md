@@ -64,4 +64,4 @@
 
 ## 10. Frontend — Testes
 
-- [ ] 10.1 [FE] Testes Vitest + Testing Library + MSW para `NotificationBell` e `NotificationPanel` (badge de contagem, marcar uma como lida, marcar todas como lidas, polling)
+- [x] 10.1 [FE] Testes Vitest + Testing Library + MSW para `NotificationBell` e `NotificationPanel` (badge de contagem, marcar uma como lida, marcar todas como lidas, polling)

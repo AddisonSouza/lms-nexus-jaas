@@ -7,7 +7,7 @@ O sistema SHALL permitir que o professor autor de uma tarefa mude seu status de 
 
 #### Scenario: Evento disparado ao publicar
 - **WHEN** tarefa é publicada com sucesso
-- **THEN** sistema dispara `TaskCreatedEvent` via CDI contendo `taskId`, `subjectId` e `organizationId`
+- **THEN** sistema dispara `TaskPublishedEvent` via CDI contendo `taskId`, `subjectId` e `organizationId`
 
 #### Scenario: Tarefa já publicada
 - **WHEN** professor tenta publicar tarefa que já está em `PUBLISHED`

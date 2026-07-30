@@ -1,83 +1,15 @@
-schema: spec-driven
-
-pr:
+# PSCode configuration — guided SDD installer.
+# See https://github.com/eipastel/pscode
+version: 3.1.2
+profile: guided
+agents:
+  - claude
+limits:
+  max_brief_lines: 40
+  max_design_lines: 30
+  max_questions: 5
+apply_mode: one_task_at_a_time
+approval_required: true
+pr_flow: true
+github:
   enabled: true
-  branch:
-    pattern: "feat/{change-name}"
-  title:
-    template: "feat: {change-name}"
-  description:
-    template: |
-      ## Resumo
-
-      <!-- Preenchido pelo /ps:apply com base nos artefatos da change -->
-
-      ## Referências
-
-      - Change: `pscode/changes/{change-name}/`
-  comments:
-    linkInTask: true
-  taskLinkInDescription: true
-
-context: |
-  Project: LMS Nexus — plataforma de gestão de aprendizado (LMS) multi-tenant (TCC)
-  Repo: AddisonSouza/lms-nexus-jaas | GitHub Project: "LMS — Open Spec"
-  Metodologia: Specification-Driven Development (SDD)
-
-  ## Stack
-  - Backend: Quarkus 3.x, Java 21 (Virtual Threads / Project Loom)
-  - Frontend: React 18 + TypeScript 5 (strict), Vite 5
-  - Banco: MySQL 8.x via Flyway + Hibernate ORM com Panache (Repository Pattern — Active Record PROIBIDO)
-  - Cache: Redis 7 (refresh tokens, rate limiting, notificações)
-  - Auth: Quarkus OIDC + JWT RS256. Claims: sub (userId), org (organizationId), roles
-  - ORM mapping: MapStruct 1.5+ — mapeamento manual entre camadas PROIBIDO
-  - Lombok: obrigatório. @Value em VOs, @Builder em Entities/DTOs, @Data apenas em JPA Entities
-  - UI: Shadcn/ui (Radix) + Tailwind CSS. Único pacote de ícones: Lucide React
-  - State: TanStack Query v5 (server state) + Zustand (client state). useState para dados de API PROIBIDO
-  - Forms: React Hook Form + Zod
-  - Testes BE: JUnit 5 + Mockito + @QuarkusTest + Testcontainers. H2 em integração PROIBIDO
-  - Testes FE: Vitest + Testing Library + MSW
-  - Monorepo: apps/api (Quarkus), apps/web (React), packages/shared-types
-
-  ## Arquitetura — Monolito Modular + DDD + Clean Arch + Hexagonal
-  Módulos: identity, organization, classroom, curriculum, assessment, communication, reporting, storage
-  Papéis: ADMIN_ORG, GESTOR, PROFESSOR, ALUNO
-
-  ## Estrutura de pacotes (backend)
-  apps/api/src/main/java/br/edu/lms/module/{modulo}/
-    domain/model/, domain/event/, domain/exception/, domain/port/in/, domain/port/out/
-    application/usecase/, application/dto/
-    infrastructure/persistence/, infrastructure/security/, infrastructure/mail/
-    interfaces/rest/
-
-  ## Regras invioláveis
-  - domain/ não importa jakarta.persistence, Quarkus, Lombok (@Data, @Entity)
-  - application/ não importa infrastructure/ ou interfaces/
-  - Módulos comunicam via interfaces Java (Ports) — nunca HTTP interno
-  - organization_id sempre extraído do JWT, nunca do request body
-  - Soft delete obrigatório: coluna deleted_at TIMESTAMP NULL
-  - Flyway obrigatório. quarkus.hibernate-orm.database.generation=update PROIBIDO
-  - Frontend: sem import cruzado entre features. Rotas protegidas via ProtectedRoute
-  - Conventional commits (inglês). Branch: feature/{modulo}-{descricao}
-
-  ## Issues
-  Issues numeradas RF-01 a RF-26. Nome da change deve conter o número: rf-01-cadastro-usuario
-
-rules:
-  proposal:
-    - "Referenciar o RF (ex: RF-01) e o módulo (ex: identity) no objetivo"
-    - "Incluir seção Non-goals explícita"
-    - "Indicar se impacta backend, frontend ou ambos"
-    - "Manter até 400 palavras"
-  design:
-    - "Detalhar estrutura de pacotes afetados seguindo a hierarquia domain/application/infrastructure/interfaces"
-    - "Listar Ports novos ou modificados (in/ e out/)"
-    - "Indicar migration Flyway necessária com nome do arquivo V{n}__{descricao}.sql"
-    - "Listar endpoints REST com método HTTP e path em kebab-case plural"
-    - "Para frontend: listar componentes, hooks, schemas Zod e query keys afetados"
-  tasks:
-    - "Cada task cabe em no máximo 2 horas"
-    - "Prefixar com [BE], [FE] ou [INFRA]"
-    - "Usar checkboxes markdown (- [ ])"
-    - "Incluir task de Flyway migration separada quando há mudança de schema"
-    - "Incluir task de testes unitários e de integração separadas"

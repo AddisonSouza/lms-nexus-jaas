@@ -1,17 +1,21 @@
 repo: AddisonSouza/lms-nexus-jaas
+owner: AddisonSouza
+ownerType: user
 project: 1
 projectNodeId: PVT_kwHOCPxf0c4BZV7-
 statusFieldId: PVTSSF_lAHOCPxf0c4BZV7-zhUVOIs
-gh: /mnt/c/Program Files/GitHub CLI/gh.exe
+gh: gh
 
 statuses:
-  backlog:     4ac59e87
-  proposed:    c1d44098
-  accepted:    f65b4f80
-  in_progress: d1ebe438
-  in_review:   1391b1fb
-  done:        5b6287f3
-  archived:    23f4ed95
+  backlog:          4ac59e87  # Backlog
+  proposed:         c1d44098  # In Refinement
+  ready_to_dev:     f65b4f80  # Ready to Dev
+  in_progress:      d1ebe438  # In Development
+  review:           1391b1fb  # In Code Review
+  in_test:          8f889228  # In Test
+  ready_to_deploy:  82200bf6  # Ready to Deploy
+  done:             5b6287f3  # Done
+  cancelled:        23f4ed95  # Cancelled
 
 # Issue number detection: pattern "<issuePattern>-NN" extracted from change name.
 # "rf" matches "rf-01-cadastro-usuario" → issue #1
