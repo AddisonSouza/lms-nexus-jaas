@@ -51,28 +51,24 @@ function AcceptInvitePage() {
 
   if (isLoadingInfo) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Card elevation="md" className="w-full max-w-sm items-center p-8 text-center">
-          <Loader2 className="h-10 w-10 animate-spin text-accent" />
-          <p className="text-sm text-muted-foreground">Carregando convite...</p>
-        </Card>
-      </div>
+      <Card elevation="md" className="w-full max-w-sm items-center p-8 text-center">
+        <Loader2 className="h-10 w-10 animate-spin text-accent" />
+        <p className="text-sm text-muted-foreground">Carregando convite...</p>
+      </Card>
     )
   }
 
   if (isError || !invitation) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Card elevation="md" className="w-full max-w-sm items-center p-8 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent-100 text-accent-800">
-            <XCircle className="h-6 w-6" />
-          </div>
-          <h2 className="font-heading text-xl">Convite inválido ou expirado</h2>
-          <p className="text-sm text-muted-foreground">
-            Este convite não é mais válido. Peça ao administrador para enviar um novo.
-          </p>
-        </Card>
-      </div>
+      <Card elevation="md" className="w-full max-w-sm items-center p-8 text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent-100 text-accent-800">
+          <XCircle className="h-6 w-6" />
+        </div>
+        <h2 className="font-heading text-xl">Convite inválido ou expirado</h2>
+        <p className="text-sm text-muted-foreground">
+          Este convite não é mais válido. Peça ao administrador para enviar um novo.
+        </p>
+      </Card>
     )
   }
 
@@ -87,36 +83,34 @@ function AcceptInvitePage() {
           : null
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <Card elevation="md" className="w-full max-w-sm items-start p-6">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent-2-100 font-heading text-lg text-accent-2-800">
-          {organizationInitials(invitation.organizationName)}
+    <Card elevation="md" className="w-full max-w-sm items-start p-6">
+      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent-2-100 font-heading text-lg text-accent-2-800">
+        {organizationInitials(invitation.organizationName)}
+      </div>
+      <CardKicker className="flex items-center gap-1.5">
+        <UserPlus className="h-3.5 w-3.5" />
+        Convite de organização
+      </CardKicker>
+      <h2 className="font-heading text-xl">{invitation.organizationName} convidou você</h2>
+
+      <div className="flex w-full flex-col gap-1.5 border-y border-border py-3 text-sm">
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Papel</span>
+          <Badge variant="accent">{roleLabels[invitation.role] ?? invitation.role}</Badge>
         </div>
-        <CardKicker className="flex items-center gap-1.5">
-          <UserPlus className="h-3.5 w-3.5" />
-          Convite de organização
-        </CardKicker>
-        <h2 className="font-heading text-xl">{invitation.organizationName} convidou você</h2>
-
-        <div className="flex w-full flex-col gap-1.5 border-y border-border py-3 text-sm">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Papel</span>
-            <Badge variant="accent">{roleLabels[invitation.role] ?? invitation.role}</Badge>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Válido até</span>
-            <span>{new Date(invitation.expiresAt).toLocaleDateString('pt-BR')}</span>
-          </div>
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Válido até</span>
+          <span>{new Date(invitation.expiresAt).toLocaleDateString('pt-BR')}</span>
         </div>
+      </div>
 
-        {acceptErrorMessage && <p className="text-sm text-destructive">{acceptErrorMessage}</p>}
+      {acceptErrorMessage && <p className="text-sm text-destructive">{acceptErrorMessage}</p>}
 
-        <Button onClick={() => accept(token)} disabled={isAccepting} className="w-full">
-          {isAccepting && <Loader2 className="h-4 w-4 animate-spin" />}
-          Aceitar convite
-        </Button>
-      </Card>
-    </div>
+      <Button onClick={() => accept(token)} disabled={isAccepting} className="w-full">
+        {isAccepting && <Loader2 className="h-4 w-4 animate-spin" />}
+        Aceitar convite
+      </Button>
+    </Card>
   )
 }
 

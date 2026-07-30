@@ -7,6 +7,7 @@ import ResetPasswordPage from '@features/auth/components/ResetPasswordPage'
 import PublicRoute from '@components/shared/PublicRoute'
 import ProtectedRoute from '@components/shared/ProtectedRoute'
 import AppShell from '@components/layout/AppShell'
+import SetupShell from '@components/layout/SetupShell'
 import CreateOrganizationPage from '@features/organization/components/CreateOrganizationPage'
 import WelcomePage from '@features/onboarding/components/WelcomePage'
 import AcceptInvitePage from '@features/invitation/components/AcceptInvitePage'
@@ -58,27 +59,29 @@ export const router = createBrowserRouter([
       </PublicRoute>
     ),
   },
+  // No AppShell (org setup flow): topo enxuto com saída, conteúdo centralizado.
+  // O aceite de convite é público — o próprio MinimalHeader esconde o "Sair".
   {
-    path: '/invitations/:token/accept',
-    element: <AcceptInvitePage />,
-  },
-
-  // Protected: no AppShell (org setup flow)
-  {
-    path: '/welcome',
-    element: (
-      <ProtectedRoute>
-        <WelcomePage />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: '/organizations/new',
-    element: (
-      <ProtectedRoute>
-        <CreateOrganizationPage />
-      </ProtectedRoute>
-    ),
+    element: <SetupShell />,
+    children: [
+      { path: '/invitations/:token/accept', element: <AcceptInvitePage /> },
+      {
+        path: '/welcome',
+        element: (
+          <ProtectedRoute>
+            <WelcomePage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/organizations/new',
+        element: (
+          <ProtectedRoute>
+            <CreateOrganizationPage />
+          </ProtectedRoute>
+        ),
+      },
+    ],
   },
   // Protected: with AppShell layout
   {

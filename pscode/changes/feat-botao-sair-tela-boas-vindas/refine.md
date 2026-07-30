@@ -48,7 +48,7 @@ enxuta com a logo, a identificação do usuário e a ação de sair.
 - [x] Criar `MinimalHeader` (logo, identificação do usuário e "Sair", com a
       ação de sair condicionada à sessão) e o layout route `SetupShell` que o
       aplica e centraliza o conteúdo.
-- [ ] Colocar `/welcome`, `/organizations/new` e `/invitations/:token/accept`
+- [x] Colocar `/welcome`, `/organizations/new` e `/invitations/:token/accept`
       sob o `SetupShell`, removendo os wrappers full-screen próprios das três
       telas.
 - [ ] Cobrir com testes: `useLogout` encerrando a sessão e indo para `/login`,
