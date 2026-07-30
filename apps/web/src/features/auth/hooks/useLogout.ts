@@ -14,6 +14,9 @@ export function useLogout() {
   return async () => {
     try {
       await logoutUser()
+    } catch {
+      // Servidor fora do ar não pode impedir a saída — o erro morre aqui para
+      // não virar uma rejeição não tratada no handler do clique.
     } finally {
       clearToken()
       navigate('/login', { replace: true })
