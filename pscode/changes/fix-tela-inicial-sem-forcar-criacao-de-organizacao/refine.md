@@ -58,7 +58,7 @@ aviso explicando a situação, em vez de uma tela quebrada.
 
 ## Subtasks
 
-- [ ] Criar `features/onboarding/components/WelcomePage.tsx` com os dois cards em
+- [x] Criar `features/onboarding/components/WelcomePage.tsx` com os dois cards em
       destaque equivalente (criar organização → `/organizations/new`; entrar via
       convite) e o aviso de que o admin/gestor de uma organização existente pode
       convidar por e-mail; registrar a rota `/welcome` fora do `AppShell` e

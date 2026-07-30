@@ -8,6 +8,7 @@ import PublicRoute from '@components/shared/PublicRoute'
 import ProtectedRoute from '@components/shared/ProtectedRoute'
 import AppShell from '@components/layout/AppShell'
 import CreateOrganizationPage from '@features/organization/components/CreateOrganizationPage'
+import WelcomePage from '@features/onboarding/components/WelcomePage'
 import AcceptInvitePage from '@features/invitation/components/AcceptInvitePage'
 import ClassroomListPage from '@features/classroom/components/ClassroomListPage'
 import SubjectListPage from '@features/curriculum/components/SubjectListPage'
@@ -62,6 +63,14 @@ export const router = createBrowserRouter([
   },
 
   // Protected: no AppShell (org setup flow)
+  {
+    path: '/welcome',
+    element: (
+      <ProtectedRoute>
+        <WelcomePage />
+      </ProtectedRoute>
+    ),
+  },
   {
     path: '/organizations/new',
     element: (
