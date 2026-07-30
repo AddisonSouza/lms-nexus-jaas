@@ -42,6 +42,27 @@ O sistema SHALL aplicar as seguintes restrições de papel por rota:
 
 ---
 
+### Requirement: Rotas internas exigem organização
+O sistema SHALL exibir um estado vazio, em vez da página, quando o usuário
+autenticado acessar uma rota que depende de organização sem possuir
+`organizationId`. O estado vazio SHALL oferecer os dois caminhos: criar uma
+organização ou entrar em uma existente por convite.
+
+#### Scenario: Usuário sem organização acessa rota interna pela URL
+- **WHEN** usuário autenticado sem `organizationId` acessa `/classrooms`
+- **THEN** sistema exibe o aviso de que ele não faz parte de nenhuma organização,
+  sem renderizar a listagem
+
+#### Scenario: Usuário com organização acessa rota interna
+- **WHEN** usuário autenticado com `organizationId` acessa `/classrooms`
+- **THEN** sistema exibe a página normalmente
+
+#### Scenario: Rota raiz fica fora do guard
+- **WHEN** usuário autenticado sem `organizationId` acessa `/`
+- **THEN** sistema redireciona para `/welcome` em vez de exibir o estado vazio
+
+---
+
 ### Requirement: PublicRoute redireciona usuário autenticado
 O sistema SHALL redirecionar automaticamente o usuário autenticado que tenta acessar rotas públicas (login, registro, recuperação de senha) de volta para o app.
 
