@@ -12,7 +12,7 @@ describe('LoginForm', () => {
   it('renders email and password fields', () => {
     render(<LoginForm onSubmit={vi.fn()} isPending={false} />, { wrapper })
     expect(screen.getByLabelText(/e-mail/i)).toBeTruthy()
-    expect(screen.getByLabelText(/senha/i)).toBeTruthy()
+    expect(screen.getByLabelText('Senha')).toBeTruthy()
   })
 
   it('shows validation errors for empty submit', async () => {
@@ -27,7 +27,7 @@ describe('LoginForm', () => {
     const onSubmit = vi.fn()
     render(<LoginForm onSubmit={onSubmit} isPending={false} />, { wrapper })
     await userEvent.type(screen.getByLabelText(/e-mail/i), 'user@test.com')
-    await userEvent.type(screen.getByLabelText(/senha/i), 'password123')
+    await userEvent.type(screen.getByLabelText('Senha'), 'password123')
     await userEvent.click(screen.getByRole('button', { name: /entrar/i }))
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith({ email: 'user@test.com', password: 'password123' })

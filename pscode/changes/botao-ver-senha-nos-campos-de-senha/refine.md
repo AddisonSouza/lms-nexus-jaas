@@ -45,8 +45,8 @@ mexe nos outros.
 
 ## Subtasks
 
-- [ ] Criar o primitivo `PasswordInput` em `apps/web/src/components/ui/password-input.tsx` com toggle Eye/EyeOff, `forwardRef` e acessibilidade (aria-label alternado, aria-pressed, focável por Tab)
-- [ ] Escrever o teste unitário do `PasswordInput` cobrindo alternância de `type`, troca de `aria-label` e independência entre duas instâncias
-- [ ] Adotar `PasswordInput` no campo de senha de `LoginForm.tsx` e `RegisterForm.tsx`
-- [ ] Adotar `PasswordInput` nos campos `newPassword` e `confirmPassword` de `ResetPasswordPage.tsx`
-- [ ] Rodar lint, typecheck e a suíte de testes do `apps/web` e confirmar que os testes existentes dos forms seguem verdes
+- [x] Criar o primitivo `PasswordInput` em `apps/web/src/components/ui/password-input.tsx` com toggle Eye/EyeOff, `forwardRef` e acessibilidade (aria-label alternado, aria-pressed, focável por Tab)
+- [x] Escrever o teste unitário do `PasswordInput` cobrindo alternância de `type`, troca de `aria-label` e independência entre duas instâncias
+- [x] Adotar `PasswordInput` no campo de senha de `LoginForm.tsx` e `RegisterForm.tsx`
+- [x] Adotar `PasswordInput` nos campos `newPassword` e `confirmPassword` de `ResetPasswordPage.tsx`
+- [x] Rodar lint, typecheck e a suíte de testes do `apps/web` e confirmar que os testes existentes dos forms seguem verdes

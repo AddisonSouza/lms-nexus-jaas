@@ -5,7 +5,7 @@ import { useSearchParams } from 'react-router-dom'
 import { resetPasswordSchema, type ResetPasswordFormData } from '../schemas/resetPasswordSchema'
 import { useResetPassword } from '../hooks/useResetPassword'
 import AuthLayout from '@components/layout/AuthLayout'
-import { Input } from '@components/ui/input'
+import { PasswordInput } from '@components/ui/password-input'
 import { Button } from '@components/ui/button'
 
 function ResetPasswordPage() {
@@ -49,13 +49,13 @@ function ResetPasswordPage() {
 
         <div className="space-y-1">
           <label htmlFor="newPassword" className="text-xs text-muted-foreground">Nova senha</label>
-          <Input {...register('newPassword')} id="newPassword" type="password" autoComplete="new-password" />
+          <PasswordInput {...register('newPassword')} id="newPassword" autoComplete="new-password" />
           {errors.newPassword && <p className="text-xs text-destructive">{errors.newPassword.message}</p>}
         </div>
 
         <div className="space-y-1">
           <label htmlFor="confirmPassword" className="text-xs text-muted-foreground">Confirmar nova senha</label>
-          <Input {...register('confirmPassword')} id="confirmPassword" type="password" autoComplete="new-password" />
+          <PasswordInput {...register('confirmPassword')} id="confirmPassword" autoComplete="new-password" />
           {errors.confirmPassword && (
             <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>
           )}
