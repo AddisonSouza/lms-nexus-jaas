@@ -29,12 +29,16 @@ function AcceptInvitePage() {
   const { token = '' } = useParams<{ token: string }>()
   const navigate = useNavigate()
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  // Esta rota é pública, então não passa pelo ProtectedRoute e precisa esperar o
+  // silent-refresh por conta própria: sem isso, quem clica no link do e-mail já
+  // logado é mandado para o cadastro antes de a sessão ser restaurada.
+  const isBootstrapping = useAuthStore((s) => s.isBootstrapping)
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isBootstrapping && !isAuthenticated) {
       navigate(`/register?invite=${token}`, { replace: true })
     }
-  }, [isAuthenticated, token, navigate])
+  }, [isBootstrapping, isAuthenticated, token, navigate])
 
   const { data: invitation, isPending: isLoadingInfo, isError } = useQuery({
     queryKey: ['invitation', token],
@@ -47,9 +51,9 @@ function AcceptInvitePage() {
     invitation?.organizationId ?? '',
   )
 
-  if (!isAuthenticated) return null
+  if (!isBootstrapping && !isAuthenticated) return null
 
-  if (isLoadingInfo) {
+  if (isBootstrapping || isLoadingInfo) {
     return (
       <Card elevation="md" className="w-full max-w-sm items-center p-8 text-center">
         <Loader2 className="h-10 w-10 animate-spin text-accent" />
