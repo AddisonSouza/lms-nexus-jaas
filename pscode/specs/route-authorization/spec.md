@@ -77,3 +77,33 @@ O sistema SHALL redirecionar automaticamente o usuário autenticado que tenta ac
 #### Scenario: Usuário não autenticado acessa /register
 - **WHEN** usuário sem sessão acessa `/register`
 - **THEN** sistema exibe o formulário de registro normalmente
+
+---
+
+### Requirement: Telas fora do AppShell oferecem saída
+O sistema SHALL exibir uma barra de topo com a ação de sair nas telas que ficam fora da área logada (`/welcome`, `/organizations/new` e `/invitations/:token/accept`), para que o usuário autenticado nunca fique sem como encerrar a sessão. A ação SHALL aparecer apenas quando houver sessão.
+
+#### Scenario: Usuário sem organização sai pela tela de boas-vindas
+- **WHEN** usuário autenticado aciona "Sair" em `/welcome`
+- **THEN** a sessão é encerrada e o sistema vai para `/login`; voltar a `/welcome` não restaura o acesso
+
+#### Scenario: Visitante deslogado abre o aceite de convite
+- **WHEN** usuário sem sessão abre `/invitations/:token/accept`
+- **THEN** a barra de topo não oferece a ação de sair
+
+#### Scenario: Servidor indisponível ao sair
+- **WHEN** a chamada de logout ao servidor falha
+- **THEN** a sessão local é encerrada mesmo assim e o usuário vai para `/login`
+
+---
+
+### Requirement: Rota pública de convite espera a restauração da sessão
+O sistema SHALL aguardar o término do silent-refresh antes de decidir o redirecionamento em `/invitations/:token/accept`. A rota é pública e não passa pelo `ProtectedRoute`, que é quem normalmente espera o bootstrap.
+
+#### Scenario: Usuário já logado clica no link do convite recebido por e-mail
+- **WHEN** usuário com sessão ativa abre `/invitations/:token/accept` numa carga inicial de página
+- **THEN** sistema aguarda a sessão ser restaurada e exibe o convite, sem mandá-lo para `/register`
+
+#### Scenario: Visitante sem sessão abre o link do convite
+- **WHEN** o bootstrap termina e não há sessão
+- **THEN** sistema redireciona para `/register?invite=<token>`

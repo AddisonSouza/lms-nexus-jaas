@@ -1,25 +1,14 @@
 import { LogOut, Moon, Sun } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@store/authStore'
 import { useThemeStore } from '@store/themeStore'
+import { useLogout } from '@features/auth/hooks/useLogout'
 import NotificationBell from '@features/communication/components/NotificationBell'
-import api from '@lib/axios'
 
 function Header() {
   const userId = useAuthStore((s) => s.userId)
-  const clearToken = useAuthStore((s) => s.clearToken)
   const theme = useThemeStore((s) => s.theme)
   const toggleTheme = useThemeStore((s) => s.toggleTheme)
-  const navigate = useNavigate()
-
-  const handleLogout = async () => {
-    try {
-      await api.post('/auth/logout', {}, { withCredentials: true })
-    } finally {
-      clearToken()
-      navigate('/login', { replace: true })
-    }
-  }
+  const handleLogout = useLogout()
 
   return (
     <header className="flex h-14 items-center justify-between bg-surface px-4">

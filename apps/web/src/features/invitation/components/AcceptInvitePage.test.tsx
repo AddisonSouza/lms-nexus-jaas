@@ -15,10 +15,12 @@ vi.mock('react-router-dom', async (importOriginal) => {
 })
 
 let mockIsAuthenticated = true
+let mockIsBootstrapping = false
 
 vi.mock('@store/authStore', () => ({
-  useAuthStore: vi.fn((selector: (s: { isAuthenticated: boolean }) => unknown) =>
-    selector({ isAuthenticated: mockIsAuthenticated }),
+  useAuthStore: vi.fn(
+    (selector: (s: { isAuthenticated: boolean; isBootstrapping: boolean }) => unknown) =>
+      selector({ isAuthenticated: mockIsAuthenticated, isBootstrapping: mockIsBootstrapping }),
   ),
 }))
 
@@ -49,6 +51,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   mockNavigate.mockReset()
   mockIsAuthenticated = true
+  mockIsBootstrapping = false
 })
 
 describe('AcceptInvitePage', () => {
@@ -108,6 +111,30 @@ describe('AcceptInvitePage', () => {
   describe('when unauthenticated', () => {
     it('redirects to /register?invite=TOKEN', () => {
       mockIsAuthenticated = false
+
+      renderPage('tok123')
+
+      expect(mockNavigate).toHaveBeenCalledWith('/register?invite=tok123', { replace: true })
+    })
+  })
+
+  // Rota pública: não passa pelo ProtectedRoute, então precisa esperar o
+  // silent-refresh sozinha. Sem isso, quem clica no link do e-mail já logado é
+  // mandado para o cadastro antes de a sessão ser restaurada.
+  describe('while the session is still being restored', () => {
+    it('waits instead of redirecting to /register', () => {
+      mockIsAuthenticated = false
+      mockIsBootstrapping = true
+
+      renderPage('tok123')
+
+      expect(mockNavigate).not.toHaveBeenCalled()
+      expect(screen.getByText(/carregando convite/i)).toBeTruthy()
+    })
+
+    it('redirects once the bootstrap finishes with no session', () => {
+      mockIsAuthenticated = false
+      mockIsBootstrapping = false
 
       renderPage('tok123')
 
