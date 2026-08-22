@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from 'lucide-react'
 import { loginSchema, type LoginFormData } from '../schemas/loginSchema'
 import { Input } from '@components/ui/input'
+import { PasswordInput } from '@components/ui/password-input'
 import { Button } from '@components/ui/button'
 
 interface Props {
@@ -29,7 +30,7 @@ function LoginForm({ onSubmit, isPending }: Props) {
 
       <div className="space-y-1">
         <label htmlFor="password" className="text-xs text-muted-foreground">Senha</label>
-        <Input {...register('password')} id="password" type="password" autoComplete="current-password" />
+        <PasswordInput {...register('password')} id="password" autoComplete="current-password" />
         {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
       </div>
 
