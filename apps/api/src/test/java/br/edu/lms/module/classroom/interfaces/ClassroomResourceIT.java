@@ -56,13 +56,4 @@ class ClassroomResourceIT {
                 .then()
                 .statusCode(401);
     }
-
-    @Test
-    void regenerateInviteCode_withoutToken_returns401() {
-        given()
-                .contentType("application/json")
-                .when().post("/classrooms/some-id/invite-code/regenerate")
-                .then()
-                .statusCode(401);
-    }
 }

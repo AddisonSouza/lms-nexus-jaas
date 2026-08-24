@@ -27,18 +27,6 @@ public class GetClassroomService implements GetClassroomUseCase {
             }
         }
 
-        var response = CreateClassroomService.toResponse(classroom);
-        if (!isManager) {
-            return ClassroomResponse.builder()
-                    .id(response.getId())
-                    .name(response.getName())
-                    .description(response.getDescription())
-                    .academicPeriod(response.getAcademicPeriod())
-                    .status(response.getStatus())
-                    .organizationId(response.getOrganizationId())
-                    .createdAt(response.getCreatedAt())
-                    .build();
-        }
-        return response;
+        return CreateClassroomService.toResponse(classroom, requesterRole);
     }
 }

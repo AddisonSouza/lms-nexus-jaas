@@ -67,8 +67,25 @@ Any authenticated organization member SHALL be able to retrieve a classroom by I
 
 #### Scenario: Authorized access
 - **WHEN** a member requests a classroom they have access to
-- **THEN** the system returns the full classroom details including invite code (only visible to ADMIN_ORG/GESTOR)
+- **THEN** the system returns the full classroom details, subject to the invite code visibility rule below
 
 #### Scenario: Unauthorized access
 - **WHEN** a `PROFESSOR` or `ALUNO` requests a classroom they are not a member of
 - **THEN** the system returns HTTP 403
+
+---
+
+### Requirement: Invite code visibility
+`ADMIN_ORG`, `GESTOR`, and `PROFESSOR` SHALL receive the classroom's invite code in both the listing and the detail response. `ALUNO` SHALL receive `inviteCode: null` — a student joins with a code but never gets it back from the system. The same rule SHALL apply to `GET /classrooms` and `GET /classrooms/{id}`.
+
+#### Scenario: Manager or teacher sees the code
+- **WHEN** an `ADMIN_ORG`, `GESTOR`, or `PROFESSOR` lists classrooms or opens a classroom they can access
+- **THEN** each classroom carries its 6-character invite code
+
+#### Scenario: Student never sees the code
+- **WHEN** an `ALUNO` lists classrooms or opens a classroom they are a member of
+- **THEN** every classroom is returned with `inviteCode: null`
+
+#### Scenario: Code shown in the classroom list
+- **WHEN** a user who may see the code opens the classroom list in the web app
+- **THEN** a "Código" column is rendered with the code and a copy button; for an `ALUNO` the column is not rendered at all

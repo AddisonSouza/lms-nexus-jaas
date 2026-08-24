@@ -1,10 +1,9 @@
 import { useState, type ReactNode } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Pencil, Trash2, Copy, RefreshCw } from 'lucide-react'
+import { ArrowLeft, Pencil, Trash2, Copy } from 'lucide-react'
 import { useClassroom } from '../hooks/useClassroom'
 import { useUpdateClassroom } from '../hooks/useUpdateClassroom'
 import { useDeleteClassroom } from '../hooks/useDeleteClassroom'
-import { useRegenerateInviteCode } from '../hooks/useRegenerateInviteCode'
 import { useAuthStore } from '@store/authStore'
 import ClassroomFormDialog from './ClassroomFormDialog'
 import ClassroomMembersPanel from './ClassroomMembersPanel'
@@ -27,11 +26,9 @@ function ClassroomDetailPage({ announcementFeedSlot }: ClassroomDetailPageProps)
   const { data: classroom, isLoading } = useClassroom(id!)
   const updateClassroom = useUpdateClassroom(id!)
   const deleteClassroom = useDeleteClassroom()
-  const regenerateCode = useRegenerateInviteCode(id!)
 
   const role = useAuthStore((s) => s.role)
   const canManage = role === 'ADMIN_ORG' || role === 'GESTOR'
-  const canRegenerateCode = role === 'ADMIN_ORG' || role === 'GESTOR' || role === 'PROFESSOR'
 
   const handleUpdate = (data: ClassroomFormData) => {
     updateClassroom.mutate(data, { onSuccess: () => setShowEdit(false) })
@@ -96,16 +93,6 @@ function ClassroomDetailPage({ announcementFeedSlot }: ClassroomDetailPageProps)
                 >
                   <Copy className="h-4 w-4" />
                 </button>
-                {canRegenerateCode && (
-                  <button
-                    onClick={() => regenerateCode.mutate()}
-                    disabled={regenerateCode.isPending}
-                    className="text-muted-foreground hover:text-foreground disabled:opacity-50"
-                    title="Regenerar código"
-                  >
-                    <RefreshCw className={`h-4 w-4 ${regenerateCode.isPending ? 'animate-spin' : ''}`} />
-                  </button>
-                )}
               </div>
             </div>
           )}

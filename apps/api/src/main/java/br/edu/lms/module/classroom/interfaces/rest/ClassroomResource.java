@@ -12,7 +12,6 @@ import br.edu.lms.module.classroom.domain.port.in.GetClassroomUseCase;
 import br.edu.lms.module.classroom.domain.port.in.JoinClassroomUseCase;
 import br.edu.lms.module.classroom.domain.port.in.ListClassroomMembersUseCase;
 import br.edu.lms.module.classroom.domain.port.in.ListClassroomsUseCase;
-import br.edu.lms.module.classroom.domain.port.in.RegenerateInviteCodeUseCase;
 import br.edu.lms.module.classroom.domain.port.in.RemoveClassroomMemberUseCase;
 import br.edu.lms.module.classroom.domain.port.in.UpdateClassroomUseCase;
 import br.edu.lms.module.classroom.interfaces.rest.dto.AddMemberRequest;
@@ -47,7 +46,6 @@ public class ClassroomResource {
     private final RemoveClassroomMemberUseCase removeClassroomMemberUseCase;
     private final ListClassroomMembersUseCase listClassroomMembersUseCase;
     private final JoinClassroomUseCase joinClassroomUseCase;
-    private final RegenerateInviteCodeUseCase regenerateInviteCodeUseCase;
     private final JsonWebToken jwt;
 
     @GET
@@ -179,19 +177,6 @@ public class ClassroomResource {
                         .userId(userId)
                         .build());
         return Response.status(Response.Status.CREATED).entity(result).build();
-    }
-
-    @POST
-    @Path("/{id}/invite-code/regenerate")
-    @RolesAllowed({"ADMIN_ORG", "GESTOR", "PROFESSOR"})
-    @Operation(summary = "Regenerar código de convite da turma")
-    @APIResponse(responseCode = "200", description = "Código regenerado")
-    @APIResponse(responseCode = "404", description = "Turma não encontrada")
-    @APIResponse(responseCode = "422", description = "Turma arquivada")
-    public Response regenerateInviteCode(@PathParam("id") String id) {
-        var orgId = (String) jwt.getClaim("org");
-        var result = regenerateInviteCodeUseCase.execute(ClassroomId.of(id), orgId);
-        return Response.ok(result).build();
     }
 
     private String primaryRole() {

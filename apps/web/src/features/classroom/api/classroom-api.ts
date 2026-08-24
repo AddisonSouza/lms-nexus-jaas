@@ -68,8 +68,3 @@ export async function joinClassroom(inviteCode: string) {
   const res = await api.post('/classrooms/join', { inviteCode })
   return classroomSchema.parse(res.data)
 }
-
-export async function regenerateInviteCode(classroomId: string) {
-  const res = await api.post(`/classrooms/${classroomId}/invite-code/regenerate`)
-  return classroomSchema.parse(res.data)
-}
