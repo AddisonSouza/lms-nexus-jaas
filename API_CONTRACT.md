@@ -339,18 +339,6 @@ Soft delete (preenche `deleted_at`).
 
 ---
 
-**`POST /classrooms/{id}/invite-code/regenerate`** · `ADMIN_ORG | GESTOR | PROFESSOR`
-
-Invalida o código atual e gera um novo código de 6 chars.
-
-| Código | Descrição |
-|---|---|
-| `200` | `{ inviteCode: "string" }` |
-| `404` | Turma não encontrada. |
-| `422` | Turma arquivada. |
-
----
-
 ## Módulo: `curriculum` — Disciplinas e Conteúdo
 
 ### RF-09 — Gestão de Disciplinas 📋
@@ -673,7 +661,7 @@ Todos os recursos usam `deleted_at TIMESTAMP NULL`. Queries filtram `WHERE delet
 | RF-05 | organization | Criação de Organização | ✅ | `POST /organizations` |
 | RF-06 | organization | Gestão de Membros | ✅ | `POST /organizations/{id}/invitations` · `GET /invitations/{token}` · `POST /invitations/{token}/accept` · `DELETE /organizations/{id}/members/{userId}` |
 | RF-07 | classroom | Gestão de Turmas | ✅ | `GET /classrooms` · `GET /classrooms/{id}` · `POST /classrooms` · `PUT /classrooms/{id}` · `DELETE /classrooms/{id}` · `GET /classrooms/{id}/members` · `POST /classrooms/{id}/members` · `DELETE /classrooms/{id}/members/{userId}` |
-| RF-08 | classroom | Ingresso via Código | 🔍 | `POST /classrooms/join` · `POST /classrooms/{id}/invite-code/regenerate` |
+| RF-08 | classroom | Ingresso via Código | 🔍 | `POST /classrooms/join` |
 | RF-09 | curriculum | Gestão de Disciplinas | 📋 | `POST /subjects` · `POST /subjects/{id}/classrooms` · `POST /subjects/{id}/teachers` |
 | RF-10 | curriculum | Conteúdo Complementar | 📋 | `POST /subjects/{id}/contents` · `GET /subjects/{id}/contents` |
 | RF-11 | assessment | Criação de Tarefas | 📋 | `POST /tasks` |

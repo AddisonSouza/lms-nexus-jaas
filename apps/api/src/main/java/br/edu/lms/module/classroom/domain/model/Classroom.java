@@ -18,7 +18,10 @@ public class Classroom {
     private String description;
     private String academicPeriod;
     private ClassroomStatus status;
-    private InviteCode inviteCode;
+
+    /** Gerado uma única vez na criação da turma e imutável para sempre (RF-08). */
+    private final InviteCode inviteCode;
+
     private String organizationId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

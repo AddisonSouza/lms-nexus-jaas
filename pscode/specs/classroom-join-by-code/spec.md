@@ -19,17 +19,13 @@ An authenticated user with role ALUNO SHALL be able to join a classroom by submi
 
 ---
 
-### Requirement: Regenerate invite code
-A user with role PROFESSOR, GESTOR, or ADMIN_ORG SHALL be able to regenerate the invite code for a classroom they are associated with. The old code SHALL be immediately invalidated.
+### Requirement: Immutable invite code
+A classroom's invite code SHALL be generated once at creation and SHALL never change. The system SHALL expose no endpoint to regenerate it, and updating a classroom SHALL preserve the existing code.
 
-#### Scenario: Successful regeneration
-- **WHEN** a PROFESSOR or GESTOR requests regeneration for an ACTIVE classroom
-- **THEN** the system generates a new 6-character code, persists it, and returns 200 with the updated classroom data including the new code
+#### Scenario: Code survives a classroom update
+- **WHEN** an `ADMIN_ORG` or `GESTOR` updates a classroom's name, description, academic period, or status
+- **THEN** the classroom keeps the invite code it was created with
 
-#### Scenario: Regeneration blocked for ALUNO
-- **WHEN** an ALUNO requests invite code regeneration
-- **THEN** the system returns 403 Forbidden
-
-#### Scenario: Regeneration on archived classroom
-- **WHEN** regeneration is requested for an ARCHIVED classroom
-- **THEN** the system returns 409 indicating the classroom is archived
+#### Scenario: No regeneration endpoint
+- **WHEN** any actor calls `POST /classrooms/{id}/invite-code/regenerate`
+- **THEN** the system returns 404, as the endpoint does not exist

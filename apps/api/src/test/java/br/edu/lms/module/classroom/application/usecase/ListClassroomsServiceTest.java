@@ -75,4 +75,24 @@ class ListClassroomsServiceTest {
 
         assertThat(result).isEmpty();
     }
+
+    @Test
+    void adminOrgGestorAndProfessorShouldSeeInviteCode() {
+        when(classroomRepository.findAllByOrganization("org-1")).thenReturn(List.of(classroom("A")));
+        when(classroomRepository.findAllByMember("user-3", "org-1")).thenReturn(List.of(classroom("D")));
+
+        assertThat(sut.execute("org-1", "user-1", "ADMIN_ORG").getFirst().getInviteCode()).isEqualTo("ABC123");
+        assertThat(sut.execute("org-1", "user-2", "GESTOR").getFirst().getInviteCode()).isEqualTo("ABC123");
+        assertThat(sut.execute("org-1", "user-3", "PROFESSOR").getFirst().getInviteCode()).isEqualTo("ABC123");
+    }
+
+    @Test
+    void alunoShouldNotSeeInviteCode() {
+        when(classroomRepository.findAllByMember("user-4", "org-1")).thenReturn(List.of(classroom("E")));
+
+        var result = sut.execute("org-1", "user-4", "ALUNO");
+
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst().getInviteCode()).isNull();
+    }
 }

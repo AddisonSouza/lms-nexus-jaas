@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, BookOpen, LogIn } from 'lucide-react'
+import { Plus, BookOpen, LogIn, Copy } from 'lucide-react'
 import { useClassrooms } from '../hooks/useClassrooms'
 import { useCreateClassroom } from '../hooks/useCreateClassroom'
 import { useAuthStore } from '@store/authStore'
@@ -20,6 +20,7 @@ function ClassroomListPage() {
 
   const role = useAuthStore((s) => s.role)
   const canManage = role === 'ADMIN_ORG' || role === 'GESTOR'
+  const canSeeInviteCode = canManage || role === 'PROFESSOR'
 
   const handleCreate = (data: ClassroomFormData) => {
     createClassroom.mutate(data, { onSuccess: () => setShowCreate(false) })
@@ -61,6 +62,7 @@ function ClassroomListPage() {
               <TableRow>
                 <TableHead>Nome</TableHead>
                 <TableHead>Período</TableHead>
+                {canSeeInviteCode && <TableHead>Código</TableHead>}
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
@@ -73,6 +75,22 @@ function ClassroomListPage() {
                     </Link>
                   </TableCell>
                   <TableCell className="text-muted-foreground">{c.academicPeriod}</TableCell>
+                  {canSeeInviteCode && (
+                    <TableCell>
+                      {c.inviteCode && (
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-medium tracking-widest">{c.inviteCode}</span>
+                          <button
+                            onClick={() => navigator.clipboard.writeText(c.inviteCode!)}
+                            className="text-muted-foreground hover:text-foreground"
+                            title="Copiar código"
+                          >
+                            <Copy className="h-4 w-4" />
+                          </button>
+                        </div>
+                      )}
+                    </TableCell>
+                  )}
                   <TableCell>
                     <Badge variant={c.status === 'ACTIVE' ? 'accent-2' : 'neutral'}>
                       {c.status === 'ACTIVE' ? 'Ativa' : 'Arquivada'}

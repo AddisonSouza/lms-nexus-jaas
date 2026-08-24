@@ -307,9 +307,9 @@
 
 **Descrição:** Alunos ingressam em turmas usando link público ou código de 6 caracteres, sem convite por e-mail.
 
-**Atores:** `ALUNO` (ingresso) | `PROFESSOR`, `GESTOR` (geração do código)  
+**Atores:** `ALUNO` (ingresso) | `ADMIN_ORG`, `GESTOR`, `PROFESSOR` (consulta do código)  
 **Módulo BE:** `classroom` | `JoinClassroomUseCase`  
-**Endpoints:** `POST /classrooms/join` | `POST /classrooms/{id}/invite-code/regenerate`
+**Endpoints:** `POST /classrooms/join`
 
 **Fluxo Principal:**
 1. Aluno acessa o link ou digita o código
@@ -329,6 +329,8 @@
 - [ ] Código inválido retorna mensagem clara
 - [ ] Turma arquivada bloqueia novo ingresso
 - [ ] Ingresso idempotente — segundo ingresso não cria duplicata
+- [ ] Código fixo — gerado na criação da turma e nunca regerado
+- [ ] Código visível para `ADMIN_ORG`, `GESTOR` e `PROFESSOR`; `ALUNO` nunca o recebe
 
 ---
 

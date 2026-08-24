@@ -22,7 +22,7 @@ public class ListClassroomsService implements ListClassroomsUseCase {
                 : classroomRepository.findAllByMember(requesterId, organizationId);
 
         return classrooms.stream()
-                .map(CreateClassroomService::toResponse)
+                .map(c -> CreateClassroomService.toResponse(c, requesterRole))
                 .toList();
     }
 }

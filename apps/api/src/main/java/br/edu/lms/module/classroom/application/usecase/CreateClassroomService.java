@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -20,6 +21,12 @@ import java.time.LocalDateTime;
 public class CreateClassroomService implements CreateClassroomUseCase {
 
     private final ClassroomRepository classroomRepository;
+
+    /**
+     * Papéis que enxergam o código de convite da turma. O ALUNO entra pelo código,
+     * mas nunca o recebe de volta na listagem nem no detalhe (RF-08).
+     */
+    private static final Set<String> ROLES_WITH_INVITE_CODE = Set.of("ADMIN_ORG", "GESTOR", "PROFESSOR");
 
     @Override
     public ClassroomResponse execute(CreateClassroomCommand command) {
@@ -38,6 +45,15 @@ public class CreateClassroomService implements CreateClassroomUseCase {
         log.info("Classroom created: {} in org: {}", saved.getId().getValue(), command.getOrganizationId());
 
         return toResponse(saved);
+    }
+
+    /** Mapeia a turma escondendo o código de convite de quem não pode vê-lo. */
+    static ClassroomResponse toResponse(Classroom c, String requesterRole) {
+        var response = toResponse(c);
+        if (ROLES_WITH_INVITE_CODE.contains(requesterRole)) {
+            return response;
+        }
+        return response.toBuilder().inviteCode(null).build();
     }
 
     static ClassroomResponse toResponse(Classroom c) {

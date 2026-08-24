@@ -56,9 +56,9 @@ O aluno continua entrando pelo código, mas não vê o código das suas turmas.
 
 ## Subtasks
 
-- [ ] Remover a regeneração no back-end: endpoint, use case, service e testes (#79)
-- [ ] Tornar `Classroom.inviteCode` imutável (`final`) no domínio (#80)
-- [ ] Unificar visibilidade do `inviteCode` (ADMIN_ORG, GESTOR, PROFESSOR) em `ListClassroomsService` e `GetClassroomService`, com testes (#81)
-- [ ] Remover `useRegenerateInviteCode`, `regenerateInviteCode` e o botão de regenerar do `ClassroomDetailPage` (#82)
-- [ ] Adicionar a coluna "Código" com botão copiar em `ClassroomListPage`, visível só para os papéis que recebem o código (#83)
-- [ ] Atualizar `API_CONTRACT.md`, `docs/requirements/RF.md` e as specs `classroom-join-by-code` / `classroom-management` (#84)
+- [x] Remover a regeneração no back-end: endpoint, use case, service e testes (#79)
+- [x] Tornar `Classroom.inviteCode` imutável (`final`) no domínio (#80)
+- [x] Unificar visibilidade do `inviteCode` (ADMIN_ORG, GESTOR, PROFESSOR) em `ListClassroomsService` e `GetClassroomService`, com testes (#81)
+- [x] Remover `useRegenerateInviteCode`, `regenerateInviteCode` e o botão de regenerar do `ClassroomDetailPage` (#82)
+- [x] Adicionar a coluna "Código" com botão copiar em `ClassroomListPage`, visível só para os papéis que recebem o código (#83)
+- [x] Atualizar `API_CONTRACT.md`, `docs/requirements/RF.md` e as specs `classroom-join-by-code` / `classroom-management` (#84)
