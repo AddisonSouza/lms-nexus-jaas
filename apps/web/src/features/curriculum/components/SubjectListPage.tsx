@@ -76,7 +76,7 @@ function SubjectListPage() {
       ) : subjects?.length === 0 ? (
         <p className="text-muted-foreground">Nenhuma disciplina encontrada.</p>
       ) : (
-        <Card elevation="sm" className="p-0">
+        <Card elevation="sm" className="overflow-hidden p-0">
           <Table>
             <TableHeader>
               <TableRow>
