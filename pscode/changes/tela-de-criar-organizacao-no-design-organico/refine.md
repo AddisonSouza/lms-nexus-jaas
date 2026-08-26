@@ -51,5 +51,5 @@ os mesmos campos, as mesmas validações e o mesmo fluxo depois de criar.
 
 - [x] Mover o layout da tela para `CreateOrganizationPage`: cabeçalho (h1 + subtítulo), `Card elevation="md"`, círculo com `Building2` e `CardKicker` (#87)
 - [x] Enxugar `CreateOrganizationForm` para campos + submit, com `aria-invalid`, `role="alert"` e contador `n/500` na descrição (#89)
-- [ ] Adicionar o botão "Voltar" para `/welcome` abaixo do submit (#91)
+- [x] Adicionar o botão "Voltar" para `/welcome` abaixo do submit (#91)
 - [ ] Ajustar `CreateOrganizationForm.test.tsx` e criar `CreateOrganizationPage.test.tsx`; rodar lint, typecheck e a suíte Vitest (#93)

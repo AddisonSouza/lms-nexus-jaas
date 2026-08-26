@@ -1,5 +1,7 @@
+import { Link } from 'react-router-dom'
 import { Building2 } from 'lucide-react'
 import { Card, CardKicker } from '@components/ui/card'
+import { Button } from '@components/ui/button'
 import CreateOrganizationForm from './CreateOrganizationForm'
 
 function CreateOrganizationPage() {
@@ -19,6 +21,14 @@ function CreateOrganizationPage() {
         </div>
         <CardKicker>Criar</CardKicker>
         <CreateOrganizationForm />
+        <Button
+          render={<Link to="/welcome" />}
+          nativeButton={false}
+          variant="ghost"
+          className="w-full"
+        >
+          Voltar
+        </Button>
       </Card>
     </div>
   )
