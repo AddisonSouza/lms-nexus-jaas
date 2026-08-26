@@ -2,9 +2,15 @@ import { Link } from 'react-router-dom'
 import { Building2 } from 'lucide-react'
 import { Card, CardKicker } from '@components/ui/card'
 import { Button } from '@components/ui/button'
+import { useAuthStore } from '@store/authStore'
 import CreateOrganizationForm from './CreateOrganizationForm'
 
 function CreateOrganizationPage() {
+  const organizationId = useAuthStore((s) => s.organizationId)
+  // /welcome tells the user they belong to no organization; whoever already has
+  // one got here from inside the app, so send them back to their dashboard.
+  const backTo = organizationId ? `/organizations/${organizationId}` : '/welcome'
+
   return (
     <div className="w-full max-w-md space-y-6">
       <div className="space-y-2 text-center">
@@ -22,7 +28,7 @@ function CreateOrganizationPage() {
         <CardKicker>Criar</CardKicker>
         <CreateOrganizationForm />
         <Button
-          render={<Link to="/welcome" />}
+          render={<Link to={backTo} />}
           nativeButton={false}
           variant="ghost"
           className="w-full"
