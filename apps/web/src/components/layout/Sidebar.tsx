@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom'
 import { BookOpen, BookOpenCheck, ClipboardList, LayoutDashboard } from 'lucide-react'
 import { useAuthStore } from '@store/authStore'
 import { CardKicker } from '@components/ui/card'
+import OrganizationSwitcher from '@features/organization/components/OrganizationSwitcher'
 import { cn } from '@features/lib/utils'
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
@@ -16,6 +17,10 @@ function Sidebar() {
 
   return (
     <aside className="w-56 shrink-0 p-4">
+      <div className="mb-3">
+        <OrganizationSwitcher />
+      </div>
+
       <nav className="flex flex-col gap-1">
         <CardKicker className="px-3 pb-1">Ensino</CardKicker>
 
