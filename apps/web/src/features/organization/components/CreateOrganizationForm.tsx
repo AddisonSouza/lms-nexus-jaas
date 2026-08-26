@@ -3,19 +3,24 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from 'lucide-react'
 import { createOrganizationSchema, type CreateOrganizationFormData } from '../schemas/createOrganizationSchema'
 import { useCreateOrganization } from '../hooks/useCreateOrganization'
-import { Card } from '@components/ui/card'
 import { Input } from '@components/ui/input'
 import { Textarea } from '@components/ui/textarea'
 import { Button } from '@components/ui/button'
+
+// Espelha o max(500) de createOrganizationSchema, só para exibir o contador.
+const DESCRIPTION_MAX_LENGTH = 500
 
 function CreateOrganizationForm() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<CreateOrganizationFormData>({
     resolver: zodResolver(createOrganizationSchema),
   })
+
+  const descriptionLength = (watch('description') ?? '').length
 
   const { mutate: create, isPending, error } = useCreateOrganization()
 
@@ -29,37 +34,57 @@ function CreateOrganizationForm() {
         : null
 
   return (
-    <Card elevation="md" className="w-full max-w-sm p-6">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <h2 className="font-heading text-2xl">Criar organização</h2>
+    <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-4">
+      {errorMessage && (
+        <p role="alert" className="text-sm text-destructive">
+          {errorMessage}
+        </p>
+      )}
 
-        {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
+      <div className="space-y-1">
+        <label htmlFor="org-name" className="text-xs text-muted-foreground">Nome</label>
+        <Input
+          {...register('name')}
+          id="org-name"
+          type="text"
+          placeholder="Ex: Escola Municipal Centro"
+          aria-invalid={!!errors.name}
+        />
+        {errors.name && (
+          <p role="alert" className="text-xs text-destructive">
+            {errors.name.message}
+          </p>
+        )}
+      </div>
 
-        <div className="space-y-1">
-          <label htmlFor="org-name" className="text-xs text-muted-foreground">Nome</label>
-          <Input {...register('name')} id="org-name" type="text" placeholder="Ex: Escola Municipal Centro" />
-          {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
+      <div className="space-y-1">
+        <label htmlFor="org-desc" className="text-xs text-muted-foreground">
+          Descrição <span className="opacity-70">(opcional)</span>
+        </label>
+        <Textarea
+          {...register('description')}
+          id="org-desc"
+          rows={3}
+          placeholder="Descreva brevemente sua organização"
+          aria-invalid={!!errors.description}
+        />
+        <div className="flex items-start gap-2">
+          {errors.description && (
+            <p role="alert" className="text-xs text-destructive">
+              {errors.description.message}
+            </p>
+          )}
+          <span className="ml-auto text-[11px] text-muted-foreground tabular-nums">
+            {descriptionLength}/{DESCRIPTION_MAX_LENGTH}
+          </span>
         </div>
+      </div>
 
-        <div className="space-y-1">
-          <label htmlFor="org-desc" className="text-xs text-muted-foreground">
-            Descrição <span className="opacity-70">(opcional)</span>
-          </label>
-          <Textarea
-            {...register('description')}
-            id="org-desc"
-            rows={3}
-            placeholder="Descreva brevemente sua organização"
-          />
-          {errors.description && <p className="text-xs text-destructive">{errors.description.message}</p>}
-        </div>
-
-        <Button type="submit" disabled={isPending} className="w-full">
-          {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-          Criar organização
-        </Button>
-      </form>
-    </Card>
+      <Button type="submit" disabled={isPending} className="w-full">
+        {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+        Criar organização
+      </Button>
+    </form>
   )
 }
 

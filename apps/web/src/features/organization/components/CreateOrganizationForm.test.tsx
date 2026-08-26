@@ -50,6 +50,25 @@ describe('CreateOrganizationForm', () => {
     })
   })
 
+  it('marks the name field invalid and announces the error', async () => {
+    render(<CreateOrganizationForm />, { wrapper })
+    await userEvent.click(screen.getByRole('button', { name: /criar organização/i }))
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert').textContent).toMatch(/ao menos 2 caracteres/i)
+    })
+    expect(screen.getByLabelText(/nome/i).getAttribute('aria-invalid')).toBe('true')
+  })
+
+  it('counts the characters typed in the description', async () => {
+    render(<CreateOrganizationForm />, { wrapper })
+    expect(screen.getByText('0/500')).toBeTruthy()
+
+    await userEvent.type(screen.getByLabelText(/descrição/i), 'Escola')
+
+    await waitFor(() => expect(screen.getByText('6/500')).toBeTruthy())
+  })
+
   it('creates org and switches organization on success', async () => {
     vi.mocked(orgApi.createOrganization).mockResolvedValue({
       id: 'org-1', name: 'Test Org', description: null, ownerId: 'u1', createdAt: '',
@@ -78,7 +97,7 @@ describe('CreateOrganizationForm', () => {
     await userEvent.click(screen.getByRole('button', { name: /criar organização/i }))
 
     await waitFor(() => {
-      expect(screen.getByText(/já possui uma organização com esse nome/i)).toBeTruthy()
+      expect(screen.getByRole('alert').textContent).toMatch(/já possui uma organização com esse nome/i)
     })
   })
 })
