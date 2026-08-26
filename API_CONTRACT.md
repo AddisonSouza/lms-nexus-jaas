@@ -170,6 +170,25 @@ Reenvia e-mail de confirmação. Sempre retorna `200`.
 
 ---
 
+**`GET /organizations`** · Autenticado
+
+Lista as organizações do usuário autenticado (pelo `sub` do JWT), com o papel em
+cada uma, ordenadas por nome. Vínculos e organizações removidos (soft delete)
+não aparecem.
+
+```json
+[
+  { "id": "uuid", "name": "string", "role": "ADMIN_ORG | GESTOR | PROFESSOR | ALUNO" }
+]
+```
+
+| Código | Descrição |
+|---|---|
+| `200` | Lista das organizações do usuário. Array vazio se ele não pertence a nenhuma. |
+| `401` | Não autenticado. |
+
+---
+
 ### RF-06 — Gestão de Membros e Convites ✅
 
 **`POST /organizations/{id}/invitations`** · `ADMIN_ORG`
@@ -658,7 +677,7 @@ Todos os recursos usam `deleted_at TIMESTAMP NULL`. Queries filtram `WHERE delet
 | RF-02 | identity | Autenticação | ✅ | `POST /auth/login` · `POST /auth/logout` · `POST /auth/refresh` |
 | RF-03 | identity | Recuperação de Senha | ✅ | `POST /auth/forgot-password` · `POST /auth/reset-password` |
 | RF-04 | identity | Confirmação de E-mail | ✅ | `GET /auth/confirm-email` · `POST /auth/resend-confirmation` |
-| RF-05 | organization | Criação de Organização | ✅ | `POST /organizations` |
+| RF-05 | organization | Criação de Organização | ✅ | `POST /organizations` · `GET /organizations` |
 | RF-06 | organization | Gestão de Membros | ✅ | `POST /organizations/{id}/invitations` · `GET /invitations/{token}` · `POST /invitations/{token}/accept` · `DELETE /organizations/{id}/members/{userId}` |
 | RF-07 | classroom | Gestão de Turmas | ✅ | `GET /classrooms` · `GET /classrooms/{id}` · `POST /classrooms` · `PUT /classrooms/{id}` · `DELETE /classrooms/{id}` · `GET /classrooms/{id}/members` · `POST /classrooms/{id}/members` · `DELETE /classrooms/{id}/members/{userId}` |
 | RF-08 | classroom | Ingresso via Código | 🔍 | `POST /classrooms/join` |
