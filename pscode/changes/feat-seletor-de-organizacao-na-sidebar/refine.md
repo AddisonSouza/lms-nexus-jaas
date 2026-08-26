@@ -81,4 +81,4 @@ contexto novo; ao pé da lista, um atalho para criar outra.
 - [x] [FE] `listOrganizations` e `switchOrganization` em `organization-api.ts`, com os hooks `useOrganizations` e `useSwitchOrganization` (#108)
 - [x] [FE] `OrganizationSwitcher` (pill + popover "Suas organizações" + criar organização) encaixado no topo da `Sidebar` (#109)
 - [x] [FE] "Voltar" contextual em `CreateOrganizationPage` (#110)
-- [ ] [FE] Testes do switcher, dos hooks e do "Voltar"; rodar lint, typecheck e a suíte Vitest (#111)
+- [x] [FE] Testes do switcher, dos hooks e do "Voltar"; rodar lint, typecheck e a suíte Vitest (#111)
