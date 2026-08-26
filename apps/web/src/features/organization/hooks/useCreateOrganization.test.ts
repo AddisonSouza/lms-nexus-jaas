@@ -4,10 +4,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createElement } from 'react'
 import { useCreateOrganization } from './useCreateOrganization'
 import * as orgApi from '../api/organization-api'
-import api from '@lib/axios'
 
 vi.mock('../api/organization-api')
-vi.mock('@lib/axios', () => ({ default: { post: vi.fn() } }))
 
 const mockSetToken = vi.fn()
 const mockNavigate = vi.fn()
@@ -33,7 +31,7 @@ describe('useCreateOrganization', () => {
     vi.mocked(orgApi.createOrganization).mockResolvedValue({
       id: 'org-42', name: 'My Org', description: null, ownerId: 'u1', createdAt: '',
     })
-    vi.mocked(api.post).mockResolvedValue({ data: { accessToken: 'fresh-token' } })
+    vi.mocked(orgApi.switchOrganization).mockResolvedValue('fresh-token')
 
     const { result } = renderHook(() => useCreateOrganization(), { wrapper })
 
@@ -41,11 +39,7 @@ describe('useCreateOrganization', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(api.post).toHaveBeenCalledWith(
-      '/auth/switch-organization',
-      { organizationId: 'org-42' },
-      expect.objectContaining({ withCredentials: true }),
-    )
+    expect(orgApi.switchOrganization).toHaveBeenCalledWith('org-42')
     expect(mockSetToken).toHaveBeenCalledWith('fresh-token')
     expect(mockNavigate).toHaveBeenCalledWith('/organizations/org-42')
   })

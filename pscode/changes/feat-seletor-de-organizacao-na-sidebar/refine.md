@@ -78,7 +78,7 @@ contexto novo; ao pé da lista, um atalho para criar outra.
 
 - [x] [BE] Método de repositório, use case e endpoint `GET /organizations` (id, name, role), com teste de integração (#106)
 - [x] [BE] Registrar o `GET /organizations` no `API_CONTRACT.md` (#107)
-- [ ] [FE] `listOrganizations` e `switchOrganization` em `organization-api.ts`, com os hooks `useOrganizations` e `useSwitchOrganization` (#108)
+- [x] [FE] `listOrganizations` e `switchOrganization` em `organization-api.ts`, com os hooks `useOrganizations` e `useSwitchOrganization` (#108)
 - [ ] [FE] `OrganizationSwitcher` (pill + popover "Suas organizações" + criar organização) encaixado no topo da `Sidebar` (#109)
 - [ ] [FE] "Voltar" contextual em `CreateOrganizationPage` (#110)
 - [ ] [FE] Testes do switcher, dos hooks e do "Voltar"; rodar lint, typecheck e a suíte Vitest (#111)
