@@ -47,4 +47,4 @@ aparência mais contida e consistente entre si.
 - [x] Trocar o raio do primitivo `Card` para `rounded-[var(--radius-md)]` (#94)
 - [x] Garantir o recorte dos cantos nas listas em tabela (hover da linha não vaza) (#95)
 - [x] Rodar lint, type-check e testes do `apps/web` (#96)
-- [ ] Validar no browser as listas (Turmas, Disciplinas, Tarefas, dashboard) em tema claro e escuro (#97)
+- [x] Validar no browser as listas (Turmas, Disciplinas, Tarefas, dashboard) em tema claro e escuro (#97)
