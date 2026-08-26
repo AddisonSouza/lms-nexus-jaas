@@ -7,14 +7,20 @@ import { Input } from '@components/ui/input'
 import { Textarea } from '@components/ui/textarea'
 import { Button } from '@components/ui/button'
 
+// Espelha o max(500) de createOrganizationSchema, só para exibir o contador.
+const DESCRIPTION_MAX_LENGTH = 500
+
 function CreateOrganizationForm() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<CreateOrganizationFormData>({
     resolver: zodResolver(createOrganizationSchema),
   })
+
+  const descriptionLength = (watch('description') ?? '').length
 
   const { mutate: create, isPending, error } = useCreateOrganization()
 
@@ -29,12 +35,26 @@ function CreateOrganizationForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-4">
-      {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
+      {errorMessage && (
+        <p role="alert" className="text-sm text-destructive">
+          {errorMessage}
+        </p>
+      )}
 
       <div className="space-y-1">
         <label htmlFor="org-name" className="text-xs text-muted-foreground">Nome</label>
-        <Input {...register('name')} id="org-name" type="text" placeholder="Ex: Escola Municipal Centro" />
-        {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
+        <Input
+          {...register('name')}
+          id="org-name"
+          type="text"
+          placeholder="Ex: Escola Municipal Centro"
+          aria-invalid={!!errors.name}
+        />
+        {errors.name && (
+          <p role="alert" className="text-xs text-destructive">
+            {errors.name.message}
+          </p>
+        )}
       </div>
 
       <div className="space-y-1">
@@ -46,8 +66,18 @@ function CreateOrganizationForm() {
           id="org-desc"
           rows={3}
           placeholder="Descreva brevemente sua organização"
+          aria-invalid={!!errors.description}
         />
-        {errors.description && <p className="text-xs text-destructive">{errors.description.message}</p>}
+        <div className="flex items-start gap-2">
+          {errors.description && (
+            <p role="alert" className="text-xs text-destructive">
+              {errors.description.message}
+            </p>
+          )}
+          <span className="ml-auto text-[11px] text-muted-foreground tabular-nums">
+            {descriptionLength}/{DESCRIPTION_MAX_LENGTH}
+          </span>
+        </div>
       </div>
 
       <Button type="submit" disabled={isPending} className="w-full">
