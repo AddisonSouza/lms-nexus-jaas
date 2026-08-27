@@ -44,7 +44,7 @@ class LogoutAndRefreshServiceTest {
         var result = refreshSut.execute(new RefreshCommand("old-token"));
 
         verify(refreshTokenRepository).delete("old-token");
-        verify(refreshTokenRepository).save(anyString(), eq("user-id-123"), any());
+        verify(refreshTokenRepository).save(anyString(), eq("user-id-123"), any(), any());
         assertThat(result.accessToken()).isEqualTo("new.jwt.token");
         assertThat(result.refreshToken()).isNotBlank().isNotEqualTo("old-token");
     }

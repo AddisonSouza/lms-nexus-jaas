@@ -56,7 +56,7 @@ class AuthenticateServiceTest {
 
         assertThat(result.accessToken()).isEqualTo("jwt.token.here");
         assertThat(result.refreshToken()).isNotBlank();
-        verify(refreshTokenRepository).save(anyString(), anyString(), any());
+        verify(refreshTokenRepository).save(anyString(), anyString(), any(), any());
         verify(jwtTokenService, never()).generateAccessToken(anyString(), anyString(), anyString());
     }
 

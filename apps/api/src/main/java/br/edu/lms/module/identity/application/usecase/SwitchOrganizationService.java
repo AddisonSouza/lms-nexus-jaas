@@ -40,7 +40,7 @@ public class SwitchOrganizationService implements SwitchOrganizationUseCase {
         var newAccessToken = jwtTokenService.generateAccessToken(userId, command.organizationId(), role);
 
         var newRefreshToken = UUID.randomUUID().toString();
-        refreshTokenRepository.save(newRefreshToken, userId, REFRESH_TOKEN_TTL);
+        refreshTokenRepository.save(newRefreshToken, userId, command.organizationId(), REFRESH_TOKEN_TTL);
 
         log.debug("Organization switched for user: {}", userId);
 

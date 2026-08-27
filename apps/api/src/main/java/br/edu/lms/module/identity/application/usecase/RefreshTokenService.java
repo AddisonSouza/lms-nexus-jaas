@@ -33,12 +33,13 @@ public class RefreshTokenService implements RefreshTokenUseCase {
         refreshTokenRepository.delete(command.refreshToken());
 
         var memberships = organizationMemberLookupPort.findOrganizationsByUser(userId);
+        var organizationId = memberships.size() == 1 ? memberships.get(0).organizationId() : null;
         var newAccessToken = memberships.size() == 1
-                ? jwtTokenService.generateAccessToken(userId, memberships.get(0).organizationId(), memberships.get(0).role())
+                ? jwtTokenService.generateAccessToken(userId, organizationId, memberships.get(0).role())
                 : jwtTokenService.generateAccessToken(userId);
 
         var newRefreshToken = UUID.randomUUID().toString();
-        refreshTokenRepository.save(newRefreshToken, userId, REFRESH_TOKEN_TTL);
+        refreshTokenRepository.save(newRefreshToken, userId, organizationId, REFRESH_TOKEN_TTL);
 
         log.debug("Tokens rotated for user: {}", userId);
 
