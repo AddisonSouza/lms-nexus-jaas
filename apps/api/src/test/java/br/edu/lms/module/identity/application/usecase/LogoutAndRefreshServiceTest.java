@@ -1,6 +1,7 @@
 package br.edu.lms.module.identity.application.usecase;
 
 import br.edu.lms.module.identity.application.dto.RefreshCommand;
+import br.edu.lms.module.identity.domain.model.RefreshSession;
 import br.edu.lms.module.identity.domain.exception.TokenNotFoundException;
 import br.edu.lms.module.identity.domain.port.out.OrganizationMemberLookupPort;
 import br.edu.lms.module.identity.domain.port.out.RefreshTokenRepository;
@@ -37,7 +38,7 @@ class LogoutAndRefreshServiceTest {
 
     @Test
     void refresh_validToken_rotatesAndReturnsNewPair() {
-        when(refreshTokenRepository.findUserId("old-token")).thenReturn(Optional.of("user-id-123"));
+        when(refreshTokenRepository.findSession("old-token")).thenReturn(Optional.of(new RefreshSession("user-id-123", null)));
         when(organizationMemberLookupPort.findOrganizationsByUser("user-id-123")).thenReturn(List.of());
         when(jwtTokenService.generateAccessToken("user-id-123")).thenReturn("new.jwt.token");
 
@@ -51,7 +52,7 @@ class LogoutAndRefreshServiceTest {
 
     @Test
     void refresh_expiredToken_throwsTokenNotFound() {
-        when(refreshTokenRepository.findUserId(any())).thenReturn(Optional.empty());
+        when(refreshTokenRepository.findSession(any())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> refreshSut.execute(new RefreshCommand("expired-token")))
                 .isInstanceOf(TokenNotFoundException.class);
