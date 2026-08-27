@@ -77,20 +77,23 @@ class AuthenticateServiceTest {
     }
 
     @Test
-    void execute_validCredentials_multipleOrganizations_returnsTokenWithoutOrgClaims() {
+    void execute_validCredentials_multipleOrganizations_entersTheFirstOne() {
         var user = activeUser();
         var userId = user.getId().getValue().toString();
         when(userRepository.findByEmail(any())).thenReturn(Optional.of(user));
         when(passwordService.verify("secret", "hashed")).thenReturn(true);
+        // Ordered by organization name by the lookup port.
         when(organizationMemberLookupPort.findOrganizationsByUser(userId)).thenReturn(List.of(
                 new OrgMembership("org-1", "ADMIN_ORG"),
                 new OrgMembership("org-2", "PROFESSOR")));
-        when(jwtTokenService.generateAccessToken(userId)).thenReturn("jwt.token.here");
+        when(jwtTokenService.generateAccessToken(userId, "org-1", "ADMIN_ORG")).thenReturn("first-org-token");
 
         AuthResult result = sut.execute(new AuthenticateCommand("user@test.com", "secret"));
 
-        assertThat(result.accessToken()).isEqualTo("jwt.token.here");
-        verify(jwtTokenService, never()).generateAccessToken(anyString(), anyString(), anyString());
+        // Without an organization the user lands on /welcome, which has no
+        // sidebar — and therefore no organization switcher to get out of it.
+        assertThat(result.accessToken()).isEqualTo("first-org-token");
+        verify(jwtTokenService, never()).generateAccessToken(anyString());
     }
 
     @Test

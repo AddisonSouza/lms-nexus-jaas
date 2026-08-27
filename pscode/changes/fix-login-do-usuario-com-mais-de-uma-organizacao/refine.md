@@ -61,7 +61,7 @@ organização está, para que um reload não desfaça a troca.
 ## Subtasks
 
 - [x] [BE] Ordenar `findOrganizationsByUser` por nome da organização e ignorar organização removida
-- [ ] [BE] Login entra na primeira organização quando o usuário tem qualquer vínculo
+- [x] [BE] Login entra na primeira organização quando o usuário tem qualquer vínculo
 - [ ] [BE] Refresh token guarda a organização da sessão no Redis (porta, impl e o switch gravando o destino)
 - [ ] [BE] Refresh reemite mantendo a organização da sessão, revalidando o vínculo
 - [ ] [BE] Teste de integração do fluxo multi-organização (login → refresh → troca → refresh) e suíte da API
