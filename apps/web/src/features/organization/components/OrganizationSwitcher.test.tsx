@@ -88,4 +88,39 @@ describe('OrganizationSwitcher', () => {
     expect(screen.getByRole('link', { name: /criar organização/i }).getAttribute('href'))
       .toBe('/organizations/new')
   })
+
+  it('does not claim there is no organization while the list is loading', async () => {
+    let resolveList: (orgs: orgApi.UserOrganization[]) => void = () => {}
+    vi.mocked(orgApi.listOrganizations).mockReturnValue(
+      new Promise((resolve) => {
+        resolveList = resolve
+      }),
+    )
+
+    render(<OrganizationSwitcher />, { wrapper })
+
+    expect(screen.queryByText('Sem organização')).toBeNull()
+    expect(screen.getByText('Carregando...')).toBeTruthy()
+
+    resolveList([{ id: 'org-1', name: 'Escola Alfa', role: 'ADMIN_ORG' }])
+    expect(await screen.findByText('Escola Alfa')).toBeTruthy()
+  })
+
+  it('carries the full name in a tooltip, since long names are truncated', async () => {
+    const longName = 'Escola Municipal Professora Maria das Dores de Albuquerque'
+    vi.mocked(orgApi.listOrganizations).mockResolvedValue([
+      { id: 'org-1', name: longName, role: 'ADMIN_ORG' },
+    ])
+
+    render(<OrganizationSwitcher />, { wrapper })
+
+    expect((await screen.findByText(longName)).getAttribute('title')).toBe(longName)
+
+    await userEvent.click(screen.getByRole('button', { name: /trocar de organização/i }))
+
+    const inTheList = (await screen.findAllByText(longName)).filter(
+      (element) => element.getAttribute('title') === longName,
+    )
+    expect(inTheList.length).toBe(2)
+  })
 })

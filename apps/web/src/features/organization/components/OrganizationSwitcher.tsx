@@ -30,7 +30,7 @@ function initials(name: string) {
 function OrganizationSwitcher() {
   const [open, setOpen] = useState(false)
   const organizationId = useAuthStore((s) => s.organizationId)
-  const { data: organizations = [] } = useOrganizations()
+  const { data: organizations = [], isPending } = useOrganizations()
   const switchOrganization = useSwitchOrganization()
 
   const active = organizations.find((org) => org.id === organizationId)
@@ -53,11 +53,11 @@ function OrganizationSwitcher() {
           {active ? initials(active.name) : '—'}
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-medium">
-            {active ? active.name : 'Sem organização'}
+          <span className="block truncate text-sm font-medium" title={active?.name}>
+            {active ? active.name : isPending ? 'Carregando...' : 'Sem organização'}
           </span>
           <span className="block truncate text-xs text-muted-foreground">
-            {active ? roleLabels[active.role] : 'Nenhuma selecionada'}
+            {active ? roleLabels[active.role] : isPending ? '' : 'Nenhuma selecionada'}
           </span>
         </span>
         <ChevronsUpDown className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -69,7 +69,9 @@ function OrganizationSwitcher() {
 
           {organizations.length === 0 && (
             <p className="px-2 py-2 text-sm text-muted-foreground">
-              Você ainda não pertence a nenhuma organização.
+              {isPending
+                ? 'Carregando suas organizações...'
+                : 'Você ainda não pertence a nenhuma organização.'}
             </p>
           )}
 
@@ -87,7 +89,9 @@ function OrganizationSwitcher() {
                       <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent font-heading text-[11px] text-accent-foreground">
                         {initials(org.name)}
                       </span>
-                      <span className="min-w-0 flex-1 truncate text-sm">{org.name}</span>
+                      <span className="min-w-0 flex-1 truncate text-sm" title={org.name}>
+                        {org.name}
+                      </span>
                       {isActive ? (
                         <Check className="h-4 w-4 shrink-0 text-accent" aria-label="Organização ativa" />
                       ) : (

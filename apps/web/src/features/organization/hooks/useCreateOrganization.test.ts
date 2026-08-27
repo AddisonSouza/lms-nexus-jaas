@@ -19,9 +19,10 @@ vi.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
 }))
 
+const queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } })
+
 function wrapper({ children }: { children: React.ReactNode }) {
-  const qc = new QueryClient({ defaultOptions: { mutations: { retry: false } } })
-  return createElement(QueryClientProvider, { client: qc }, children)
+  return createElement(QueryClientProvider, { client: queryClient }, children)
 }
 
 beforeEach(() => vi.clearAllMocks())
@@ -52,5 +53,19 @@ describe('useCreateOrganization', () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect((result.current.error as { response?: { status?: number } })?.response?.status).toBe(409)
+  })
+
+  it('clears the cache so the organization list is refetched with the new one', async () => {
+    vi.mocked(orgApi.createOrganization).mockResolvedValue({
+      id: 'org-99', name: 'Nova', description: null, ownerId: 'u1', createdAt: '',
+    })
+    vi.mocked(orgApi.switchOrganization).mockResolvedValue('token-of-org-99')
+    const clear = vi.spyOn(queryClient, 'clear')
+
+    const { result } = renderHook(() => useCreateOrganization(), { wrapper })
+    act(() => result.current.mutate({ name: 'Nova' }))
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(clear).toHaveBeenCalled()
   })
 })
