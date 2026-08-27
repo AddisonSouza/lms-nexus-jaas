@@ -1,22 +1,21 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { createOrganization, type CreateOrganizationData } from '../api/organization-api'
+import { createOrganization, switchOrganization, type CreateOrganizationData } from '../api/organization-api'
 import { useAuthStore } from '@store/authStore'
-import api from '@lib/axios'
 
 export function useCreateOrganization() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const setToken = useAuthStore((s) => s.setToken)
 
   return useMutation({
     mutationFn: (data: CreateOrganizationData) => createOrganization(data),
     onSuccess: async (org) => {
-      const response = await api.post<{ accessToken: string }>(
-        '/auth/switch-organization',
-        { organizationId: org.id },
-        { withCredentials: true },
-      )
-      setToken(response.data.accessToken)
+      // Creating an organization also switches into it, so — as in
+      // useSwitchOrganization — every cached query belongs to the previous
+      // context, the list of organizations included.
+      setToken(await switchOrganization(org.id))
+      queryClient.clear()
       navigate(`/organizations/${org.id}`)
     },
   })

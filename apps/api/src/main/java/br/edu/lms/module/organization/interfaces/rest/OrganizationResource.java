@@ -5,6 +5,7 @@ import br.edu.lms.module.organization.application.dto.InviteMemberCommand;
 import br.edu.lms.module.organization.application.dto.OrganizationResponse;
 import br.edu.lms.module.organization.domain.port.in.CreateOrganizationUseCase;
 import br.edu.lms.module.organization.domain.port.in.InviteMemberUseCase;
+import br.edu.lms.module.organization.domain.port.in.ListUserOrganizationsUseCase;
 import br.edu.lms.module.organization.domain.port.in.RemoveMemberUseCase;
 import br.edu.lms.module.organization.interfaces.rest.dto.CreateOrganizationRequest;
 import br.edu.lms.module.organization.interfaces.rest.dto.InviteMemberRequest;
@@ -31,6 +32,7 @@ public class OrganizationResource {
     private final CreateOrganizationUseCase createOrganizationUseCase;
     private final RemoveMemberUseCase removeMemberUseCase;
     private final InviteMemberUseCase inviteMemberUseCase;
+    private final ListUserOrganizationsUseCase listUserOrganizationsUseCase;
     private final JsonWebToken jwt;
 
     @POST
@@ -49,6 +51,14 @@ public class OrganizationResource {
         return Response.created(URI.create("/organizations/" + result.getId()))
                 .entity(result)
                 .build();
+    }
+
+    @GET
+    @Authenticated
+    @Operation(summary = "Listar as organizações do usuário autenticado")
+    @APIResponse(responseCode = "200", description = "Organizações do usuário, com o papel em cada uma")
+    public Response listMine() {
+        return Response.ok(listUserOrganizationsUseCase.execute(jwt.getSubject())).build();
     }
 
     @POST

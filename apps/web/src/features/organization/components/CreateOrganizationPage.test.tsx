@@ -6,9 +6,10 @@ import CreateOrganizationPage from './CreateOrganizationPage'
 
 vi.mock('../api/organization-api')
 vi.mock('@lib/axios', () => ({ default: { post: vi.fn() } }))
+let organizationId: string | null = null
 vi.mock('@store/authStore', () => ({
   useAuthStore: vi.fn((selector) =>
-    selector({ setToken: vi.fn(), organizationId: null, isAuthenticated: true }),
+    selector({ setToken: vi.fn(), organizationId, isAuthenticated: true }),
   ),
 }))
 
@@ -23,6 +24,7 @@ function wrapper({ children }: { children: React.ReactNode }) {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  organizationId = null
 })
 
 describe('CreateOrganizationPage', () => {
@@ -40,5 +42,13 @@ describe('CreateOrganizationPage', () => {
 
     // O Button do design system renderiza o Link como <a role="button">.
     expect(screen.getByRole('button', { name: /voltar/i }).getAttribute('href')).toBe('/welcome')
+  })
+
+  it('sends a user who already has an organization back to its dashboard', () => {
+    organizationId = 'org-7'
+
+    render(<CreateOrganizationPage />, { wrapper })
+
+    expect(screen.getByRole('button', { name: /voltar/i }).getAttribute('href')).toBe('/organizations/org-7')
   })
 })

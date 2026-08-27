@@ -4,6 +4,7 @@ import br.edu.lms.module.identity.domain.model.OrgMembership;
 import br.edu.lms.module.identity.domain.port.out.OrganizationMemberLookupPort;
 import br.edu.lms.module.organization.domain.model.MemberRole;
 import br.edu.lms.module.organization.domain.model.OrganizationMember;
+import br.edu.lms.module.organization.domain.model.UserOrganization;
 import br.edu.lms.module.organization.domain.port.out.OrganizationMemberRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
@@ -55,6 +56,26 @@ public class OrganizationMemberRepositoryImpl implements OrganizationMemberRepos
 
         return rows.stream()
                 .map(row -> new OrgMembership(row.get(0, String.class), row.get(1, String.class)))
+                .toList();
+    }
+
+    @Override
+    public List<UserOrganization> findUserOrganizations(String userId) {
+        List<Tuple> rows = em.createQuery(
+                        "SELECT o.id, o.name, m.role FROM OrganizationMemberJpaEntity m " +
+                        "JOIN OrganizationJpaEntity o ON o.id = m.organizationId " +
+                        "WHERE m.userId = :userId AND m.deletedAt IS NULL AND o.deletedAt IS NULL " +
+                        "ORDER BY o.name",
+                        Tuple.class)
+                .setParameter("userId", userId)
+                .getResultList();
+
+        return rows.stream()
+                .map(row -> UserOrganization.builder()
+                        .id(row.get(0, String.class))
+                        .name(row.get(1, String.class))
+                        .role(MemberRole.valueOf(row.get(2, String.class)))
+                        .build())
                 .toList();
     }
 
