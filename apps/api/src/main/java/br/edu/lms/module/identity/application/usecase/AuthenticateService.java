@@ -47,13 +47,18 @@ public class AuthenticateService implements AuthenticateUseCase {
         }
 
         var userId = user.getId().getValue().toString();
+        // Any membership puts an organization in the token: without one the user
+        // lands on /welcome, a screen with no sidebar and no organization
+        // switcher, so whoever belongs to several would never reach the app.
+        // The list is ordered by organization name, so "the first" is stable.
         var memberships = organizationMemberLookupPort.findOrganizationsByUser(userId);
-        var accessToken = memberships.size() == 1
-                ? jwtTokenService.generateAccessToken(userId, memberships.get(0).organizationId(), memberships.get(0).role())
-                : jwtTokenService.generateAccessToken(userId);
+        var organizationId = memberships.isEmpty() ? null : memberships.get(0).organizationId();
+        var accessToken = memberships.isEmpty()
+                ? jwtTokenService.generateAccessToken(userId)
+                : jwtTokenService.generateAccessToken(userId, organizationId, memberships.get(0).role());
         var refreshToken = UUID.randomUUID().toString();
 
-        refreshTokenRepository.save(refreshToken, userId, REFRESH_TOKEN_TTL);
+        refreshTokenRepository.save(refreshToken, userId, organizationId, REFRESH_TOKEN_TTL);
 
         log.info("User authenticated: {}", userId);
 

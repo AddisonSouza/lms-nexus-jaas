@@ -73,19 +73,37 @@ class OrganizationMemberRepositoryImplIT {
     }
 
     @Test
-    void findOrganizationsByUser_multipleActiveMemberships_returnsAll() throws Exception {
+    void findOrganizationsByUser_multipleActiveMemberships_returnsAllOrderedByOrganizationName() throws Exception {
         tx.begin();
         em.createNativeQuery("INSERT INTO organization_members (id, organization_id, user_id, role, joined_at) VALUES (UUID(), ?, ?, ?, NOW(6))")
-                .setParameter(1, ORG_1).setParameter(2, USER_ID).setParameter(3, "ADMIN_ORG")
+                .setParameter(1, ORG_2).setParameter(2, USER_ID).setParameter(3, "PROFESSOR")
                 .executeUpdate();
         em.createNativeQuery("INSERT INTO organization_members (id, organization_id, user_id, role, joined_at) VALUES (UUID(), ?, ?, ?, NOW(6))")
-                .setParameter(1, ORG_2).setParameter(2, USER_ID).setParameter(3, "PROFESSOR")
+                .setParameter(1, ORG_1).setParameter(2, USER_ID).setParameter(3, "ADMIN_ORG")
                 .executeUpdate();
         tx.commit();
 
         var result = sut.findOrganizationsByUser(USER_ID);
 
+        // The login picks the first of this list, so the order has to be stable
+        // and the same one the sidebar switcher draws.
         assertThat(result).hasSize(2);
+        assertThat(result.get(0).organizationId()).isEqualTo(ORG_1);
+        assertThat(result.get(1).organizationId()).isEqualTo(ORG_2);
+    }
+
+    @Test
+    void findOrganizationsByUser_softDeletedOrganization_isIgnored() throws Exception {
+        tx.begin();
+        em.createNativeQuery("INSERT INTO organization_members (id, organization_id, user_id, role, joined_at) VALUES (UUID(), ?, ?, ?, NOW(6))")
+                .setParameter(1, ORG_1).setParameter(2, USER_ID).setParameter(3, "ADMIN_ORG")
+                .executeUpdate();
+        em.createNativeQuery("UPDATE organizations SET deleted_at = NOW(6) WHERE id = ?")
+                .setParameter(1, ORG_1)
+                .executeUpdate();
+        tx.commit();
+
+        assertThat(sut.findOrganizationsByUser(USER_ID)).isEmpty();
     }
 
     @Test

@@ -49,7 +49,9 @@ public class OrganizationMemberRepositoryImpl implements OrganizationMemberRepos
     public List<OrgMembership> findOrganizationsByUser(String userId) {
         List<Tuple> rows = em.createQuery(
                         "SELECT m.organizationId, m.role FROM OrganizationMemberJpaEntity m " +
-                        "WHERE m.userId = :userId AND m.deletedAt IS NULL",
+                        "JOIN OrganizationJpaEntity o ON o.id = m.organizationId " +
+                        "WHERE m.userId = :userId AND m.deletedAt IS NULL AND o.deletedAt IS NULL " +
+                        "ORDER BY o.name",
                         Tuple.class)
                 .setParameter("userId", userId)
                 .getResultList();
