@@ -41,6 +41,6 @@ opção de mensagem do schema e passa a cobrir o caso com teste.
 
 ## Subtasks
 
-- [ ] Trocar `required_error` por `errorMap` no `role` do `addMemberSchema`
+- [x] Trocar `required_error` por `errorMap` no `role` do `addMemberSchema`
 - [ ] Ligar rótulo e campo por `id`/`htmlFor` nos dois campos do `AddMemberDialog`
 - [ ] Criar `AddMemberDialog.test.tsx` cobrindo sem papel, sem `userId` e o caminho feliz
