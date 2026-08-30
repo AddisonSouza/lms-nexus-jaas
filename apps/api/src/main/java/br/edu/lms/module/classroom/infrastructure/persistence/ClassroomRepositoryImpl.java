@@ -127,11 +127,13 @@ public class ClassroomRepositoryImpl implements ClassroomRepository {
     }
 
     @Override
-    public Optional<Classroom> findByInviteCode(String code) {
+    public Optional<Classroom> findByInviteCode(String code, String organizationId) {
         return em.createQuery(
-                        "SELECT c FROM ClassroomJpaEntity c WHERE c.inviteCode = :code AND c.deletedAt IS NULL",
+                        "SELECT c FROM ClassroomJpaEntity c " +
+                        "WHERE c.inviteCode = :code AND c.organizationId = :orgId AND c.deletedAt IS NULL",
                         ClassroomJpaEntity.class)
                 .setParameter("code", code)
+                .setParameter("orgId", organizationId)
                 .getResultStream()
                 .findFirst()
                 .map(classroomMapper::toDomain);

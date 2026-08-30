@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { createOrganization, switchOrganization, type CreateOrganizationData } from '../api/organization-api'
+import { createOrganization, type CreateOrganizationData } from '../api/organization-api'
+import { switchOrganization } from '@lib/session'
 import { useAuthStore } from '@store/authStore'
 
 export function useCreateOrganization() {

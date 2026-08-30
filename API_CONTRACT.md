@@ -222,10 +222,17 @@ Retorna informações do convite (organização, papel, convidante) para preview
 
 Aceita o convite. Cria vínculo em `organization_members`.
 
+O convite vale para o e-mail a que foi endereçado: o link é secreto, mas não é
+uma credencial. O e-mail é comparado sem diferenciar maiúsculas de minúsculas.
+
 | Código | Descrição |
 |---|---|
-| `201` | Membro adicionado com o papel do convite. |
-| `400` | Token expirado ou já utilizado. |
+| `204` | Membro adicionado com o papel do convite. |
+| `401` | Não autenticado. |
+| `403` | Convite endereçado a outro e-mail (`INVITATION_NOT_FOR_THIS_USER`). |
+| `404` | Convite não encontrado (`INVITATION_NOT_FOUND`). |
+| `409` | Convite já utilizado (`INVITATION_ALREADY_USED`) ou usuário já é membro (`ALREADY_A_MEMBER`). |
+| `410` | Convite expirado (`INVITATION_EXPIRED`). |
 
 ---
 
@@ -353,8 +360,13 @@ Soft delete (preenche `deleted_at`).
 |---|---|
 | `201` | Ingresso realizado. `role=ALUNO` definido automaticamente. |
 | `200` | Usuário já era membro (idempotente). |
-| `404` | Código inválido. |
+| `404` | Código inválido **ou de turma de outra organização**. |
 | `422` | Turma arquivada — ingresso bloqueado. |
+
+O código só resolve dentro da organização do JWT: um código válido em outra
+organização responde `404 INVALID_INVITE_CODE`, sem revelar que a turma existe.
+A resposta de `200`/`201` traz `inviteCode: null` — quem entra pelo código entra
+como `ALUNO`, e o `ALUNO` nunca recebe o código de volta.
 
 ---
 

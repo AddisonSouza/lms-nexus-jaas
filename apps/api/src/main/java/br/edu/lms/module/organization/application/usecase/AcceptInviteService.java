@@ -6,6 +6,7 @@ import br.edu.lms.module.organization.domain.model.*;
 import br.edu.lms.module.organization.domain.port.in.AcceptInviteUseCase;
 import br.edu.lms.module.organization.domain.port.out.InvitationRepository;
 import br.edu.lms.module.organization.domain.port.out.OrganizationMemberRepository;
+import br.edu.lms.module.organization.domain.port.out.UserDirectoryPort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ public class AcceptInviteService implements AcceptInviteUseCase {
 
     private final InvitationRepository invitationRepository;
     private final OrganizationMemberRepository memberRepository;
+    private final UserDirectoryPort userDirectory;
 
     @Override
     @Transactional
@@ -32,6 +34,12 @@ public class AcceptInviteService implements AcceptInviteUseCase {
         }
         if (invitation.isExpired()) {
             throw new InvitationExpiredException();
+        }
+        // O link é secreto, mas não é uma credencial: só entra quem foi convidado.
+        var email = userDirectory.findEmailById(command.getUserId())
+                .orElseThrow(InvitationNotForThisUserException::new);
+        if (!invitation.isAddressedTo(email)) {
+            throw new InvitationNotForThisUserException();
         }
         if (memberRepository.existsActiveByOrgAndUser(invitation.getOrganizationId(), command.getUserId())) {
             throw new AlreadyAMemberException();

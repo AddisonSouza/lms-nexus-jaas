@@ -5,8 +5,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import CreateOrganizationForm from './CreateOrganizationForm'
 import * as orgApi from '../api/organization-api'
+import * as session from '@lib/session'
 
 vi.mock('../api/organization-api')
+vi.mock('@lib/session')
 vi.mock('@store/authStore', () => ({
   useAuthStore: vi.fn((selector) =>
     selector({ setToken: vi.fn(), organizationId: null, isAuthenticated: true }),
@@ -71,7 +73,7 @@ describe('CreateOrganizationForm', () => {
     vi.mocked(orgApi.createOrganization).mockResolvedValue({
       id: 'org-1', name: 'Test Org', description: null, ownerId: 'u1', createdAt: '',
     })
-    vi.mocked(orgApi.switchOrganization).mockResolvedValue('new-token')
+    vi.mocked(session.switchOrganization).mockResolvedValue('new-token')
 
     render(<CreateOrganizationForm />, { wrapper })
     await userEvent.type(screen.getByLabelText(/nome/i), 'Test Org')
@@ -79,7 +81,7 @@ describe('CreateOrganizationForm', () => {
 
     await waitFor(() => {
       expect(orgApi.createOrganization).toHaveBeenCalledWith(expect.objectContaining({ name: 'Test Org' }))
-      expect(orgApi.switchOrganization).toHaveBeenCalledWith('org-1')
+      expect(session.switchOrganization).toHaveBeenCalledWith('org-1')
     })
   })
 

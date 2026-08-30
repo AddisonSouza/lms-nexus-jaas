@@ -4,8 +4,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createElement } from 'react'
 import { useCreateOrganization } from './useCreateOrganization'
 import * as orgApi from '../api/organization-api'
+import * as session from '@lib/session'
 
 vi.mock('../api/organization-api')
+vi.mock('@lib/session')
 
 const mockSetToken = vi.fn()
 const mockNavigate = vi.fn()
@@ -32,7 +34,7 @@ describe('useCreateOrganization', () => {
     vi.mocked(orgApi.createOrganization).mockResolvedValue({
       id: 'org-42', name: 'My Org', description: null, ownerId: 'u1', createdAt: '',
     })
-    vi.mocked(orgApi.switchOrganization).mockResolvedValue('fresh-token')
+    vi.mocked(session.switchOrganization).mockResolvedValue('fresh-token')
 
     const { result } = renderHook(() => useCreateOrganization(), { wrapper })
 
@@ -40,7 +42,7 @@ describe('useCreateOrganization', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(orgApi.switchOrganization).toHaveBeenCalledWith('org-42')
+    expect(session.switchOrganization).toHaveBeenCalledWith('org-42')
     expect(mockSetToken).toHaveBeenCalledWith('fresh-token')
     expect(mockNavigate).toHaveBeenCalledWith('/organizations/org-42')
   })
@@ -59,7 +61,7 @@ describe('useCreateOrganization', () => {
     vi.mocked(orgApi.createOrganization).mockResolvedValue({
       id: 'org-99', name: 'Nova', description: null, ownerId: 'u1', createdAt: '',
     })
-    vi.mocked(orgApi.switchOrganization).mockResolvedValue('token-of-org-99')
+    vi.mocked(session.switchOrganization).mockResolvedValue('token-of-org-99')
     const clear = vi.spyOn(queryClient, 'clear')
 
     const { result } = renderHook(() => useCreateOrganization(), { wrapper })

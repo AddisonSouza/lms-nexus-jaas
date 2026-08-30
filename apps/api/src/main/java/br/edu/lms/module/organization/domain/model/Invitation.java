@@ -30,4 +30,10 @@ public class Invitation {
     public boolean isExpired() {
         return Instant.now().isAfter(expiresAt);
     }
+
+    /** O convite vale para o e-mail a que foi endereçado, comparado sem caixa. */
+    public boolean isAddressedTo(String candidateEmail) {
+        return candidateEmail != null && email != null
+                && email.equalsIgnoreCase(candidateEmail.trim());
+    }
 }

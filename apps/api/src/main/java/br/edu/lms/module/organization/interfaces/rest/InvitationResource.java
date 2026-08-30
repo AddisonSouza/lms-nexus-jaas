@@ -39,6 +39,7 @@ public class InvitationResource {
     @Operation(summary = "Aceitar convite")
     @APIResponse(responseCode = "204", description = "Convite aceito")
     @APIResponse(responseCode = "401", description = "Não autenticado")
+    @APIResponse(responseCode = "403", description = "Convite endereçado a outro e-mail")
     @APIResponse(responseCode = "404", description = "Convite não encontrado")
     @APIResponse(responseCode = "409", description = "Convite já utilizado ou usuário já membro")
     @APIResponse(responseCode = "410", description = "Convite expirado")

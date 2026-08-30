@@ -8,4 +8,5 @@ import lombok.Getter;
 public class JoinClassroomCommand {
     private String inviteCode;
     private String userId;
+    private String organizationId;
 }

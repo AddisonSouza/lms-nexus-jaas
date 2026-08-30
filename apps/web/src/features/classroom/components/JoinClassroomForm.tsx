@@ -6,6 +6,23 @@ import { useJoinClassroom } from '../hooks/useJoinClassroom'
 import { Input } from '@components/ui/input'
 import { Button } from '@components/ui/button'
 
+/**
+ * O back-end devolve um `errorCode` estável por caso; a tela traduz cada um.
+ * Um código de outra organização volta como INVALID_INVITE_CODE de propósito,
+ * para não revelar que a turma existe em outro lugar.
+ */
+function joinErrorMessage(error: unknown): string {
+  const code = (error as { response?: { data?: { error?: string } } })?.response?.data?.error
+  switch (code) {
+    case 'INVALID_INVITE_CODE':
+      return 'Código não encontrado. Confira com quem enviou — ele vale só dentro da sua organização.'
+    case 'CLASSROOM_ARCHIVED':
+      return 'Esta turma está arquivada e não aceita novas entradas.'
+    default:
+      return 'Não foi possível entrar na turma. Tente de novo em instantes.'
+  }
+}
+
 function JoinClassroomForm() {
   const navigate = useNavigate()
   const joinClassroom = useJoinClassroom()
@@ -19,7 +36,7 @@ function JoinClassroomForm() {
   })
 
   const onSubmit = (data: JoinClassroomFormData) => {
-    joinClassroom.mutate(data.inviteCode.toUpperCase(), {
+    joinClassroom.mutate(data.inviteCode, {
       onSuccess: (classroom) => navigate(`/classrooms/${classroom.id}`),
     })
   }
@@ -43,7 +60,7 @@ function JoinClassroomForm() {
         </div>
 
         {joinClassroom.isError && (
-          <p className="text-sm text-destructive">Código inválido ou turma indisponível.</p>
+          <p className="text-sm text-destructive">{joinErrorMessage(joinClassroom.error)}</p>
         )}
 
         <Button type="submit" disabled={joinClassroom.isPending} className="w-full">
