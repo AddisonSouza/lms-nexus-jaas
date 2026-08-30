@@ -4,10 +4,12 @@ import br.edu.lms.module.organization.application.dto.AcceptInviteCommand;
 import br.edu.lms.module.organization.domain.exception.AlreadyAMemberException;
 import br.edu.lms.module.organization.domain.exception.InvitationAlreadyUsedException;
 import br.edu.lms.module.organization.domain.exception.InvitationExpiredException;
+import br.edu.lms.module.organization.domain.exception.InvitationNotForThisUserException;
 import br.edu.lms.module.organization.domain.exception.InvitationNotFoundException;
 import br.edu.lms.module.organization.domain.model.*;
 import br.edu.lms.module.organization.domain.port.out.InvitationRepository;
 import br.edu.lms.module.organization.domain.port.out.OrganizationMemberRepository;
+import br.edu.lms.module.organization.domain.port.out.UserDirectoryPort;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -28,6 +30,7 @@ class AcceptInviteServiceTest {
 
     @Mock InvitationRepository invitationRepository;
     @Mock OrganizationMemberRepository memberRepository;
+    @Mock UserDirectoryPort userDirectory;
 
     @InjectMocks AcceptInviteService sut;
 
@@ -52,6 +55,7 @@ class AcceptInviteServiceTest {
     @Test
     void shouldAcceptInvitationAndCreateMember() {
         when(invitationRepository.findByToken("test-token")).thenReturn(Optional.of(pendingInvitation()));
+        when(userDirectory.findEmailById("user-1")).thenReturn(Optional.of("user@test.com"));
         when(memberRepository.existsActiveByOrgAndUser("org-1", "user-1")).thenReturn(false);
 
         sut.execute(cmd());
@@ -100,8 +104,42 @@ class AcceptInviteServiceTest {
     }
 
     @Test
+    void shouldAcceptRegardlessOfEmailCasing() {
+        when(invitationRepository.findByToken("test-token")).thenReturn(Optional.of(pendingInvitation()));
+        when(userDirectory.findEmailById("user-1")).thenReturn(Optional.of("USER@Test.com"));
+        when(memberRepository.existsActiveByOrgAndUser("org-1", "user-1")).thenReturn(false);
+
+        sut.execute(cmd());
+
+        verify(memberRepository).save(any());
+    }
+
+    @Test
+    void shouldThrowWhenInvitationWasAddressedToAnotherEmail() {
+        when(invitationRepository.findByToken("test-token")).thenReturn(Optional.of(pendingInvitation()));
+        when(userDirectory.findEmailById("user-1")).thenReturn(Optional.of("intruder@test.com"));
+
+        assertThatThrownBy(() -> sut.execute(cmd()))
+                .isInstanceOf(InvitationNotForThisUserException.class);
+
+        verify(memberRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldThrowWhenAcceptingUserIsUnknown() {
+        when(invitationRepository.findByToken("test-token")).thenReturn(Optional.of(pendingInvitation()));
+        when(userDirectory.findEmailById("user-1")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> sut.execute(cmd()))
+                .isInstanceOf(InvitationNotForThisUserException.class);
+
+        verify(memberRepository, never()).save(any());
+    }
+
+    @Test
     void shouldThrowWhenUserAlreadyActiveMember() {
         when(invitationRepository.findByToken("test-token")).thenReturn(Optional.of(pendingInvitation()));
+        when(userDirectory.findEmailById("user-1")).thenReturn(Optional.of("user@test.com"));
         when(memberRepository.existsActiveByOrgAndUser("org-1", "user-1")).thenReturn(true);
 
         assertThatThrownBy(() -> sut.execute(cmd()))

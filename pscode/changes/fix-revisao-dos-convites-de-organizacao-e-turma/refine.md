@@ -69,15 +69,15 @@ token real e conferidas no banco.
 
 ## Subtasks
 
-- [ ] Restringir o join à organização do JWT: `findByInviteCode` com `orgId`,
+- [x] Restringir o join à organização do JWT: `findByInviteCode` com `orgId`,
       `JoinClassroomCommand` e `ClassroomResource` passando o claim
-- [ ] Join deixa de devolver `inviteCode` (filtro por papel) e responde 200
+- [x] Join deixa de devolver `inviteCode` (filtro por papel) e responde 200
       quando o usuário já era membro
-- [ ] Aceite de convite valida o e-mail: `UserDirectoryPort` no módulo
+- [x] Aceite de convite valida o e-mail: `UserDirectoryPort` no módulo
       `organization`, adapter e exceção própria
-- [ ] Testes de integração: join fora da org, código não vazando, já-membro 200
+- [x] Testes de integração: join fora da org, código não vazando, já-membro 200
       e aceite com e-mail divergente
-- [ ] `useAcceptInvitation` chama `setToken` e `queryClient.clear()` após aceitar
-- [ ] `JoinClassroomForm` deriva a mensagem do `errorCode` do back-end
-- [ ] Atualizar `API_CONTRACT.md` e as specs; rodar lint, type-check e a suíte;
+- [x] `useAcceptInvitation` chama `setToken` e `queryClient.clear()` após aceitar
+- [x] `JoinClassroomForm` deriva a mensagem do `errorCode` do back-end
+- [x] Atualizar `API_CONTRACT.md` e as specs; rodar lint, type-check e a suíte;
       validar os dois fluxos no browser

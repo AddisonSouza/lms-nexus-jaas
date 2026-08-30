@@ -5,8 +5,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import AcceptInvitePage from './AcceptInvitePage'
 import * as invitationApi from '../api/invitation-api'
+import * as session from '@lib/session'
 
 vi.mock('../api/invitation-api')
+vi.mock('@lib/session')
 
 const mockNavigate = vi.fn()
 vi.mock('react-router-dom', async (importOriginal) => {
@@ -19,8 +21,16 @@ let mockIsBootstrapping = false
 
 vi.mock('@store/authStore', () => ({
   useAuthStore: vi.fn(
-    (selector: (s: { isAuthenticated: boolean; isBootstrapping: boolean }) => unknown) =>
-      selector({ isAuthenticated: mockIsAuthenticated, isBootstrapping: mockIsBootstrapping }),
+    (selector: (s: {
+      isAuthenticated: boolean
+      isBootstrapping: boolean
+      setToken: (t: string) => void
+    }) => unknown) =>
+      selector({
+        isAuthenticated: mockIsAuthenticated,
+        isBootstrapping: mockIsBootstrapping,
+        setToken: vi.fn(),
+      }),
   ),
 }))
 
@@ -71,6 +81,7 @@ describe('AcceptInvitePage', () => {
     it('calls acceptInvitation and navigates to org on button click', async () => {
       vi.mocked(invitationApi.getInvitationInfo).mockResolvedValue(mockInfo)
       vi.mocked(invitationApi.acceptInvitation).mockResolvedValue(undefined)
+      vi.mocked(session.switchOrganization).mockResolvedValue('token-of-org-1')
 
       renderPage('abc123')
 

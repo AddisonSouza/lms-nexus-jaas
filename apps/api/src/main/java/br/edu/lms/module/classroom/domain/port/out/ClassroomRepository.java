@@ -19,5 +19,9 @@ public interface ClassroomRepository {
     void softDeleteMember(ClassroomId classroomId, String userId);
     List<ClassroomMember> findMembersByClassroom(ClassroomId classroomId, String organizationId);
     boolean isUserInOrganization(String userId, String organizationId);
-    Optional<Classroom> findByInviteCode(String code);
+    /**
+     * O código só resolve dentro da organização de quem procura: um código válido
+     * em outra organização é indistinguível de um código inexistente.
+     */
+    Optional<Classroom> findByInviteCode(String code, String organizationId);
 }

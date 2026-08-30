@@ -75,3 +75,33 @@ A rota `/invitations/:token/accept` verifica autenticação; se não autenticado
 #### Scenario: Usuário não autenticado
 - **WHEN** usuário acessa `/invitations/:token/accept` sem sessão
 - **THEN** redirecionar para `/register?invite={token}`
+
+---
+
+### Requirement: An invitation is accepted only by its addressee
+The invitation link is secret but is not a credential. Accepting SHALL require that the invitation's email matches the authenticated user's email, compared case-insensitively.
+
+#### Scenario: Someone else holds the token
+- **WHEN** an authenticated user whose email differs from the invitation's posts the accept endpoint
+- **THEN** the system returns `403 INVITATION_NOT_FOR_THIS_USER` and creates no membership
+
+#### Scenario: The addressee accepts
+- **WHEN** the invited user accepts, even having signed up with the email in a different case
+- **THEN** the system returns 204 and creates the membership with the role carried by the invitation
+
+#### Scenario: The accepting user is unknown
+- **WHEN** the authenticated subject has no matching user record
+- **THEN** the system returns `403 INVITATION_NOT_FOR_THIS_USER`, revealing nothing about the invitation
+
+---
+
+### Requirement: Accepting an invitation enters the organization
+Accepting is entering a new organization, so the web app SHALL reissue the access token for that organization and drop the cached queries before navigating. Without it the JWT still points at the previous organization (or none) and the destination screen answers 403.
+
+#### Scenario: Invitation accepted
+- **WHEN** the user accepts an invitation
+- **THEN** the app switches the session to that organization, clears the query cache and navigates to it
+
+#### Scenario: Accepting fails
+- **WHEN** the accept request fails
+- **THEN** the session is left untouched — no token switch and no cache clear

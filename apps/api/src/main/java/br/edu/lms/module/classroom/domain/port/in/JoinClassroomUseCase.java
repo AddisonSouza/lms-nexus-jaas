@@ -1,8 +1,8 @@
 package br.edu.lms.module.classroom.domain.port.in;
 
-import br.edu.lms.module.classroom.application.dto.ClassroomResponse;
 import br.edu.lms.module.classroom.application.dto.JoinClassroomCommand;
+import br.edu.lms.module.classroom.application.dto.JoinClassroomResult;
 
 public interface JoinClassroomUseCase {
-    ClassroomResponse execute(JoinClassroomCommand command);
+    JoinClassroomResult execute(JoinClassroomCommand command);
 }

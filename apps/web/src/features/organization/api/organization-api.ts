@@ -33,16 +33,3 @@ export async function listOrganizations(): Promise<UserOrganization[]> {
   const response = await api.get('/organizations')
   return z.array(userOrganizationSchema).parse(response.data)
 }
-
-const switchOrganizationSchema = z.object({
-  accessToken: z.string(),
-})
-
-export async function switchOrganization(organizationId: string): Promise<string> {
-  const response = await api.post(
-    '/auth/switch-organization',
-    { organizationId },
-    { withCredentials: true },
-  )
-  return switchOrganizationSchema.parse(response.data).accessToken
-}

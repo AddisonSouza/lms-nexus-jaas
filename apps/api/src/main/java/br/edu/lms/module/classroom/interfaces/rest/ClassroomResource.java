@@ -167,16 +167,19 @@ public class ClassroomResource {
     @Operation(summary = "Ingressar em turma via código de convite")
     @APIResponse(responseCode = "201", description = "Ingresso realizado com sucesso")
     @APIResponse(responseCode = "200", description = "Usuário já era membro da turma")
-    @APIResponse(responseCode = "404", description = "Código inválido")
+    @APIResponse(responseCode = "404", description = "Código inválido ou de turma de outra organização")
     @APIResponse(responseCode = "422", description = "Turma arquivada")
     public Response join(@Valid JoinClassroomRequest request) {
+        var orgId = (String) jwt.getClaim("org");
         var userId = jwt.getSubject();
         var result = joinClassroomUseCase.execute(
                 JoinClassroomCommand.builder()
                         .inviteCode(request.inviteCode())
                         .userId(userId)
+                        .organizationId(orgId)
                         .build());
-        return Response.status(Response.Status.CREATED).entity(result).build();
+        var status = result.alreadyMember() ? Response.Status.OK : Response.Status.CREATED;
+        return Response.status(status).entity(result.classroom()).build();
     }
 
     private String primaryRole() {

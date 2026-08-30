@@ -3,9 +3,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createElement } from 'react'
 import { useSwitchOrganization } from './useSwitchOrganization'
-import * as orgApi from '../api/organization-api'
+import * as session from '@lib/session'
 
-vi.mock('../api/organization-api')
+vi.mock('@lib/session')
 
 const mockSetToken = vi.fn()
 const mockNavigate = vi.fn()
@@ -27,7 +27,7 @@ beforeEach(() => vi.clearAllMocks())
 
 describe('useSwitchOrganization', () => {
   it('stores the new token, clears the cache and lands on the root route', async () => {
-    vi.mocked(orgApi.switchOrganization).mockResolvedValue('token-of-org-2')
+    vi.mocked(session.switchOrganization).mockResolvedValue('token-of-org-2')
     const clear = vi.spyOn(queryClient, 'clear')
 
     const { result } = renderHook(() => useSwitchOrganization(), { wrapper })
@@ -36,14 +36,14 @@ describe('useSwitchOrganization', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(orgApi.switchOrganization).toHaveBeenCalledWith('org-2')
+    expect(session.switchOrganization).toHaveBeenCalledWith('org-2')
     expect(mockSetToken).toHaveBeenCalledWith('token-of-org-2')
     expect(clear).toHaveBeenCalled()
     expect(mockNavigate).toHaveBeenCalledWith('/', { replace: true })
   })
 
   it('keeps the session untouched when the switch is refused', async () => {
-    vi.mocked(orgApi.switchOrganization).mockRejectedValue({ response: { status: 403 } })
+    vi.mocked(session.switchOrganization).mockRejectedValue({ response: { status: 403 } })
 
     const { result } = renderHook(() => useSwitchOrganization(), { wrapper })
     act(() => result.current.mutate('org-not-mine'))

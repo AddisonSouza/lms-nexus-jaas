@@ -35,6 +35,7 @@ class JoinClassroomServiceTest {
 
     private static final String CODE = "ABC123";
     private static final String USER_ID = "user-1";
+    private static final String ORG_ID = "org-1";
     private final ClassroomId classroomId = ClassroomId.generate();
 
     private Classroom activeClassroom() {
@@ -44,7 +45,7 @@ class JoinClassroomServiceTest {
                 .academicPeriod("2025/1")
                 .status(ClassroomStatus.ACTIVE)
                 .inviteCode(InviteCode.of(CODE))
-                .organizationId("org-1")
+                .organizationId(ORG_ID)
                 .build();
     }
 
@@ -52,23 +53,26 @@ class JoinClassroomServiceTest {
         return JoinClassroomCommand.builder()
                 .inviteCode(CODE)
                 .userId(USER_ID)
+                .organizationId(ORG_ID)
                 .build();
     }
 
     @Test
     void shouldJoinSuccessfully() {
-        when(classroomRepository.findByInviteCode(CODE)).thenReturn(Optional.of(activeClassroom()));
+        when(classroomRepository.findByInviteCode(CODE, ORG_ID)).thenReturn(Optional.of(activeClassroom()));
         when(classroomRepository.findMember(classroomId, USER_ID)).thenReturn(Optional.empty());
         var saved = ClassroomMember.builder()
                 .id(UUID.randomUUID().toString())
-                .classroomId(classroomId).userId(USER_ID).organizationId("org-1")
+                .classroomId(classroomId).userId(USER_ID).organizationId(ORG_ID)
                 .role(ClassroomMemberRole.ALUNO).build();
         when(classroomRepository.saveMember(any())).thenReturn(saved);
 
         var result = sut.execute(cmd());
 
-        assertThat(result.getId()).isEqualTo(classroomId.getValue());
-        assertThat(result.getInviteCode()).isEqualTo(CODE);
+        assertThat(result.alreadyMember()).isFalse();
+        assertThat(result.classroom().getId()).isEqualTo(classroomId.getValue());
+        // Quem entra pelo código entra como ALUNO e nunca recebe o código (RF-08).
+        assertThat(result.classroom().getInviteCode()).isNull();
         verify(classroomRepository).saveMember(any());
     }
 
@@ -76,20 +80,22 @@ class JoinClassroomServiceTest {
     void shouldBeIdempotentWhenAlreadyMember() {
         var existing = ClassroomMember.builder()
                 .id(UUID.randomUUID().toString())
-                .classroomId(classroomId).userId(USER_ID).organizationId("org-1")
+                .classroomId(classroomId).userId(USER_ID).organizationId(ORG_ID)
                 .role(ClassroomMemberRole.ALUNO).build();
-        when(classroomRepository.findByInviteCode(CODE)).thenReturn(Optional.of(activeClassroom()));
+        when(classroomRepository.findByInviteCode(CODE, ORG_ID)).thenReturn(Optional.of(activeClassroom()));
         when(classroomRepository.findMember(classroomId, USER_ID)).thenReturn(Optional.of(existing));
 
         var result = sut.execute(cmd());
 
-        assertThat(result.getId()).isEqualTo(classroomId.getValue());
+        assertThat(result.alreadyMember()).isTrue();
+        assertThat(result.classroom().getId()).isEqualTo(classroomId.getValue());
+        assertThat(result.classroom().getInviteCode()).isNull();
         verify(classroomRepository, never()).saveMember(any());
     }
 
     @Test
     void shouldThrowWhenInviteCodeInvalid() {
-        when(classroomRepository.findByInviteCode(CODE)).thenReturn(Optional.empty());
+        when(classroomRepository.findByInviteCode(CODE, ORG_ID)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> sut.execute(cmd()))
                 .isInstanceOf(InvalidInviteCodeException.class);
@@ -98,7 +104,7 @@ class JoinClassroomServiceTest {
     @Test
     void shouldThrowWhenClassroomArchived() {
         var archived = activeClassroom().toBuilder().status(ClassroomStatus.ARCHIVED).build();
-        when(classroomRepository.findByInviteCode(CODE)).thenReturn(Optional.of(archived));
+        when(classroomRepository.findByInviteCode(CODE, ORG_ID)).thenReturn(Optional.of(archived));
 
         assertThatThrownBy(() -> sut.execute(cmd()))
                 .isInstanceOf(ClassroomArchivedException.class);
