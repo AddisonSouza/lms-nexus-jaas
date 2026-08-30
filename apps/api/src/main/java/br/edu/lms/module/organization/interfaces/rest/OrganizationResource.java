@@ -5,6 +5,7 @@ import br.edu.lms.module.organization.application.dto.InviteMemberCommand;
 import br.edu.lms.module.organization.application.dto.OrganizationResponse;
 import br.edu.lms.module.organization.domain.port.in.CreateOrganizationUseCase;
 import br.edu.lms.module.organization.domain.port.in.InviteMemberUseCase;
+import br.edu.lms.module.organization.domain.port.in.ListOrganizationMembersUseCase;
 import br.edu.lms.module.organization.domain.port.in.ListUserOrganizationsUseCase;
 import br.edu.lms.module.organization.domain.port.in.RemoveMemberUseCase;
 import br.edu.lms.module.organization.interfaces.rest.dto.CreateOrganizationRequest;
@@ -33,6 +34,7 @@ public class OrganizationResource {
     private final RemoveMemberUseCase removeMemberUseCase;
     private final InviteMemberUseCase inviteMemberUseCase;
     private final ListUserOrganizationsUseCase listUserOrganizationsUseCase;
+    private final ListOrganizationMembersUseCase listOrganizationMembersUseCase;
     private final JsonWebToken jwt;
 
     @POST
@@ -69,9 +71,7 @@ public class OrganizationResource {
     @APIResponse(responseCode = "409", description = "Usuário já é membro")
     @APIResponse(responseCode = "403", description = "Sem permissão")
     public Response invite(@PathParam("id") String organizationId, @Valid InviteMemberRequest request) {
-        var orgClaim = (String) jwt.getClaim("org");
-        var groups = jwt.getGroups();
-        if (orgClaim == null || !orgClaim.equals(organizationId) || groups == null || !groups.contains("ADMIN_ORG")) {
+        if (!isAdminOf(organizationId)) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
         inviteMemberUseCase.execute(InviteMemberCommand.builder()
@@ -83,6 +83,19 @@ public class OrganizationResource {
         return Response.status(Response.Status.CREATED).build();
     }
 
+    @GET
+    @Path("/{id}/members")
+    @RolesAllowed("ADMIN_ORG")
+    @Operation(summary = "Listar membros da organização")
+    @APIResponse(responseCode = "200", description = "Membros ativos, ordenados por nome")
+    @APIResponse(responseCode = "403", description = "Sem permissão")
+    public Response listMembers(@PathParam("id") String organizationId) {
+        if (!isAdminOf(organizationId)) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
+        return Response.ok(listOrganizationMembersUseCase.execute(organizationId)).build();
+    }
+
     @DELETE
     @Path("/{id}/members/{userId}")
     @Operation(summary = "Remover membro da organização")
@@ -91,12 +104,18 @@ public class OrganizationResource {
     @APIResponse(responseCode = "404", description = "Membro não encontrado")
     public Response removeMember(@PathParam("id") String organizationId,
                                  @PathParam("userId") String userId) {
-        var orgClaim = (String) jwt.getClaim("org");
-        var groups = jwt.getGroups();
-        if (orgClaim == null || !orgClaim.equals(organizationId) || groups == null || !groups.contains("ADMIN_ORG")) {
+        if (!isAdminOf(organizationId)) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
         removeMemberUseCase.execute(organizationId, userId);
         return Response.noContent().build();
+    }
+
+    /** O ADMIN_ORG só age sobre a organização do próprio token (org do JWT, nunca do path). */
+    private boolean isAdminOf(String organizationId) {
+        var orgClaim = (String) jwt.getClaim("org");
+        var groups = jwt.getGroups();
+        return orgClaim != null && orgClaim.equals(organizationId)
+                && groups != null && groups.contains("ADMIN_ORG");
     }
 }

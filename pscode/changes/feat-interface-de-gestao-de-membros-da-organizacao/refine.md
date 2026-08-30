@@ -59,7 +59,7 @@ que faltavam no back-end também entram.
 
 ## Subtasks
 
-- [ ] BE: endpoint `GET /organizations/{id}/members` (repositório, UserDirectoryPort em lote, use case, resposta com `owner`) + testes
+- [x] BE: endpoint `GET /organizations/{id}/members` (repositório, UserDirectoryPort em lote, use case, resposta com `owner`) + testes
 - [ ] BE: endpoint `PATCH /organizations/{id}/members/{userId}` para alterar papel (owner protegido, `updateRole` por JPQL) + testes
 - [ ] Docs: registrar os dois endpoints no `API_CONTRACT.md` (RF-06)
 - [ ] FE: camada de dados — `listMembers`/`inviteMember`/`removeMember`/`changeMemberRole` com Zod, query keys e hooks TanStack Query

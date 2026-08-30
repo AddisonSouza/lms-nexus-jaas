@@ -1,10 +1,15 @@
 package br.edu.lms.module.organization.infrastructure.persistence;
 
+import br.edu.lms.module.organization.domain.model.UserProfile;
 import br.edu.lms.module.organization.domain.port.out.UserDirectoryPort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @ApplicationScoped
@@ -28,5 +33,25 @@ public class UserDirectoryAdapter implements UserDirectoryPort {
                 .setParameter("id", userId)
                 .getResultStream()
                 .findFirst();
+    }
+
+    @Override
+    public Map<String, UserProfile> findProfilesByIds(Collection<String> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return Map.of();
+        }
+
+        var rows = entityManager.createQuery(
+                        "SELECT u.id, u.fullName, u.email FROM " + USER_ENTITY + " u WHERE u.id IN :ids",
+                        Tuple.class)
+                .setParameter("ids", userIds)
+                .getResultList();
+
+        Map<String, UserProfile> profiles = new HashMap<>();
+        for (Tuple row : rows) {
+            var id = row.get(0, String.class);
+            profiles.put(id, new UserProfile(id, row.get(1, String.class), row.get(2, String.class)));
+        }
+        return profiles;
     }
 }

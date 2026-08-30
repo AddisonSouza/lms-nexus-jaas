@@ -4,6 +4,8 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -15,4 +17,5 @@ public class OrganizationMember {
     private final String organizationId;
     private final String userId;
     private final MemberRole role;
+    private final LocalDateTime joinedAt;
 }

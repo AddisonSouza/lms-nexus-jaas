@@ -11,6 +11,7 @@ public interface OrganizationMemberRepository {
     boolean existsActiveMemberByEmail(String organizationId, String email);
     boolean existsActiveByOrgAndUser(String organizationId, String userId);
     Optional<OrganizationMember> findActiveByOrgAndUser(String organizationId, String userId);
+    List<OrganizationMember> findActiveMembersByOrganization(String organizationId);
     List<UserOrganization> findUserOrganizations(String userId);
     void softDelete(String memberId);
 }
