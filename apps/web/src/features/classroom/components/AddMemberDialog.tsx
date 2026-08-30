@@ -35,22 +35,33 @@ function AddMemberDialog({ open, onClose, onSubmit, isPending }: Props) {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-1">
-            <label className="text-xs text-muted-foreground">ID do usuário *</label>
-            <Input {...register('userId')} placeholder="UUID do membro" />
-            {errors.userId && <p className="text-xs text-destructive">{errors.userId.message}</p>}
+            <label htmlFor="add-member-user-id" className="text-xs text-muted-foreground">ID do usuário *</label>
+            <Input
+              {...register('userId')}
+              id="add-member-user-id"
+              placeholder="UUID do membro"
+              aria-invalid={!!errors.userId}
+            />
+            {errors.userId && (
+              <p role="alert" className="text-xs text-destructive">{errors.userId.message}</p>
+            )}
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs text-muted-foreground">Papel *</label>
+            <label htmlFor="add-member-role" className="text-xs text-muted-foreground">Papel *</label>
             <select
               {...register('role')}
+              id="add-member-role"
+              aria-invalid={!!errors.role}
               className="h-9 w-full rounded-full border border-border bg-surface px-3.5 text-sm text-foreground outline-none focus-visible:border-accent"
             >
               <option value="">Selecione...</option>
               <option value="PROFESSOR">Professor</option>
               <option value="ALUNO">Aluno</option>
             </select>
-            {errors.role && <p className="text-xs text-destructive">{errors.role.message}</p>}
+            {errors.role && (
+              <p role="alert" className="text-xs text-destructive">{errors.role.message}</p>
+            )}
           </div>
 
           <DialogFooter>
