@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { BookOpen, BookOpenCheck, ClipboardList, LayoutDashboard } from 'lucide-react'
+import { BookOpen, BookOpenCheck, ClipboardList, LayoutDashboard, Users } from 'lucide-react'
 import { useAuthStore } from '@store/authStore'
 import { CardKicker } from '@components/ui/card'
 import OrganizationSwitcher from '@features/organization/components/OrganizationSwitcher'
@@ -55,6 +55,17 @@ function Sidebar() {
             <ClipboardList className="h-[19px] w-[19px] shrink-0" />
             Minhas Tarefas
           </NavLink>
+        )}
+
+        {role === 'ADMIN_ORG' && organizationId && (
+          <>
+            <CardKicker className="px-3 pb-1 pt-3">Organização</CardKicker>
+
+            <NavLink to={`/organizations/${organizationId}/members`} className={linkClass}>
+              <Users className="h-[19px] w-[19px] shrink-0" />
+              Membros
+            </NavLink>
+          </>
         )}
       </nav>
     </aside>

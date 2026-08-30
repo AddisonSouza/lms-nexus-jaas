@@ -115,12 +115,39 @@ public class OrganizationMemberRepositoryImpl implements OrganizationMemberRepos
                 .setParameter("userId", userId)
                 .getResultStream()
                 .findFirst()
-                .map(e -> OrganizationMember.builder()
-                        .id(e.getId())
-                        .organizationId(e.getOrganizationId())
-                        .userId(e.getUserId())
-                        .role(MemberRole.valueOf(e.getRole()))
-                        .build());
+                .map(this::toDomain);
+    }
+
+    @Override
+    public List<OrganizationMember> findActiveMembersByOrganization(String organizationId) {
+        return em.createQuery(
+                        "SELECT m FROM OrganizationMemberJpaEntity m " +
+                        "WHERE m.organizationId = :orgId AND m.deletedAt IS NULL " +
+                        "ORDER BY m.joinedAt",
+                        OrganizationMemberJpaEntity.class)
+                .setParameter("orgId", organizationId)
+                .getResultStream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    private OrganizationMember toDomain(OrganizationMemberJpaEntity e) {
+        return OrganizationMember.builder()
+                .id(e.getId())
+                .organizationId(e.getOrganizationId())
+                .userId(e.getUserId())
+                .role(MemberRole.valueOf(e.getRole()))
+                .joinedAt(e.getJoinedAt())
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public void updateRole(String memberId, MemberRole role) {
+        em.createQuery("UPDATE OrganizationMemberJpaEntity m SET m.role = :role WHERE m.id = :id")
+                .setParameter("role", role.name())
+                .setParameter("id", memberId)
+                .executeUpdate();
     }
 
     @Override

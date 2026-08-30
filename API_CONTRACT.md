@@ -236,6 +236,57 @@ uma credencial. O e-mail é comparado sem diferenciar maiúsculas de minúsculas
 
 ---
 
+**`GET /organizations/{id}/members`** · `ADMIN_ORG`
+
+Lista os membros ativos da organização, ordenados por nome. Nome e e-mail vêm do
+módulo `identity`. `owner` marca o criador da organização, que não pode ser
+removido nem ter o papel alterado. Vínculos removidos (soft delete) não aparecem.
+
+```json
+[
+  {
+    "id": "uuid do vínculo",
+    "userId": "uuid",
+    "name": "string",
+    "email": "string",
+    "role": "ADMIN_ORG | GESTOR | PROFESSOR | ALUNO",
+    "joinedAt": "2026-08-30T10:00:00",
+    "owner": true
+  }
+]
+```
+
+| Código | Descrição |
+|---|---|
+| `200` | Membros da organização. |
+| `401` | Não autenticado. |
+| `403` | Não é `ADMIN_ORG` desta organização (o `{id}` precisa bater com o claim `org`). |
+
+---
+
+**`PATCH /organizations/{id}/members/{userId}`** · `ADMIN_ORG`
+
+Altera o papel de um membro.
+
+```json
+{
+  "role": "GESTOR | PROFESSOR | ALUNO"
+}
+```
+
+O membro só passa a agir com o novo papel no próximo login ou troca de
+organização — o papel viaja no JWT, que não é reemitido aqui.
+
+| Código | Descrição |
+|---|---|
+| `204` | Papel alterado. |
+| `401` | Não autenticado. |
+| `403` | Sem permissão, ou tentativa de alterar o papel do criador (`CANNOT_CHANGE_OWNER_ROLE`). |
+| `404` | Membro não encontrado nesta organização (`MEMBER_NOT_FOUND`). |
+| `422` | `ADMIN_ORG` não é atribuível a um membro (`ROLE_NOT_ASSIGNABLE`). |
+
+---
+
 **`DELETE /organizations/{id}/members/{userId}`** · `ADMIN_ORG`
 
 Remove membro da organização (soft delete).
@@ -243,7 +294,8 @@ Remove membro da organização (soft delete).
 | Código | Descrição |
 |---|---|
 | `204` | Membro removido. |
-| `422` | Tentativa de remover o ADMIN_ORG criador. |
+| `403` | Sem permissão, ou tentativa de remover o criador (`CANNOT_REMOVE_OWNER`). |
+| `404` | Membro não encontrado nesta organização (`MEMBER_NOT_FOUND`). |
 
 ---
 
@@ -690,7 +742,7 @@ Todos os recursos usam `deleted_at TIMESTAMP NULL`. Queries filtram `WHERE delet
 | RF-03 | identity | Recuperação de Senha | ✅ | `POST /auth/forgot-password` · `POST /auth/reset-password` |
 | RF-04 | identity | Confirmação de E-mail | ✅ | `GET /auth/confirm-email` · `POST /auth/resend-confirmation` |
 | RF-05 | organization | Criação de Organização | ✅ | `POST /organizations` · `GET /organizations` |
-| RF-06 | organization | Gestão de Membros | ✅ | `POST /organizations/{id}/invitations` · `GET /invitations/{token}` · `POST /invitations/{token}/accept` · `DELETE /organizations/{id}/members/{userId}` |
+| RF-06 | organization | Gestão de Membros | ✅ | `POST /organizations/{id}/invitations` · `GET /invitations/{token}` · `POST /invitations/{token}/accept` · `GET /organizations/{id}/members` · `PATCH /organizations/{id}/members/{userId}` · `DELETE /organizations/{id}/members/{userId}` |
 | RF-07 | classroom | Gestão de Turmas | ✅ | `GET /classrooms` · `GET /classrooms/{id}` · `POST /classrooms` · `PUT /classrooms/{id}` · `DELETE /classrooms/{id}` · `GET /classrooms/{id}/members` · `POST /classrooms/{id}/members` · `DELETE /classrooms/{id}/members/{userId}` |
 | RF-08 | classroom | Ingresso via Código | 🔍 | `POST /classrooms/join` |
 | RF-09 | curriculum | Gestão de Disciplinas | 📋 | `POST /subjects` · `POST /subjects/{id}/classrooms` · `POST /subjects/{id}/teachers` |
