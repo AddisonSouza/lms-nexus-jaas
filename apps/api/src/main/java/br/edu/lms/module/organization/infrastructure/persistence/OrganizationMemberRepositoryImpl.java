@@ -143,6 +143,15 @@ public class OrganizationMemberRepositoryImpl implements OrganizationMemberRepos
 
     @Override
     @Transactional
+    public void updateRole(String memberId, MemberRole role) {
+        em.createQuery("UPDATE OrganizationMemberJpaEntity m SET m.role = :role WHERE m.id = :id")
+                .setParameter("role", role.name())
+                .setParameter("id", memberId)
+                .executeUpdate();
+    }
+
+    @Override
+    @Transactional
     public void softDelete(String memberId) {
         em.createQuery(
                         "UPDATE OrganizationMemberJpaEntity m SET m.deletedAt = :now WHERE m.id = :id")

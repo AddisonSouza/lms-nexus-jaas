@@ -3,12 +3,14 @@ package br.edu.lms.module.organization.interfaces.rest;
 import br.edu.lms.module.organization.application.dto.CreateOrganizationCommand;
 import br.edu.lms.module.organization.application.dto.InviteMemberCommand;
 import br.edu.lms.module.organization.application.dto.OrganizationResponse;
+import br.edu.lms.module.organization.domain.port.in.ChangeMemberRoleUseCase;
 import br.edu.lms.module.organization.domain.port.in.CreateOrganizationUseCase;
 import br.edu.lms.module.organization.domain.port.in.InviteMemberUseCase;
 import br.edu.lms.module.organization.domain.port.in.ListOrganizationMembersUseCase;
 import br.edu.lms.module.organization.domain.port.in.ListUserOrganizationsUseCase;
 import br.edu.lms.module.organization.domain.port.in.RemoveMemberUseCase;
 import br.edu.lms.module.organization.interfaces.rest.dto.CreateOrganizationRequest;
+import br.edu.lms.module.organization.interfaces.rest.dto.ChangeMemberRoleRequest;
 import br.edu.lms.module.organization.interfaces.rest.dto.InviteMemberRequest;
 import io.quarkus.security.Authenticated;
 import jakarta.annotation.security.RolesAllowed;
@@ -35,6 +37,7 @@ public class OrganizationResource {
     private final InviteMemberUseCase inviteMemberUseCase;
     private final ListUserOrganizationsUseCase listUserOrganizationsUseCase;
     private final ListOrganizationMembersUseCase listOrganizationMembersUseCase;
+    private final ChangeMemberRoleUseCase changeMemberRoleUseCase;
     private final JsonWebToken jwt;
 
     @POST
@@ -94,6 +97,24 @@ public class OrganizationResource {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
         return Response.ok(listOrganizationMembersUseCase.execute(organizationId)).build();
+    }
+
+    @PATCH
+    @Path("/{id}/members/{userId}")
+    @RolesAllowed("ADMIN_ORG")
+    @Operation(summary = "Alterar o papel de um membro")
+    @APIResponse(responseCode = "204", description = "Papel alterado")
+    @APIResponse(responseCode = "403", description = "Sem permissão ou tentativa de alterar o papel do owner")
+    @APIResponse(responseCode = "404", description = "Membro não encontrado")
+    @APIResponse(responseCode = "422", description = "Papel não atribuível a um membro")
+    public Response changeMemberRole(@PathParam("id") String organizationId,
+                                     @PathParam("userId") String userId,
+                                     @Valid ChangeMemberRoleRequest request) {
+        if (!isAdminOf(organizationId)) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
+        changeMemberRoleUseCase.execute(organizationId, userId, request.role());
+        return Response.noContent().build();
     }
 
     @DELETE
