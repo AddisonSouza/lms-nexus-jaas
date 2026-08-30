@@ -111,3 +111,20 @@ THEN the system SHALL return 404 Not Found
 
 WHEN a GESTOR or PROFESSOR sends DELETE /subjects/{id}
 THEN the system SHALL return 403 Forbidden
+
+---
+
+### Requirement: Subject list reports load failures
+The subject list SHALL distinguish a failed request from an organization with no subjects. The empty state SHALL be shown only when the request succeeded and returned no subject.
+
+#### Scenario: Request fails
+- **WHEN** `GET /subjects` fails for any reason — an expired session, a token without the `org` claim (HTTP 403), or a server error
+- **THEN** the list renders a failure message naming what could not be loaded, plus a "Tentar de novo" action, and renders no table and no empty-state message
+
+#### Scenario: User retries
+- **WHEN** the user activates "Tentar de novo" and the request then succeeds
+- **THEN** the list renders the subjects; while the retry is in flight the action is disabled
+
+#### Scenario: Organization genuinely has no subject
+- **WHEN** `GET /subjects` succeeds and returns an empty list
+- **THEN** the list renders "Nenhuma disciplina encontrada."

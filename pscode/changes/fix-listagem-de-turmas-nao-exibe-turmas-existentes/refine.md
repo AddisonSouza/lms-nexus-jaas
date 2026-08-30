@@ -50,15 +50,15 @@ Fecha #74 e #75 juntas: mesma tela, mesmo defeito, mesma correção.
 
 ## Subtasks
 
-- [ ] Criar `components/shared/ListErrorState.tsx` — mensagem de falha + botão
+- [x] Criar `components/shared/ListErrorState.tsx` — mensagem de falha + botão
       "Tentar de novo", com teste unitário
-- [ ] Consumir `isError`/`refetch` em `ClassroomListPage` e renderizar
+- [x] Consumir `isError`/`refetch` em `ClassroomListPage` e renderizar
       `ListErrorState`, mantendo o vazio só no sucesso
-- [ ] Consumir `isError`/`refetch` em `SubjectListPage` do mesmo jeito
-- [ ] Tornar `classroomSchema` defensivo em `classroom-api.ts`, espelhando o
+- [x] Consumir `isError`/`refetch` em `SubjectListPage` do mesmo jeito
+- [x] Tornar `classroomSchema` defensivo em `classroom-api.ts`, espelhando o
       `subjectSchema`
-- [ ] Testes das duas telas nos três estados: com dados, vazio e erro
-- [ ] Rodar lint, type-check e a suíte do `apps/web`; validar as duas telas no
+- [x] Testes das duas telas nos três estados: com dados, vazio e erro
+- [x] Rodar lint, type-check e a suíte do `apps/web`; validar as duas telas no
       browser
-- [ ] Atualizar as specs `classroom-management` e `subject-management` e
+- [x] Atualizar as specs `classroom-management` e `subject-management` e
       comentar na #75 que ela é fechada por esta change

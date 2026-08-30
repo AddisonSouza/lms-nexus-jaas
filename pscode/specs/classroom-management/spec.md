@@ -89,3 +89,24 @@ Any authenticated organization member SHALL be able to retrieve a classroom by I
 #### Scenario: Code shown in the classroom list
 - **WHEN** a user who may see the code opens the classroom list in the web app
 - **THEN** a "Código" column is rendered with the code and a copy button; for an `ALUNO` the column is not rendered at all
+
+---
+
+### Requirement: Classroom list reports load failures
+The classroom list SHALL distinguish a failed request from an organization with no classrooms. The empty state SHALL be shown only when the request succeeded and returned no classroom.
+
+#### Scenario: Request fails
+- **WHEN** `GET /classrooms` fails for any reason — an expired session, a token without the `org` claim (HTTP 403), or a server error
+- **THEN** the list renders a failure message naming what could not be loaded, plus a "Tentar de novo" action, and renders no table and no empty-state message
+
+#### Scenario: User retries
+- **WHEN** the user activates "Tentar de novo" and the request then succeeds
+- **THEN** the list renders the classrooms; while the retry is in flight the action is disabled
+
+#### Scenario: Organization genuinely has no classroom
+- **WHEN** `GET /classrooms` succeeds and returns an empty list
+- **THEN** the list renders "Nenhuma turma encontrada."
+
+#### Scenario: Response is missing optional fields
+- **WHEN** a classroom in the response omits `description`, `academicPeriod`, `status`, `inviteCode`, `organizationId` or `createdAt`
+- **THEN** that classroom is still listed, the missing field falling back to a default, rather than the whole list failing to parse
