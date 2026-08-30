@@ -1,22 +1,44 @@
 import { useState } from 'react'
-import { Users, Trash2 } from 'lucide-react'
+import { Users, Trash2, UserPlus, CheckCircle2 } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 import { useOrganizationMembers } from '../hooks/useOrganizationMembers'
 import { useRemoveMember } from '../hooks/useRemoveMember'
+import { useInviteMember } from '../hooks/useInviteMember'
 import { roleLabels } from '../roles'
 import type { OrganizationMember } from '../api/organization-api'
+import InviteMemberDialog from './InviteMemberDialog'
+import type { InviteMemberFormData } from '../schemas/inviteMemberSchema'
 import ConfirmDialog from '@components/shared/ConfirmDialog'
 import ListErrorState from '@components/shared/ListErrorState'
 import { Card } from '@components/ui/card'
+import { Button } from '@components/ui/button'
 import { Badge } from '@components/ui/badge'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@components/ui/table'
 
 function OrganizationMembersPage() {
   const { id: organizationId = '' } = useParams<{ id: string }>()
   const [removeTarget, setRemoveTarget] = useState<OrganizationMember | null>(null)
+  const [showInvite, setShowInvite] = useState(false)
+  const [invitedEmail, setInvitedEmail] = useState<string | null>(null)
 
   const { data: members, isLoading, isError, isFetching, refetch } = useOrganizationMembers(organizationId)
   const removeMember = useRemoveMember(organizationId)
+  const inviteMember = useInviteMember(organizationId)
+
+  const handleInvite = (data: InviteMemberFormData) => {
+    inviteMember.mutate(data, {
+      onSuccess: () => {
+        setInvitedEmail(data.email)
+        setShowInvite(false)
+      },
+    })
+  }
+
+  const openInvite = () => {
+    setInvitedEmail(null)
+    inviteMember.reset()
+    setShowInvite(true)
+  }
 
   const handleConfirmRemove = () => {
     if (!removeTarget) return
@@ -30,7 +52,17 @@ function OrganizationMembersPage() {
           <Users className="h-6 w-6 text-accent" />
           <h2 className="mb-0">Membros</h2>
         </div>
+        <Button onClick={openInvite}>
+          <UserPlus className="h-4 w-4" /> Convidar
+        </Button>
       </div>
+
+      {invitedEmail && (
+        <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
+          <CheckCircle2 className="h-4 w-4 text-accent" />
+          Convite enviado para {invitedEmail}. Ele aparece na lista depois de aceitar.
+        </p>
+      )}
 
       {isLoading ? (
         <p className="text-muted-foreground">Carregando membros...</p>
@@ -84,6 +116,14 @@ function OrganizationMembersPage() {
           </Table>
         </Card>
       )}
+
+      <InviteMemberDialog
+        open={showInvite}
+        onClose={() => setShowInvite(false)}
+        onSubmit={handleInvite}
+        isPending={inviteMember.isPending}
+        error={inviteMember.error}
+      />
 
       <ConfirmDialog
         open={!!removeTarget}

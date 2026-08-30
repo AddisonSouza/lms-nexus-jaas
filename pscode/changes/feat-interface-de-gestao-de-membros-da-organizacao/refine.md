@@ -64,6 +64,6 @@ que faltavam no back-end também entram.
 - [x] Docs: registrar os dois endpoints no `API_CONTRACT.md` (RF-06)
 - [x] FE: camada de dados — `listMembers`/`inviteMember`/`removeMember`/`changeMemberRole` com Zod, query keys e hooks TanStack Query
 - [x] FE: página `OrganizationMembersPage` com a tabela de membros, remoção via `ConfirmDialog`, rota protegida e item "Membros" na sidebar
-- [ ] FE: `InviteMemberDialog` — formulário Zod (e-mail + papel) ligado ao `POST /invitations`, tratando o 409 de membro já existente
+- [x] FE: `InviteMemberDialog` — formulário Zod (e-mail + papel) ligado ao `POST /invitations`, tratando o 409 de membro já existente
 - [ ] FE: alteração de papel inline na tabela, desabilitada para o owner
 - [ ] Validar o golden path na aplicação (convidar → listar → alterar papel → remover)

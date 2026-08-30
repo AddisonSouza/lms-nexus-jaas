@@ -108,6 +108,87 @@ describe('OrganizationMembersPage', () => {
     expect(await screen.findByText('Nenhum membro nesta organização.')).toBeTruthy()
   })
 
+  it('sends the invite with the chosen email and role, then confirms it', async () => {
+    vi.mocked(orgApi.inviteMember).mockResolvedValue(undefined)
+    renderPage()
+
+    await userEvent.click(await screen.findByRole('button', { name: /Convidar/ }))
+    await userEvent.type(screen.getByLabelText('E-mail *'), 'novo@test.com')
+    await userEvent.selectOptions(screen.getByLabelText('Papel *'), 'PROFESSOR')
+    await userEvent.click(screen.getByRole('button', { name: 'Enviar convite' }))
+
+    await waitFor(() =>
+      expect(orgApi.inviteMember).toHaveBeenCalledWith('org-1', {
+        email: 'novo@test.com',
+        role: 'PROFESSOR',
+      }),
+    )
+    expect(await screen.findByRole('status')).toBeTruthy()
+    expect(screen.getByText(/Convite enviado para novo@test.com/)).toBeTruthy()
+  })
+
+  it('does not send the invite without an email', async () => {
+    renderPage()
+
+    await userEvent.click(await screen.findByRole('button', { name: /Convidar/ }))
+    await userEvent.selectOptions(screen.getByLabelText('Papel *'), 'ALUNO')
+    await userEvent.click(screen.getByRole('button', { name: 'Enviar convite' }))
+
+    expect(await screen.findByText('Informe o e-mail')).toBeTruthy()
+    expect(orgApi.inviteMember).not.toHaveBeenCalled()
+  })
+
+  it('does not send the invite without a role', async () => {
+    renderPage()
+
+    await userEvent.click(await screen.findByRole('button', { name: /Convidar/ }))
+    await userEvent.type(screen.getByLabelText('E-mail *'), 'novo@test.com')
+    await userEvent.click(screen.getByRole('button', { name: 'Enviar convite' }))
+
+    expect(await screen.findByText('Selecione o papel')).toBeTruthy()
+    expect(orgApi.inviteMember).not.toHaveBeenCalled()
+  })
+
+  it('does not send a malformed email to the API', async () => {
+    renderPage()
+
+    await userEvent.click(await screen.findByRole('button', { name: /Convidar/ }))
+    await userEvent.type(screen.getByLabelText('E-mail *'), 'nao-e-email')
+    await userEvent.selectOptions(screen.getByLabelText('Papel *'), 'ALUNO')
+    await userEvent.click(screen.getByRole('button', { name: 'Enviar convite' }))
+
+    await waitFor(() => expect(orgApi.inviteMember).not.toHaveBeenCalled())
+  })
+
+  it('explains the 409 instead of a generic failure when the email is already a member', async () => {
+    vi.mocked(orgApi.inviteMember).mockRejectedValue({ response: { status: 409 } })
+    renderPage()
+
+    await userEvent.click(await screen.findByRole('button', { name: /Convidar/ }))
+    await userEvent.type(screen.getByLabelText('E-mail *'), 'ana@test.com')
+    await userEvent.selectOptions(screen.getByLabelText('Papel *'), 'ALUNO')
+    await userEvent.click(screen.getByRole('button', { name: 'Enviar convite' }))
+
+    expect(
+      await screen.findByText('Esse e-mail já pertence a um membro desta organização.'),
+    ).toBeTruthy()
+  })
+
+  it('keeps the dialog open with a generic message when the invite fails otherwise', async () => {
+    vi.mocked(orgApi.inviteMember).mockRejectedValue({ response: { status: 500 } })
+    renderPage()
+
+    await userEvent.click(await screen.findByRole('button', { name: /Convidar/ }))
+    await userEvent.type(screen.getByLabelText('E-mail *'), 'novo@test.com')
+    await userEvent.selectOptions(screen.getByLabelText('Papel *'), 'ALUNO')
+    await userEvent.click(screen.getByRole('button', { name: 'Enviar convite' }))
+
+    expect(
+      await screen.findByText('Não foi possível enviar o convite. Tente novamente.'),
+    ).toBeTruthy()
+    expect(screen.queryByRole('status')).toBeNull()
+  })
+
   it('falls back to the user id when identity has no name for the member', async () => {
     vi.mocked(orgApi.listMembers).mockResolvedValue([{ ...teacher, name: null, email: null }])
     renderPage()
