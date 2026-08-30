@@ -62,7 +62,7 @@ que faltavam no back-end também entram.
 - [x] BE: endpoint `GET /organizations/{id}/members` (repositório, UserDirectoryPort em lote, use case, resposta com `owner`) + testes
 - [x] BE: endpoint `PATCH /organizations/{id}/members/{userId}` para alterar papel (owner protegido, `updateRole` por JPQL) + testes
 - [x] Docs: registrar os dois endpoints no `API_CONTRACT.md` (RF-06)
-- [ ] FE: camada de dados — `listMembers`/`inviteMember`/`removeMember`/`changeMemberRole` com Zod, query keys e hooks TanStack Query
+- [x] FE: camada de dados — `listMembers`/`inviteMember`/`removeMember`/`changeMemberRole` com Zod, query keys e hooks TanStack Query
 - [ ] FE: página `OrganizationMembersPage` com a tabela de membros, remoção via `ConfirmDialog`, rota protegida e item "Membros" na sidebar
 - [ ] FE: `InviteMemberDialog` — formulário Zod (e-mail + papel) ligado ao `POST /invitations`, tratando o 409 de membro já existente
 - [ ] FE: alteração de papel inline na tabela, desabilitada para o owner
