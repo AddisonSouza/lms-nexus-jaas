@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.*;
 class InvitationResourceIT {
 
     static final String USER_ID = "11111111-1111-1111-1111-111111111111";
+    static final String ACCEPTEE_ID = "44444444-4444-4444-4444-444444444444";
     static final String ORG_ID  = "22222222-2222-2222-2222-222222222222";
 
     @Inject EntityManager em;
@@ -206,12 +207,14 @@ class InvitationResourceIT {
                 .body("error", equalTo("INVITATION_ALREADY_USED"));
     }
 
+    // O convite vale para o e-mail a que foi endereçado (#138), então quem aceita
+    // é o convidado — autenticar como o convidante daria 403.
     @Test
-    @TestSecurity(user = USER_ID, roles = {})
-    @JwtSecurity(claims = {@Claim(key = "sub", value = USER_ID)})
+    @TestSecurity(user = ACCEPTEE_ID, roles = {})
+    @JwtSecurity(claims = {@Claim(key = "sub", value = ACCEPTEE_ID)})
     void accept_validToken_returns204() throws Exception {
         var acceptToken = "valid-accept-token-it-001";
-        var accepteeId = "44444444-4444-4444-4444-444444444444";
+        var accepteeId = ACCEPTEE_ID;
         tx.begin();
         em.createNativeQuery("INSERT IGNORE INTO users (id, full_name, email, password_hash, status) VALUES (?,?,?,?,?)")
                 .setParameter(1, accepteeId)
