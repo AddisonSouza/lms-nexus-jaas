@@ -6,15 +6,18 @@ import type {
   UpdateClassroomPayload,
 } from '../types'
 
+// Só `id` e `name` são realmente indispensáveis para desenhar a linha. Os demais
+// campos ganham default para que um campo ausente na resposta não derrube o
+// parse da lista inteira — o que a tela mostraria como "nenhuma turma".
 const classroomSchema = z.object({
   id: z.string(),
   name: z.string(),
-  description: z.string().nullable(),
-  academicPeriod: z.string(),
-  status: z.enum(['ACTIVE', 'ARCHIVED']),
-  inviteCode: z.string().nullable(),
-  organizationId: z.string(),
-  createdAt: z.string(),
+  description: z.string().nullable().default(null),
+  academicPeriod: z.string().default(''),
+  status: z.enum(['ACTIVE', 'ARCHIVED']).default('ACTIVE'),
+  inviteCode: z.string().nullable().default(null),
+  organizationId: z.string().default(''),
+  createdAt: z.string().default(''),
 })
 
 const classroomMemberSchema = z.object({
