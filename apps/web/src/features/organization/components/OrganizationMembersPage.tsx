@@ -4,8 +4,9 @@ import { useParams } from 'react-router-dom'
 import { useOrganizationMembers } from '../hooks/useOrganizationMembers'
 import { useRemoveMember } from '../hooks/useRemoveMember'
 import { useInviteMember } from '../hooks/useInviteMember'
-import { roleLabels } from '../roles'
-import type { OrganizationMember } from '../api/organization-api'
+import { useChangeMemberRole } from '../hooks/useChangeMemberRole'
+import { roleLabels, assignableRoles, isAssignableRole } from '../roles'
+import type { OrganizationMember, AssignableRole } from '../api/organization-api'
 import InviteMemberDialog from './InviteMemberDialog'
 import type { InviteMemberFormData } from '../schemas/inviteMemberSchema'
 import ConfirmDialog from '@components/shared/ConfirmDialog'
@@ -20,10 +21,17 @@ function OrganizationMembersPage() {
   const [removeTarget, setRemoveTarget] = useState<OrganizationMember | null>(null)
   const [showInvite, setShowInvite] = useState(false)
   const [invitedEmail, setInvitedEmail] = useState<string | null>(null)
+  const [roleError, setRoleError] = useState<string | null>(null)
 
   const { data: members, isLoading, isError, isFetching, refetch } = useOrganizationMembers(organizationId)
   const removeMember = useRemoveMember(organizationId)
   const inviteMember = useInviteMember(organizationId)
+  const changeRole = useChangeMemberRole(organizationId)
+
+  const handleRoleChange = (userId: string, role: AssignableRole) => {
+    setRoleError(null)
+    changeRole.mutate({ userId, role }, { onError: () => setRoleError(userId) })
+  }
 
   const handleInvite = (data: InviteMemberFormData) => {
     inviteMember.mutate(data, {
@@ -90,7 +98,31 @@ function OrganizationMembersPage() {
                   </TableCell>
                   <TableCell className="text-muted-foreground">{m.email ?? '—'}</TableCell>
                   <TableCell>
-                    <Badge variant={m.owner ? 'accent' : 'neutral'}>{roleLabels[m.role]}</Badge>
+                    {/* O papel do criador é fixo — o back-end responde 403 a qualquer troca. */}
+                    {m.owner || !isAssignableRole(m.role) ? (
+                      <Badge variant={m.owner ? 'accent' : 'neutral'}>{roleLabels[m.role]}</Badge>
+                    ) : (
+                      <>
+                        <select
+                          value={m.role}
+                          aria-label={`Papel de ${m.name ?? m.email ?? m.userId}`}
+                          disabled={changeRole.isPending}
+                          onChange={(e) => handleRoleChange(m.userId, e.target.value as AssignableRole)}
+                          className="h-8 rounded-full border border-border bg-surface px-3 text-sm text-foreground outline-none focus-visible:border-accent disabled:opacity-60"
+                        >
+                          {assignableRoles.map((role) => (
+                            <option key={role} value={role}>
+                              {roleLabels[role]}
+                            </option>
+                          ))}
+                        </select>
+                        {roleError === m.userId && (
+                          <p role="alert" className="mt-1 text-xs text-destructive">
+                            Não foi possível alterar o papel.
+                          </p>
+                        )}
+                      </>
+                    )}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {new Date(m.joinedAt).toLocaleDateString('pt-BR')}

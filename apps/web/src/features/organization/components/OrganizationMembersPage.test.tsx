@@ -189,6 +189,51 @@ describe('OrganizationMembersPage', () => {
     expect(screen.queryByRole('status')).toBeNull()
   })
 
+  it('changes the role of a member through the inline select', async () => {
+    vi.mocked(orgApi.changeMemberRole).mockResolvedValue(undefined)
+    renderPage()
+
+    await userEvent.selectOptions(await screen.findByLabelText('Papel de Ana Silva'), 'GESTOR')
+
+    await waitFor(() =>
+      expect(orgApi.changeMemberRole).toHaveBeenCalledWith('org-1', 'user-1', 'GESTOR'),
+    )
+  })
+
+  it('shows the current role as the selected option', async () => {
+    renderPage()
+
+    const select = (await screen.findByLabelText('Papel de Ana Silva')) as HTMLSelectElement
+    expect(select.value).toBe('PROFESSOR')
+  })
+
+  it('offers no role select for the organization owner', async () => {
+    renderPage()
+
+    await screen.findByText('Zelia Owner')
+    expect(screen.queryByLabelText('Papel de Zelia Owner')).toBeNull()
+    expect(screen.getByText('Administrador')).toBeTruthy()
+  })
+
+  it('shows a role badge instead of a select when the role is not assignable', async () => {
+    vi.mocked(orgApi.listMembers).mockResolvedValue([
+      { ...teacher, role: 'ADMIN_ORG', owner: false },
+    ])
+    renderPage()
+
+    expect(await screen.findByText('Administrador')).toBeTruthy()
+    expect(screen.queryByLabelText('Papel de Ana Silva')).toBeNull()
+  })
+
+  it('reports a failed role change on the affected row', async () => {
+    vi.mocked(orgApi.changeMemberRole).mockRejectedValue({ response: { status: 403 } })
+    renderPage()
+
+    await userEvent.selectOptions(await screen.findByLabelText('Papel de Ana Silva'), 'ALUNO')
+
+    expect(await screen.findByText('Não foi possível alterar o papel.')).toBeTruthy()
+  })
+
   it('falls back to the user id when identity has no name for the member', async () => {
     vi.mocked(orgApi.listMembers).mockResolvedValue([{ ...teacher, name: null, email: null }])
     renderPage()
