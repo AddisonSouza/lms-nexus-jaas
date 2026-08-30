@@ -9,6 +9,7 @@ import ProtectedRoute from '@components/shared/ProtectedRoute'
 import AppShell from '@components/layout/AppShell'
 import SetupShell from '@components/layout/SetupShell'
 import CreateOrganizationPage from '@features/organization/components/CreateOrganizationPage'
+import OrganizationMembersPage from '@features/organization/components/OrganizationMembersPage'
 import WelcomePage from '@features/onboarding/components/WelcomePage'
 import AcceptInvitePage from '@features/invitation/components/AcceptInvitePage'
 import ClassroomListPage from '@features/classroom/components/ClassroomListPage'
@@ -98,6 +99,14 @@ export const router = createBrowserRouter([
         element: <RequireOrganization />,
         children: [
           { path: '/organizations/:id', element: <OrganizationRoute /> },
+          {
+            path: '/organizations/:id/members',
+            element: (
+              <ProtectedRoute roles={['ADMIN_ORG']}>
+                <OrganizationMembersPage />
+              </ProtectedRoute>
+            ),
+          },
           { path: '/classrooms', element: <ClassroomListPage /> },
           { path: '/classrooms/:id', element: <ClassroomDetailRoute /> },
           { path: '/curriculum', element: <SubjectListPage /> },
