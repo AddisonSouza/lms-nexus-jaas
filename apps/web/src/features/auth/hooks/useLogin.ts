@@ -4,7 +4,11 @@ import { loginUser } from '../api/auth-api'
 import { useAuthStore } from '@store/authStore'
 import type { LoginFormData } from '../schemas/loginSchema'
 
-export function useLogin() {
+/**
+ * @param inviteToken convite que trouxe o usuário até aqui, se houver: depois de
+ * entrar ele volta para o aceite em vez de cair na raiz.
+ */
+export function useLogin(inviteToken?: string | null) {
   const setToken = useAuthStore((s) => s.setToken)
   const navigate = useNavigate()
 
@@ -12,7 +16,7 @@ export function useLogin() {
     mutationFn: (data: LoginFormData) => loginUser(data),
     onSuccess: ({ accessToken }) => {
       setToken(accessToken)
-      navigate('/')
+      navigate(inviteToken ? `/invitations/${encodeURIComponent(inviteToken)}/accept` : '/')
     },
   })
 }

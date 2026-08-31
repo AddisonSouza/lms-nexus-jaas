@@ -7,7 +7,10 @@ import AuthLayout from '@components/layout/AuthLayout'
 function LoginPage() {
   const [searchParams] = useSearchParams()
   const justConfirmed = searchParams.get('confirmed') === 'true'
-  const { mutate: login, isPending, error } = useLogin()
+  // Convite que trouxe o usuário até o login: seguido depois de entrar e
+  // repassado ao cadastro, para o convidado sem conta não perdê-lo.
+  const inviteToken = searchParams.get('invite')
+  const { mutate: login, isPending, error } = useLogin(inviteToken)
 
   const errorMessage =
     (error as { response?: { status?: number } })?.response?.status === 401
@@ -44,7 +47,10 @@ function LoginPage() {
         </p>
         <p className="text-center text-[13px] text-muted-foreground">
           Ainda não tem conta?{' '}
-          <Link to="/register" className="text-accent hover:underline">
+          <Link
+            to={inviteToken ? `/register?invite=${encodeURIComponent(inviteToken)}` : '/register'}
+            className="text-accent hover:underline"
+          >
             Criar conta
           </Link>{' '}
           — você poderá fundar sua própria organização.
