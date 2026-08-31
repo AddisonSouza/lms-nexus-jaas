@@ -71,4 +71,4 @@ antes de aceitar. Sem aceite automático.
 - [x] FE: `AcceptInvitePage` manda o deslogado para `/login?invite=<token>`
 - [x] FE: `LoginPage`/`useLogin` honram `?invite=` e repassam ao link de cadastro
 - [x] FE: `RootRedirect` leva ao convite pendente quando o usuário chega sem organização
-- [ ] Validar o golden path na aplicação (convite → cadastro → confirmação → login → aceite)
+- [x] Validar o golden path na aplicação (convite → cadastro → confirmação → login → aceite)
