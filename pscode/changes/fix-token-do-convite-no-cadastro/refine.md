@@ -67,7 +67,7 @@ antes de aceitar. Sem aceite automático.
 ## Subtasks
 
 - [x] BE: `GET /invitations/pending` — repositório, use case, endpoint e testes
-- [ ] Docs: registrar o endpoint no `API_CONTRACT.md` (RF-06)
+- [x] Docs: registrar o endpoint no `API_CONTRACT.md` (RF-06)
 - [ ] FE: `AcceptInvitePage` manda o deslogado para `/login?invite=<token>`
 - [ ] FE: `LoginPage`/`useLogin` honram `?invite=` e repassam ao link de cadastro
 - [ ] FE: `RootRedirect` leva ao convite pendente quando o usuário chega sem organização
