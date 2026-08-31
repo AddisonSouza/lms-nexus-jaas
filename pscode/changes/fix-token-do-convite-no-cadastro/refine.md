@@ -68,7 +68,7 @@ antes de aceitar. Sem aceite automático.
 
 - [x] BE: `GET /invitations/pending` — repositório, use case, endpoint e testes
 - [x] Docs: registrar o endpoint no `API_CONTRACT.md` (RF-06)
-- [ ] FE: `AcceptInvitePage` manda o deslogado para `/login?invite=<token>`
+- [x] FE: `AcceptInvitePage` manda o deslogado para `/login?invite=<token>`
 - [ ] FE: `LoginPage`/`useLogin` honram `?invite=` e repassam ao link de cadastro
 - [ ] FE: `RootRedirect` leva ao convite pendente quando o usuário chega sem organização
 - [ ] Validar o golden path na aplicação (convite → cadastro → confirmação → login → aceite)
