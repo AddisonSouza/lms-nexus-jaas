@@ -1,50 +1,89 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import RootRedirect from './RootRedirect'
+import * as invitationApi from '@features/invitation/api/invitation-api'
 
-let mockOrganizationId: string | null = null
+vi.mock('@features/invitation/api/invitation-api')
 
+let organizationId: string | null = null
 vi.mock('@store/authStore', () => ({
-  useAuthStore: vi.fn((selector) => selector({ organizationId: mockOrganizationId })),
+  useAuthStore: vi.fn((selector) => selector({ organizationId })),
 }))
 
-beforeEach(() => {
-  mockOrganizationId = null
-})
-
-function renderRoute() {
+function renderRedirect() {
+  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
-    <MemoryRouter initialEntries={['/']}>
-      <Routes>
-        <Route path="/" element={<RootRedirect />} />
-        <Route path="/welcome" element={<div>welcome screen</div>} />
-        <Route path="/classrooms" element={<div>classroom list</div>} />
-        <Route path="/organizations/new" element={<div>create organization form</div>} />
-      </Routes>
-    </MemoryRouter>,
+    <QueryClientProvider client={qc}>
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route path="/" element={<RootRedirect />} />
+          <Route path="/classrooms" element={<p>turmas</p>} />
+          <Route path="/welcome" element={<p>boas-vindas</p>} />
+          <Route path="/invitations/:token/accept" element={<p>aceite</p>} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
   )
 }
 
+const invitation = {
+  token: 'tok-1',
+  organizationId: 'org-1',
+  organizationName: 'Escola Alfa',
+  role: 'PROFESSOR' as const,
+  expiresAt: '2026-09-06T10:00:00Z',
+}
+
+beforeEach(() => {
+  vi.clearAllMocks()
+  organizationId = null
+  vi.mocked(invitationApi.listPendingInvitations).mockResolvedValue([])
+})
+
 describe('RootRedirect', () => {
-  it('sends a user without an organization to the welcome screen', () => {
-    mockOrganizationId = null
-    renderRoute()
+  it('takes a user without an organization to their pending invitation', async () => {
+    vi.mocked(invitationApi.listPendingInvitations).mockResolvedValue([invitation])
 
-    expect(screen.getByText('welcome screen')).toBeTruthy()
+    renderRedirect()
+
+    expect(await screen.findByText('aceite')).toBeTruthy()
   })
 
-  it('no longer forces the organization creation form', () => {
-    mockOrganizationId = null
-    renderRoute()
+  it('takes the most recent invitation when there are several', async () => {
+    vi.mocked(invitationApi.listPendingInvitations).mockResolvedValue([
+      invitation,
+      { ...invitation, token: 'tok-antigo' },
+    ])
 
-    expect(screen.queryByText('create organization form')).toBeNull()
+    renderRedirect()
+
+    await screen.findByText('aceite')
+    // A primeira da lista é a mais recente: o back-end ordena por criação.
+    expect(screen.getByText('aceite')).toBeTruthy()
   })
 
-  it('sends a user with an organization to the classroom list', () => {
-    mockOrganizationId = 'org-1'
-    renderRoute()
+  it('falls back to the welcome screen when there is no invitation', async () => {
+    renderRedirect()
 
-    expect(screen.getByText('classroom list')).toBeTruthy()
+    expect(await screen.findByText('boas-vindas')).toBeTruthy()
+  })
+
+  it('sends a user who already has an organization straight to the app', () => {
+    organizationId = 'org-1'
+
+    renderRedirect()
+
+    expect(screen.getByText('turmas')).toBeTruthy()
+    expect(invitationApi.listPendingInvitations).not.toHaveBeenCalled()
+  })
+
+  it('still reaches the welcome screen when the lookup fails', async () => {
+    vi.mocked(invitationApi.listPendingInvitations).mockRejectedValue(new Error('boom'))
+
+    renderRedirect()
+
+    await waitFor(() => expect(screen.getByText('boas-vindas')).toBeTruthy())
   })
 })
