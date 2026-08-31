@@ -8,6 +8,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped
@@ -46,5 +47,24 @@ public class InvitationRepositoryImpl implements InvitationRepository {
                 .setParameter("email", email)
                 .setParameter("now", LocalDateTime.now())
                 .getSingleResult() > 0;
+    }
+
+    @Override
+    public List<Invitation> findPendingByEmail(String email) {
+        if (email == null || email.isBlank()) {
+            return List.of();
+        }
+
+        return em.createQuery(
+                        "SELECT i FROM InvitationJpaEntity i " +
+                        "WHERE LOWER(i.email) = LOWER(:email) " +
+                        "AND i.status = 'PENDING' AND i.expiresAt > :now " +
+                        "ORDER BY i.createdAt DESC",
+                        InvitationJpaEntity.class)
+                .setParameter("email", email.trim())
+                .setParameter("now", LocalDateTime.now())
+                .getResultStream()
+                .map(invitationMapper::toDomain)
+                .toList();
     }
 }

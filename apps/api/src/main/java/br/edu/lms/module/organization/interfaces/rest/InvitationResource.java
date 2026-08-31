@@ -3,6 +3,7 @@ package br.edu.lms.module.organization.interfaces.rest;
 import br.edu.lms.module.organization.application.dto.AcceptInviteCommand;
 import br.edu.lms.module.organization.domain.port.in.AcceptInviteUseCase;
 import br.edu.lms.module.organization.domain.port.in.GetInvitationInfoUseCase;
+import br.edu.lms.module.organization.domain.port.in.ListPendingInvitationsUseCase;
 import io.quarkus.security.Authenticated;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -21,7 +22,18 @@ public class InvitationResource {
 
     private final AcceptInviteUseCase acceptInviteUseCase;
     private final GetInvitationInfoUseCase getInvitationInfoUseCase;
+    private final ListPendingInvitationsUseCase listPendingInvitationsUseCase;
     private final JsonWebToken jwt;
+
+    @GET
+    @Path("/pending")
+    @Authenticated
+    @Operation(summary = "Listar os convites pendentes endereçados ao usuário autenticado")
+    @APIResponse(responseCode = "200", description = "Convites pendentes, do mais recente ao mais antigo")
+    @APIResponse(responseCode = "401", description = "Não autenticado")
+    public Response pending() {
+        return Response.ok(listPendingInvitationsUseCase.execute(jwt.getSubject())).build();
+    }
 
     @GET
     @Path("/{token}")
