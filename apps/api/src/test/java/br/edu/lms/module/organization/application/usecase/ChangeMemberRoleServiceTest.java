@@ -3,9 +3,11 @@ package br.edu.lms.module.organization.application.usecase;
 import br.edu.lms.module.organization.domain.exception.CannotChangeOwnerRoleException;
 import br.edu.lms.module.organization.domain.exception.MemberNotFoundException;
 import br.edu.lms.module.organization.domain.exception.RoleNotAssignableException;
+import br.edu.lms.module.organization.domain.event.OrganizationMembershipChangedEvent;
 import br.edu.lms.module.organization.domain.model.*;
 import br.edu.lms.module.organization.domain.port.out.OrganizationMemberRepository;
 import br.edu.lms.module.organization.domain.port.out.OrganizationRepository;
+import jakarta.enterprise.event.Event;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,6 +28,7 @@ class ChangeMemberRoleServiceTest {
 
     @Mock OrganizationRepository organizationRepository;
     @Mock OrganizationMemberRepository memberRepository;
+    @Mock Event<OrganizationMembershipChangedEvent> membershipChangedEvent;
 
     @InjectMocks ChangeMemberRoleService sut;
 
@@ -59,6 +62,16 @@ class ChangeMemberRoleServiceTest {
     }
 
     @Test
+    void shouldAnnounceThatTheMembershipChanged() {
+        givenOrganization();
+        givenActiveMember(MemberRole.PROFESSOR);
+
+        sut.execute(ORG_ID, MEMBER_ID, MemberRole.ALUNO);
+
+        verify(membershipChangedEvent).fire(new OrganizationMembershipChangedEvent(MEMBER_ID, ORG_ID));
+    }
+
+    @Test
     void shouldRejectChangingTheOwnerRole() {
         givenOrganization();
 
@@ -66,6 +79,7 @@ class ChangeMemberRoleServiceTest {
                 .isInstanceOf(CannotChangeOwnerRoleException.class);
 
         verify(memberRepository, never()).updateRole(any(), any());
+        verify(membershipChangedEvent, never()).fire(any());
     }
 
     @Test
@@ -73,7 +87,7 @@ class ChangeMemberRoleServiceTest {
         assertThatThrownBy(() -> sut.execute(ORG_ID, MEMBER_ID, MemberRole.ADMIN_ORG))
                 .isInstanceOf(RoleNotAssignableException.class);
 
-        verifyNoInteractions(organizationRepository, memberRepository);
+        verifyNoInteractions(organizationRepository, memberRepository, membershipChangedEvent);
     }
 
     @Test

@@ -4,11 +4,13 @@ import br.edu.lms.module.organization.domain.exception.CannotChangeOwnerRoleExce
 import br.edu.lms.module.organization.domain.exception.MemberNotFoundException;
 import br.edu.lms.module.organization.domain.exception.RoleNotAssignableException;
 import br.edu.lms.module.organization.domain.model.MemberRole;
+import br.edu.lms.module.organization.domain.event.OrganizationMembershipChangedEvent;
 import br.edu.lms.module.organization.domain.model.OrganizationId;
 import br.edu.lms.module.organization.domain.port.in.ChangeMemberRoleUseCase;
 import br.edu.lms.module.organization.domain.port.out.OrganizationMemberRepository;
 import br.edu.lms.module.organization.domain.port.out.OrganizationRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +22,7 @@ public class ChangeMemberRoleService implements ChangeMemberRoleUseCase {
 
     private final OrganizationRepository organizationRepository;
     private final OrganizationMemberRepository memberRepository;
+    private final Event<OrganizationMembershipChangedEvent> membershipChangedEvent;
 
     @Override
     @Transactional
@@ -39,6 +42,7 @@ public class ChangeMemberRoleService implements ChangeMemberRoleUseCase {
                 .orElseThrow(MemberNotFoundException::new);
 
         memberRepository.updateRole(member.getId(), role);
+        membershipChangedEvent.fire(new OrganizationMembershipChangedEvent(userId, organizationId));
         log.info("Member {} of org {} changed to role {}", userId, organizationId, role);
     }
 }
