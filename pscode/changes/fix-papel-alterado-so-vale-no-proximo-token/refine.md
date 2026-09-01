@@ -74,7 +74,7 @@ perceber.
 
 - [x] BE: `OrganizationMembershipChangedEvent` disparado por `ChangeMemberRoleService` e `RemoveMemberService`, com os testes dos dois services
 - [x] BE: porta `StaleSessionRepository` + implementação Redis (`identity:stale-since:<userId>`, TTL do access token)
-- [ ] BE: observer em `identity` que marca as sessões do usuário como obsoletas
+- [x] BE: observer em `identity` que marca as sessões do usuário como obsoletas
 - [ ] BE: `StaleSessionFilter` responde 401 ao token anterior à marca e ignora requisição sem JWT
 - [ ] BE: teste de integração — papel alterado e membro removido passam a valer na requisição seguinte
 - [ ] Docs: `API_CONTRACT.md` (a nota da janela de 15 min do RF-06) e a spec viva de `authentication`
