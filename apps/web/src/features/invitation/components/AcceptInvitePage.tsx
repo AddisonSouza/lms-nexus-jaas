@@ -36,7 +36,10 @@ function AcceptInvitePage() {
 
   useEffect(() => {
     if (!isBootstrapping && !isAuthenticated) {
-      navigate(`/register?invite=${token}`, { replace: true })
+      // Login, e não cadastro: o convidado costuma já ter conta, e quem não tem
+      // chega ao cadastro pelo link da própria tela de login, que leva o convite
+      // adiante.
+      navigate(`/login?invite=${encodeURIComponent(token)}`, { replace: true })
     }
   }, [isBootstrapping, isAuthenticated, token, navigate])
 

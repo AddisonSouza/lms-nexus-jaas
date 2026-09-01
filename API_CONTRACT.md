@@ -218,6 +218,33 @@ Retorna informações do convite (organização, papel, convidante) para preview
 
 ---
 
+**`GET /invitations/pending`** · Autenticado
+
+Convites pendentes e não expirados endereçados ao **e-mail do usuário
+autenticado** (o `sub` do JWT resolve o e-mail; a comparação ignora maiúsculas),
+do mais recente para o mais antigo. É o que permite ao convidado chegar ao aceite
+depois de se cadastrar, mesmo tendo confirmado o e-mail em outro navegador.
+Convite cuja organização foi removida não aparece.
+
+```json
+[
+  {
+    "token": "uuid",
+    "organizationId": "uuid",
+    "organizationName": "string",
+    "role": "ADMIN_ORG | GESTOR | PROFESSOR | ALUNO",
+    "expiresAt": "2026-09-06T10:00:00Z"
+  }
+]
+```
+
+| Código | Descrição |
+|---|---|
+| `200` | Convites pendentes. Array vazio se não houver. |
+| `401` | Não autenticado. |
+
+---
+
 **`POST /invitations/{token}/accept`** · Autenticado
 
 Aceita o convite. Cria vínculo em `organization_members`.
@@ -742,7 +769,7 @@ Todos os recursos usam `deleted_at TIMESTAMP NULL`. Queries filtram `WHERE delet
 | RF-03 | identity | Recuperação de Senha | ✅ | `POST /auth/forgot-password` · `POST /auth/reset-password` |
 | RF-04 | identity | Confirmação de E-mail | ✅ | `GET /auth/confirm-email` · `POST /auth/resend-confirmation` |
 | RF-05 | organization | Criação de Organização | ✅ | `POST /organizations` · `GET /organizations` |
-| RF-06 | organization | Gestão de Membros | ✅ | `POST /organizations/{id}/invitations` · `GET /invitations/{token}` · `POST /invitations/{token}/accept` · `GET /organizations/{id}/members` · `PATCH /organizations/{id}/members/{userId}` · `DELETE /organizations/{id}/members/{userId}` |
+| RF-06 | organization | Gestão de Membros | ✅ | `POST /organizations/{id}/invitations` · `GET /invitations/{token}` · `GET /invitations/pending` · `POST /invitations/{token}/accept` · `GET /organizations/{id}/members` · `PATCH /organizations/{id}/members/{userId}` · `DELETE /organizations/{id}/members/{userId}` |
 | RF-07 | classroom | Gestão de Turmas | ✅ | `GET /classrooms` · `GET /classrooms/{id}` · `POST /classrooms` · `PUT /classrooms/{id}` · `DELETE /classrooms/{id}` · `GET /classrooms/{id}/members` · `POST /classrooms/{id}/members` · `DELETE /classrooms/{id}/members/{userId}` |
 | RF-08 | classroom | Ingresso via Código | 🔍 | `POST /classrooms/join` |
 | RF-09 | curriculum | Gestão de Disciplinas | 📋 | `POST /subjects` · `POST /subjects/{id}/classrooms` · `POST /subjects/{id}/teachers` |

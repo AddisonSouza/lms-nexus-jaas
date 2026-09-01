@@ -120,20 +120,20 @@ describe('AcceptInvitePage', () => {
   })
 
   describe('when unauthenticated', () => {
-    it('redirects to /register?invite=TOKEN', () => {
+    it('redirects to /login?invite=TOKEN, since the invitee usually already has an account', () => {
       mockIsAuthenticated = false
 
       renderPage('tok123')
 
-      expect(mockNavigate).toHaveBeenCalledWith('/register?invite=tok123', { replace: true })
+      expect(mockNavigate).toHaveBeenCalledWith('/login?invite=tok123', { replace: true })
     })
   })
 
   // Rota pública: não passa pelo ProtectedRoute, então precisa esperar o
   // silent-refresh sozinha. Sem isso, quem clica no link do e-mail já logado é
-  // mandado para o cadastro antes de a sessão ser restaurada.
+  // mandado para o login antes de a sessão ser restaurada.
   describe('while the session is still being restored', () => {
-    it('waits instead of redirecting to /register', () => {
+    it('waits instead of redirecting to /login', () => {
       mockIsAuthenticated = false
       mockIsBootstrapping = true
 
@@ -149,7 +149,7 @@ describe('AcceptInvitePage', () => {
 
       renderPage('tok123')
 
-      expect(mockNavigate).toHaveBeenCalledWith('/register?invite=tok123', { replace: true })
+      expect(mockNavigate).toHaveBeenCalledWith('/login?invite=tok123', { replace: true })
     })
   })
 })
