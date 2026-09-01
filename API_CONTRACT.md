@@ -301,8 +301,11 @@ Altera o papel de um membro.
 }
 ```
 
-O membro só passa a agir com o novo papel no próximo login ou troca de
-organização — o papel viaja no JWT, que não é reemitido aqui.
+O papel novo vale na requisição seguinte. O papel viaja no JWT e o token do
+membro não é reemitido aqui, então os access tokens dele emitidos antes desta
+chamada passam a responder `401 SESSION_STALE` — o front renova em silêncio e
+refaz a requisição, e a renovação relê o papel do banco. O refresh token não é
+tocado: ninguém é deslogado.
 
 | Código | Descrição |
 |---|---|
@@ -316,7 +319,9 @@ organização — o papel viaja no JWT, que não é reemitido aqui.
 
 **`DELETE /organizations/{id}/members/{userId}`** · `ADMIN_ORG`
 
-Remove membro da organização (soft delete).
+Remove membro da organização (soft delete). Vale na requisição seguinte: os
+access tokens do removido emitidos antes desta chamada passam a responder
+`401 SESSION_STALE`.
 
 | Código | Descrição |
 |---|---|
@@ -739,6 +744,15 @@ Pontuação configurável por organização: entrega no prazo (+100pts), entrega
 ```
 
 Todos os erros seguem `ProblemDetails` (RFC 7807).
+
+### Sessão obsoleta
+
+Mudar o vínculo de um usuário com a organização — papel alterado, membro
+removido — marca as sessões dele como obsoletas. A partir daí, **qualquer**
+endpoint autenticado responde `401 SESSION_STALE` ao access token emitido antes
+da mudança, até que o token seja renovado. O refresh token não é tocado: o front
+renova em silêncio, refaz a requisição e a renovação relê o papel do banco —
+ninguém é deslogado.
 
 ### Paginação
 

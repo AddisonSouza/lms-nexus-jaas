@@ -2,9 +2,11 @@ package br.edu.lms.module.organization.application.usecase;
 
 import br.edu.lms.module.organization.domain.exception.CannotRemoveOwnerException;
 import br.edu.lms.module.organization.domain.exception.MemberNotFoundException;
+import br.edu.lms.module.organization.domain.event.OrganizationMembershipChangedEvent;
 import br.edu.lms.module.organization.domain.model.*;
 import br.edu.lms.module.organization.domain.port.out.OrganizationMemberRepository;
 import br.edu.lms.module.organization.domain.port.out.OrganizationRepository;
+import jakarta.enterprise.event.Event;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,6 +23,7 @@ class RemoveMemberServiceTest {
 
     @Mock OrganizationRepository organizationRepository;
     @Mock OrganizationMemberRepository memberRepository;
+    @Mock Event<OrganizationMembershipChangedEvent> membershipChangedEvent;
 
     @InjectMocks RemoveMemberService sut;
 
@@ -49,6 +52,7 @@ class RemoveMemberServiceTest {
         sut.execute("org-1", "user-1");
 
         verify(memberRepository).softDelete("member-1");
+        verify(membershipChangedEvent).fire(new OrganizationMembershipChangedEvent("user-1", "org-1"));
     }
 
     @Test
@@ -59,6 +63,7 @@ class RemoveMemberServiceTest {
                 .isInstanceOf(CannotRemoveOwnerException.class);
 
         verify(memberRepository, never()).softDelete(any());
+        verify(membershipChangedEvent, never()).fire(any());
     }
 
     @Test
