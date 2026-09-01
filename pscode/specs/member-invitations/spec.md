@@ -105,3 +105,41 @@ Accepting is entering a new organization, so the web app SHALL reissue the acces
 #### Scenario: Accepting fails
 - **WHEN** the accept request fails
 - **THEN** the session is left untouched — no token switch and no cache clear
+
+---
+
+### Requirement: A pending invitation finds its addressee after sign-up
+Between the invitation link and the accept screen sits the confirmation email, possibly opened in another browser, so neither the URL nor `localStorage` survives the trip. The system SHALL expose the pending, unexpired invitations addressed to the authenticated user's email, and the web app SHALL follow one when a user arrives without an organization.
+
+#### Scenario: Invited user signs in without an organization
+- **WHEN** an authenticated user with no organization lands on the root route
+- **THEN** the app looks up the pending invitations and navigates to the most recent one's accept screen
+
+#### Scenario: No invitation waiting
+- **WHEN** the same user has no pending invitation
+- **THEN** the app navigates to `/welcome` as before
+
+#### Scenario: User already belongs to an organization
+- **WHEN** a user with an organization lands on the root route
+- **THEN** the app goes straight to `/classrooms` without looking up invitations
+
+#### Scenario: The inviting organization is gone
+- **WHEN** a pending invitation points at an organization that no longer exists
+- **THEN** it is omitted from the list, since it has nowhere to lead
+
+---
+
+### Requirement: The invitation survives the login screen
+A logged-out visitor opening an invitation SHALL be sent to login carrying the token, and be returned to the accept screen once signed in. Registration is reached from the login screen, which passes the token along.
+
+#### Scenario: Logged-out visitor opens the invitation link
+- **WHEN** an unauthenticated user opens `/invitations/<token>/accept`
+- **THEN** the app redirects to `/login?invite=<token>`
+
+#### Scenario: Signing in with an invitation pending
+- **WHEN** the user signs in from `/login?invite=<token>`
+- **THEN** the app navigates to `/invitations/<token>/accept` instead of the root
+
+#### Scenario: The invitee has no account yet
+- **WHEN** the user follows "Criar conta" from `/login?invite=<token>`
+- **THEN** the registration link carries `?invite=<token>` forward
