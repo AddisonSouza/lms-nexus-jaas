@@ -83,3 +83,24 @@ Extensão do comportamento de `RefreshTokenRepository`: ao concluir o reset de s
 #### Scenario: Usuário sem sessões ativas
 - **WHEN** reset concluído e usuário não possui Refresh Tokens ativos
 - **THEN** `deleteAllByUserId` executa sem erro (no-op)
+
+### REQ-AUTH-10 — Mudança de vínculo invalida os access tokens já emitidos
+O papel viaja no claim `groups` do JWT, então gravar o novo vínculo no banco não basta: os access tokens em circulação continuariam valendo até expirar. Toda mudança de vínculo com a organização — papel alterado ou membro removido — deve marcar o instante em que as sessões daquele usuário ficaram obsoletas (`identity:stale-since:{userId}` no Redis, TTL igual ao do access token), e o access token emitido antes da marca deve ser recusado com **401 `SESSION_STALE`**.
+
+O 401 é deliberado: é o que o interceptor Axios trata renovando o token em silêncio (REQ-AUTH-09) e refazendo a requisição, e o refresh relê o papel do banco (REQ-AUTH-REFRESH-01). O Refresh Token não é tocado — ninguém é deslogado.
+
+#### Scenario: Papel alterado com sessão ativa
+- **WHEN** um `ADMIN_ORG` altera o papel de um membro que tem access token válido em mãos
+- **THEN** a requisição seguinte com aquele token responde 401 `SESSION_STALE`, e o token reemitido depois da marca é aceito com o papel novo
+
+#### Scenario: Membro removido com sessão ativa
+- **WHEN** um `ADMIN_ORG` remove um membro que tem access token válido em mãos
+- **THEN** a requisição seguinte com aquele token responde 401 `SESSION_STALE`
+
+#### Scenario: Os demais usuários não são afetados
+- **WHEN** o vínculo de um membro muda
+- **THEN** os access tokens de qualquer outro usuário seguem válidos — a marca é por usuário
+
+#### Scenario: Requisição sem access token
+- **WHEN** a requisição chega sem JWT — endpoint público ou o próprio `POST /auth/refresh`
+- **THEN** o filtro não interfere

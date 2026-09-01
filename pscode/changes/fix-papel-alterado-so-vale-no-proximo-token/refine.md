@@ -77,4 +77,4 @@ perceber.
 - [x] BE: observer em `identity` que marca as sessões do usuário como obsoletas
 - [x] BE: `StaleSessionFilter` responde 401 ao token anterior à marca e ignora requisição sem JWT
 - [x] BE: teste de integração — papel alterado e membro removido passam a valer na requisição seguinte
-- [ ] Docs: `API_CONTRACT.md` (a nota da janela de 15 min do RF-06) e a spec viva de `authentication`
+- [x] Docs: `API_CONTRACT.md` (a nota da janela de 15 min do RF-06) e a spec viva de `authentication`
