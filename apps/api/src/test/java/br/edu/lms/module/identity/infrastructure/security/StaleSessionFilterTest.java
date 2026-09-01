@@ -7,7 +7,6 @@ import jakarta.ws.rs.core.SecurityContext;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -17,7 +16,6 @@ import java.time.Instant;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,11 +47,10 @@ class StaleSessionFilterTest {
         givenTokenIssuedAt(MARK.minusSeconds(60));
         when(staleSessionRepository.staleSince(USER_ID)).thenReturn(Optional.of(MARK));
 
-        sut.filter(requestContext);
+        var response = sut.refuseStaleSession(requestContext);
 
-        var response = ArgumentCaptor.forClass(Response.class);
-        verify(requestContext).abortWith(response.capture());
-        assertThat(response.getValue().getStatus()).isEqualTo(401);
+        assertThat(response).isPresent();
+        assertThat(response.get().getStatus()).isEqualTo(401);
     }
 
     @Test
@@ -61,9 +58,7 @@ class StaleSessionFilterTest {
         givenTokenIssuedAt(MARK.plusSeconds(1));
         when(staleSessionRepository.staleSince(USER_ID)).thenReturn(Optional.of(MARK));
 
-        sut.filter(requestContext);
-
-        verify(requestContext, never()).abortWith(any());
+        assertThat(sut.refuseStaleSession(requestContext)).isEmpty();
     }
 
     @Test
@@ -71,9 +66,7 @@ class StaleSessionFilterTest {
         givenAToken();
         when(staleSessionRepository.staleSince(USER_ID)).thenReturn(Optional.empty());
 
-        sut.filter(requestContext);
-
-        verify(requestContext, never()).abortWith(any());
+        assertThat(sut.refuseStaleSession(requestContext)).isEmpty();
     }
 
     @Test
@@ -81,10 +74,8 @@ class StaleSessionFilterTest {
         when(requestContext.getSecurityContext()).thenReturn(securityContext);
         when(securityContext.getUserPrincipal()).thenReturn(mock(Principal.class));
 
-        sut.filter(requestContext);
-
+        assertThat(sut.refuseStaleSession(requestContext)).isEmpty();
         verifyNoInteractions(staleSessionRepository);
-        verify(requestContext, never()).abortWith(any());
     }
 
     @Test
@@ -92,9 +83,7 @@ class StaleSessionFilterTest {
         when(requestContext.getSecurityContext()).thenReturn(securityContext);
         when(securityContext.getUserPrincipal()).thenReturn(null);
 
-        sut.filter(requestContext);
-
+        assertThat(sut.refuseStaleSession(requestContext)).isEmpty();
         verifyNoInteractions(staleSessionRepository);
-        verify(requestContext, never()).abortWith(any());
     }
 }
