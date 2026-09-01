@@ -15,7 +15,8 @@ public class JwtTokenService implements TokenGeneratorPort {
     @ConfigProperty(name = "mp.jwt.verify.issuer")
     String issuer;
 
-    private static final Duration ACCESS_TOKEN_TTL = Duration.ofMinutes(15);
+    /** Visível no pacote porque a marca de sessão obsoleta vive exatamente o mesmo tempo. */
+    static final Duration ACCESS_TOKEN_TTL = Duration.ofMinutes(15);
 
     public String generateAccessToken(String userId) {
         return Jwt.issuer(issuer)

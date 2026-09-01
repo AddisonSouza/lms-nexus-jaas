@@ -73,7 +73,7 @@ perceber.
 ## Subtasks
 
 - [x] BE: `OrganizationMembershipChangedEvent` disparado por `ChangeMemberRoleService` e `RemoveMemberService`, com os testes dos dois services
-- [ ] BE: porta `StaleSessionRepository` + implementação Redis (`identity:stale-since:<userId>`, TTL do access token)
+- [x] BE: porta `StaleSessionRepository` + implementação Redis (`identity:stale-since:<userId>`, TTL do access token)
 - [ ] BE: observer em `identity` que marca as sessões do usuário como obsoletas
 - [ ] BE: `StaleSessionFilter` responde 401 ao token anterior à marca e ignora requisição sem JWT
 - [ ] BE: teste de integração — papel alterado e membro removido passam a valer na requisição seguinte
