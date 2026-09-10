@@ -4,7 +4,7 @@
 The system SHALL allow any unauthenticated person to create an account by providing full name, e-mail, and password. The account is created with status `PENDING_CONFIRMATION` and a confirmation e-mail is sent. The account SHALL NOT be usable for login until confirmed.
 
 #### Scenario: Successful registration
-- **WHEN** user submits valid full name, unique e-mail, and password with at least 8 characters
+- **WHEN** user submits valid full name, unique e-mail, and a strong password confirmed in a second field
 - **THEN** system creates the user with status `PENDING_CONFIRMATION`
 - **AND** system sends a confirmation e-mail containing a token valid for 24 hours
 - **AND** system returns `201 Created`
@@ -24,6 +24,28 @@ The system SHALL allow any unauthenticated person to create an account by provid
 - **WHEN** user submits the form with any required field empty (full name, e-mail, or password)
 - **THEN** system returns `422 Unprocessable Entity` listing the missing fields
 - **AND** no user is created
+
+### Requirement: Registration form enforces a strong, confirmed password
+The registration form SHALL require the password twice and SHALL reject, before any request is sent, a password that does not have at least 8 characters with an uppercase letter, a lowercase letter, a digit and a symbol. The error message SHALL name only the criteria that are missing.
+
+#### Scenario: Password missing strength criteria
+- **WHEN** user submits a password that meets the minimum length but lacks one or more character classes
+- **THEN** the form shows a single message listing the missing criteria (e.g. "A senha precisa de: uma maiúscula, um número")
+- **AND** no request is sent to the server
+
+#### Scenario: Password shorter than the minimum
+- **WHEN** user submits a password with fewer than 8 characters
+- **THEN** the form shows "Senha deve ter no mínimo 8 caracteres"
+- **AND** no request is sent to the server
+
+#### Scenario: Confirmation does not match
+- **WHEN** user submits a password and a confirmation that differ
+- **THEN** the form shows "As senhas não conferem" under the confirmation field
+- **AND** no request is sent to the server
+
+#### Scenario: Confirmation is not sent to the server
+- **WHEN** the form submits a valid registration
+- **THEN** the request body carries only full name, e-mail and password
 
 ### Requirement: Password is stored securely
 The system SHALL store passwords using BCrypt with a minimum cost factor of 12. Plain-text passwords SHALL never be persisted or logged.
