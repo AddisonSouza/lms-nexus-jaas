@@ -41,6 +41,12 @@ function RegisterForm({ onSubmit, isPending, serverError }: Props) {
         {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
       </div>
 
+      <div className="space-y-1">
+        <label htmlFor="confirmPassword" className="text-xs text-muted-foreground">Confirmar senha</label>
+        <PasswordInput id="confirmPassword" autoComplete="new-password" {...register('confirmPassword')} />
+        {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>}
+      </div>
+
       {serverError && (
         <p className="rounded-[var(--radius-md)] bg-accent-100 px-3 py-2 text-sm text-accent-800">
           {serverError}

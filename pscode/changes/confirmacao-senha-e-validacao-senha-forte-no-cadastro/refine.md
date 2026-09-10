@@ -38,10 +38,10 @@ formulário aponta exatamente o que falta e não envia nada ao servidor.
 - Qualquer validação nova no back-end.
 
 ## Subtasks
-- [ ] Criar `apps/web/src/features/auth/schemas/passwordSchema.ts` com a regra de força e a mensagem que lista os critérios faltantes
-- [ ] Consumir o `passwordSchema` no `registerSchema` e adicionar `confirmPassword` com o `.refine` de igualdade
-- [ ] Adicionar o campo "Confirmar senha" ao `RegisterForm.tsx` com `PasswordInput` e exibição do erro
-- [ ] Escrever `passwordSchema.test.ts` cobrindo cada critério isolado, a mensagem composta e a senha válida
-- [ ] Escrever `RegisterForm.test.tsx` cobrindo senha fraca, senhas divergentes e o caminho feliz
-- [ ] Atualizar a spec `pscode/specs/user-registration/spec.md` com os critérios de força e a confirmação
+- [x] Criar `apps/web/src/features/auth/schemas/passwordSchema.ts` com a regra de força e a mensagem que lista os critérios faltantes
+- [x] Consumir o `passwordSchema` no `registerSchema` e adicionar `confirmPassword` com o `.refine` de igualdade
+- [x] Adicionar o campo "Confirmar senha" ao `RegisterForm.tsx` com `PasswordInput` e exibição do erro
+- [x] Escrever `passwordSchema.test.ts` cobrindo cada critério isolado, a mensagem composta e a senha válida
+- [x] Escrever `RegisterForm.test.tsx` cobrindo senha fraca, senhas divergentes e o caminho feliz
+- [x] Atualizar a spec `pscode/specs/user-registration/spec.md` com os critérios de força e a confirmação
 - [ ] Rodar lint, type-check e a suíte Vitest do `apps/web` e validar o cadastro no browser
