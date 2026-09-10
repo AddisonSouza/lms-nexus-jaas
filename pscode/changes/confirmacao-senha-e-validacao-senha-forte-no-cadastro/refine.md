@@ -44,4 +44,4 @@ formulário aponta exatamente o que falta e não envia nada ao servidor.
 - [x] Escrever `passwordSchema.test.ts` cobrindo cada critério isolado, a mensagem composta e a senha válida
 - [x] Escrever `RegisterForm.test.tsx` cobrindo senha fraca, senhas divergentes e o caminho feliz
 - [x] Atualizar a spec `pscode/specs/user-registration/spec.md` com os critérios de força e a confirmação
-- [ ] Rodar lint, type-check e a suíte Vitest do `apps/web` e validar o cadastro no browser
+- [x] Rodar lint, type-check e a suíte Vitest do `apps/web` e validar o cadastro no browser
