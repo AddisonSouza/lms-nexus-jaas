@@ -37,6 +37,7 @@ describe('ConfirmEmailCallbackPage', () => {
       renderPage('/confirm-email')
       expect(screen.getByText(/confirme seu e-mail/i)).toBeTruthy()
       expect(screen.getByText(/o link expira em 24 horas/i)).toBeTruthy()
+      expect(screen.getByRole('link', { name: 'Voltar ao login' })).toBeTruthy()
     })
   })
 
@@ -66,6 +67,7 @@ describe('ConfirmEmailCallbackPage', () => {
       await waitFor(() => {
         expect(screen.getByText(/link inválido ou expirado/i)).toBeTruthy()
         expect(screen.getByRole('button', { name: /reenviar/i })).toBeTruthy()
+        expect(screen.getByRole('link', { name: 'Voltar ao login' })).toBeTruthy()
       })
     })
   })
@@ -78,6 +80,7 @@ describe('ConfirmEmailCallbackPage', () => {
       await waitFor(() => {
         expect(screen.getByText(/e-mail já confirmado/i)).toBeTruthy()
         expect(screen.queryByRole('button', { name: /reenviar/i })).toBeNull()
+        expect(screen.getByRole('link', { name: 'Voltar ao login' })).toBeTruthy()
       })
     })
   })

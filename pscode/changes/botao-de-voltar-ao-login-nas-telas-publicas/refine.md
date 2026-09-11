@@ -42,10 +42,10 @@ falta de saída é mais sentida.
 - Qualquer mudança de rota, guard ou regra de autenticação.
 
 ## Subtasks
-- [ ] Criar `apps/web/src/components/shared/BackToLogin.tsx` com `ArrowLeft` + link para `/login`, e seu teste unitário
-- [ ] Inserir o `BackToLogin` no `RegisterPage`, mantendo o rodapé "Já tem conta? Entrar"
-- [ ] Inserir no `ForgotPasswordPage`, no formulário e no estado "E-mail enviado"
-- [ ] Inserir no `ResetPasswordPage`, no formulário e no retorno de token ausente
-- [ ] Inserir no `ConfirmEmailCallbackPage`, no pendente e nos dois estados de erro, alinhado à esquerda no `StatusCard`
-- [ ] Escrever os testes de tela dos estados sem formulário (e-mail enviado, token ausente, link inválido, já confirmado)
-- [ ] Atualizar a spec `pscode/specs/app-layout/spec.md` e rodar lint, type-check e a suíte Vitest do `apps/web`
+- [x] Criar `apps/web/src/components/shared/BackToLogin.tsx` com `ArrowLeft` + link para `/login`, e seu teste unitário
+- [x] Inserir o `BackToLogin` no `RegisterPage`, mantendo o rodapé "Já tem conta? Entrar"
+- [x] Inserir no `ForgotPasswordPage`, no formulário e no estado "E-mail enviado"
+- [x] Inserir no `ResetPasswordPage`, no formulário e no retorno de token ausente
+- [x] Inserir no `ConfirmEmailCallbackPage`, no pendente e nos dois estados de erro, alinhado à esquerda no `StatusCard`
+- [x] Escrever os testes de tela dos estados sem formulário (e-mail enviado, token ausente, link inválido, já confirmado)
+- [x] Atualizar a spec `pscode/specs/app-layout/spec.md` e rodar lint, type-check e a suíte Vitest do `apps/web`

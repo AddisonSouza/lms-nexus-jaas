@@ -4,6 +4,7 @@ import { Loader2 } from 'lucide-react'
 import { forgotPasswordSchema, type ForgotPasswordFormData } from '../schemas/forgotPasswordSchema'
 import { useForgotPassword } from '../hooks/useForgotPassword'
 import AuthLayout from '@components/layout/AuthLayout'
+import BackToLogin from '@components/shared/BackToLogin'
 import { Input } from '@components/ui/input'
 import { Button } from '@components/ui/button'
 
@@ -23,11 +24,15 @@ function ForgotPasswordPage() {
   if (isSuccess) {
     return (
       <AuthLayout>
-        <div className="space-y-2 text-center">
-          <h2 className="font-heading text-2xl">E-mail enviado</h2>
-          <p className="text-sm text-muted-foreground">
-            Se houver uma conta com esse e-mail, você receberá um link para redefinir sua senha em breve.
-          </p>
+        <div className="space-y-4">
+          <BackToLogin />
+
+          <div className="space-y-2 text-center">
+            <h2 className="font-heading text-2xl">E-mail enviado</h2>
+            <p className="text-sm text-muted-foreground">
+              Se houver uma conta com esse e-mail, você receberá um link para redefinir sua senha em breve.
+            </p>
+          </div>
         </div>
       </AuthLayout>
     )
@@ -36,6 +41,8 @@ function ForgotPasswordPage() {
   return (
     <AuthLayout>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <BackToLogin />
+
         <div>
           <h2 className="mb-2 font-heading text-2xl">Esqueci minha senha</h2>
           <p className="text-sm text-muted-foreground">

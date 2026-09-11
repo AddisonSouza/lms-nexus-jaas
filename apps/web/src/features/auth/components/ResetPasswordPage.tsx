@@ -5,6 +5,7 @@ import { useSearchParams } from 'react-router-dom'
 import { resetPasswordSchema, type ResetPasswordFormData } from '../schemas/resetPasswordSchema'
 import { useResetPassword } from '../hooks/useResetPassword'
 import AuthLayout from '@components/layout/AuthLayout'
+import BackToLogin from '@components/shared/BackToLogin'
 import { PasswordInput } from '@components/ui/password-input'
 import { Button } from '@components/ui/button'
 
@@ -35,7 +36,10 @@ function ResetPasswordPage() {
   if (!token) {
     return (
       <AuthLayout>
-        <p className="text-center text-sm text-destructive">Link de redefinição inválido.</p>
+        <div className="space-y-4">
+          <BackToLogin />
+          <p className="text-center text-sm text-destructive">Link de redefinição inválido.</p>
+        </div>
       </AuthLayout>
     )
   }
@@ -43,6 +47,8 @@ function ResetPasswordPage() {
   return (
     <AuthLayout>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <BackToLogin />
+
         <h2 className="font-heading text-2xl">Redefinir senha</h2>
 
         {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
