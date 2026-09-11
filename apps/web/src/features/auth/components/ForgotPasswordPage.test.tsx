@@ -35,4 +35,16 @@ describe('ForgotPasswordPage', () => {
       expect(screen.getByText(/e-mail enviado/i)).toBeTruthy()
     })
   })
+
+  it('keeps a way back to login in the success state', async () => {
+    vi.mocked(authApi.forgotPassword).mockResolvedValue(undefined)
+    render(<ForgotPasswordPage />, { wrapper })
+
+    await userEvent.type(screen.getByLabelText(/e-mail/i), 'user@test.com')
+    await userEvent.click(screen.getByRole('button', { name: /enviar link/i }))
+
+    await waitFor(() => {
+      expect(screen.getByRole('link', { name: 'Voltar ao login' }).getAttribute('href')).toBe('/login')
+    })
+  })
 })

@@ -5,6 +5,7 @@ import { CheckCircle, Loader2, Mail, XCircle } from 'lucide-react'
 import { confirmEmail } from '../api/auth-api'
 import ResendConfirmationForm from './ResendConfirmationForm'
 import { Card } from '@components/ui/card'
+import BackToLogin from '@components/shared/BackToLogin'
 
 function StatusCard({ children }: { children: React.ReactNode }) {
   return (
@@ -19,6 +20,7 @@ function StatusCard({ children }: { children: React.ReactNode }) {
 function StaticPendingPage() {
   return (
     <StatusCard>
+      <BackToLogin className="self-start" />
       <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent-100 text-accent-800">
         <Mail className="h-6 w-6" />
       </div>
@@ -88,6 +90,7 @@ function ConfirmEmailCallbackPage() {
 
     return (
       <StatusCard>
+        <BackToLogin className="self-start" />
         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent-100 text-accent-800">
           <XCircle className="h-6 w-6" />
         </div>

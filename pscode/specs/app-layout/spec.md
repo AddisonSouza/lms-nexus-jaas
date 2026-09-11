@@ -17,6 +17,24 @@ O sistema SHALL renderizar um layout persistente (`AppShell`) composto por `Head
 
 ---
 
+### Requirement: Telas públicas de autenticação têm saída para o login
+As rotas públicas que não são o próprio login (`/register`, `/forgot-password`, `/reset-password`, `/confirm-email`) SHALL exibir um controle de retorno consistente (`← Voltar ao login`) que leva a `/login`, inclusive nos estados sem formulário. O `/login` não exibe o controle — é o destino. As telas do fluxo de organização (`/welcome`, `/organizations/new`) e o aceite de convite seguem com a saída própria do `MinimalHeader`.
+
+#### Scenario: Tela pública com formulário
+- **WHEN** usuário abre `/register`, `/forgot-password` ou `/reset-password` com token válido
+- **THEN** sistema exibe `Voltar ao login` acima do título, apontando para `/login`
+- **AND** no `/register` o rodapé "Já tem conta? Entrar" permanece, por ser convite contextual e não navegação de retorno
+
+#### Scenario: Estado terminal sem formulário
+- **WHEN** a tela chega a um estado sem formulário — "E-mail enviado" do `/forgot-password`, "Link de redefinição inválido." do `/reset-password`, "Confirme seu e-mail", "Link inválido ou expirado" ou "E-mail já confirmado" do `/confirm-email`
+- **THEN** o controle de retorno continua visível, porque nesses estados ele é a única saída da tela
+
+#### Scenario: Estados que já redirecionam sozinhos
+- **WHEN** o `/confirm-email` está confirmando o token ou acabou de confirmar com sucesso
+- **THEN** o controle não é exibido, porque a própria tela leva ao `/login` em seguida
+
+---
+
 ### Requirement: Sidebar exibe navegação contextual ao papel
 O sistema SHALL exibir links de navegação na `Sidebar` de acordo com o papel (`role`) do usuário autenticado, lido do `authStore`.
 
