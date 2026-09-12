@@ -67,4 +67,23 @@ public class InvitationRepositoryImpl implements InvitationRepository {
                 .map(invitationMapper::toDomain)
                 .toList();
     }
+
+    @Override
+    public List<Invitation> findPendingByOrgAndEmail(String organizationId, String email) {
+        if (email == null || email.isBlank()) {
+            return List.of();
+        }
+
+        return em.createQuery(
+                        "SELECT i FROM InvitationJpaEntity i " +
+                        "WHERE i.organizationId = :orgId AND LOWER(i.email) = LOWER(:email) " +
+                        "AND i.status = 'PENDING' AND i.expiresAt > :now",
+                        InvitationJpaEntity.class)
+                .setParameter("orgId", organizationId)
+                .setParameter("email", email.trim())
+                .setParameter("now", LocalDateTime.now())
+                .getResultStream()
+                .map(invitationMapper::toDomain)
+                .toList();
+    }
 }

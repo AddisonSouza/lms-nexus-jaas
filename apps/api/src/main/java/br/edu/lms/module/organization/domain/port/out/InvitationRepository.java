@@ -15,4 +15,10 @@ public interface InvitationRepository {
      * recente para o mais antigo. Comparação sem diferenciar caixa.
      */
     List<Invitation> findPendingByEmail(String email);
+
+    /**
+     * Convites pendentes e não expirados desta organização para este e-mail.
+     * Comparação sem diferenciar caixa.
+     */
+    List<Invitation> findPendingByOrgAndEmail(String organizationId, String email);
 }

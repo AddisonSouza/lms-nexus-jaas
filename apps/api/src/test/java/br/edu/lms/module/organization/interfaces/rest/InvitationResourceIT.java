@@ -141,6 +141,29 @@ class InvitationResourceIT {
                 .body("error", equalTo("ALREADY_A_MEMBER"));
     }
 
+    @Test
+    @TestSecurity(user = USER_ID, roles = {"ADMIN_ORG"})
+    @JwtSecurity(claims = {@Claim(key = "sub", value = USER_ID), @Claim(key = "org", value = ORG_ID)})
+    void invite_sameEmailAgain_cancelsThePendingInvitation() throws Exception {
+        for (var email : new String[]{"reinvited@test.com", "REINVITED@test.com"}) {
+            given()
+                    .contentType(ContentType.JSON)
+                    .body("{\"email\":\"%s\",\"role\":\"PROFESSOR\"}".formatted(email))
+                    .when().post("/organizations/{id}/invitations", ORG_ID)
+                    .then().statusCode(201);
+        }
+
+        tx.begin();
+        @SuppressWarnings("unchecked")
+        var statuses = (java.util.List<String>) em.createNativeQuery(
+                        "SELECT status FROM invitations WHERE organization_id = ? AND LOWER(email) = 'reinvited@test.com' ORDER BY created_at")
+                .setParameter(1, ORG_ID)
+                .getResultList();
+        tx.commit();
+
+        org.assertj.core.api.Assertions.assertThat(statuses).containsExactly("CANCELLED", "PENDING");
+    }
+
     // --- POST /invitations/{token}/accept ---
 
     @Test

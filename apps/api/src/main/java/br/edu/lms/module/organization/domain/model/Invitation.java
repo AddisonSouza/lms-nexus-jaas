@@ -31,6 +31,11 @@ public class Invitation {
         return Instant.now().isAfter(expiresAt);
     }
 
+    /** Um convite cancelado deixa de valer: o link não serve mais para entrar. */
+    public Invitation cancel() {
+        return toBuilder().status(InvitationStatus.CANCELLED).build();
+    }
+
     /** O convite vale para o e-mail a que foi endereçado, comparado sem caixa. */
     public boolean isAddressedTo(String candidateEmail) {
         return candidateEmail != null && email != null

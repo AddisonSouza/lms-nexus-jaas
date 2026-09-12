@@ -8,6 +8,7 @@ import br.edu.lms.module.organization.domain.port.out.InvitationRepository;
 import br.edu.lms.module.organization.domain.port.out.OrganizationMemberRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import br.edu.lms.module.organization.domain.event.MemberInvitedEvent;
@@ -26,10 +27,15 @@ public class InviteMemberService implements InviteMemberUseCase {
     private final Event<MemberInvitedEvent> memberInvitedEvent;
 
     @Override
+    @Transactional
     public void execute(InviteMemberCommand command) {
         if (memberRepository.existsActiveMemberByEmail(command.getOrganizationId(), command.getEmail())) {
             throw new AlreadyAMemberException();
         }
+
+        // Reconvidar é reenviar: só um link vale por vez, então o anterior deixa de valer.
+        invitationRepository.findPendingByOrgAndEmail(command.getOrganizationId(), command.getEmail())
+                .forEach(previous -> invitationRepository.save(previous.cancel()));
 
         var token = UUID.randomUUID().toString();
         var invitation = Invitation.builder()
