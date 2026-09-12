@@ -253,6 +253,63 @@ class InvitationResourceIT {
                 .body("error", equalTo("INVITATION_CANCELLED"));
     }
 
+    // Remover é soft delete e uq_member (org, user) ignora o deleted_at: aceitar
+    // inseria outra linha e respondia 500 (#204).
+    @Test
+    @TestSecurity(user = ACCEPTEE_ID, roles = {})
+    @JwtSecurity(claims = {@Claim(key = "sub", value = ACCEPTEE_ID)})
+    void accept_byARemovedMember_reactivatesTheMembership() throws Exception {
+        var token = "returning-member-token-it-001";
+        tx.begin();
+        em.createNativeQuery("INSERT IGNORE INTO users (id, full_name, email, password_hash, status) VALUES (?,?,?,?,?)")
+                .setParameter(1, ACCEPTEE_ID)
+                .setParameter(2, "Acceptee")
+                .setParameter(3, "acceptee@test.com")
+                .setParameter(4, "$2b$10$placeholder")
+                .setParameter(5, "ACTIVE")
+                .executeUpdate();
+        em.createNativeQuery("""
+                INSERT INTO organization_members (id, organization_id, user_id, role, joined_at, deleted_at)
+                VALUES ('removed-member-it-001', ?, ?, 'ALUNO', DATE_SUB(NOW(6), INTERVAL 30 DAY), DATE_SUB(NOW(6), INTERVAL 1 DAY))
+                """)
+                .setParameter(1, ORG_ID)
+                .setParameter(2, ACCEPTEE_ID)
+                .executeUpdate();
+        em.createNativeQuery("""
+                INSERT INTO invitations (id, organization_id, email, role, token, status, invited_by, expires_at, created_at)
+                VALUES (UUID(), ?, 'acceptee@test.com', 'PROFESSOR', ?, 'PENDING', ?, DATE_ADD(NOW(6), INTERVAL 7 DAY), NOW(6))
+                """)
+                .setParameter(1, ORG_ID)
+                .setParameter(2, token)
+                .setParameter(3, USER_ID)
+                .executeUpdate();
+        tx.commit();
+
+        given()
+                .when().post("/invitations/{token}/accept", token)
+                .then().statusCode(204);
+
+        tx.begin();
+        // joined_at sai do LocalDateTime.now() da JVM (horário local) e o NOW() do MySQL
+        // pode estar em UTC: a folga de um dia absorve o fuso e ainda prova que a data
+        // deixou os 30 dias semeados.
+        var rows = em.createNativeQuery("""
+                SELECT id, role, deleted_at IS NULL, joined_at > DATE_SUB(NOW(6), INTERVAL 1 DAY)
+                FROM organization_members WHERE organization_id = ? AND user_id = ?
+                """)
+                .setParameter(1, ORG_ID)
+                .setParameter(2, ACCEPTEE_ID)
+                .getResultList();
+        tx.commit();
+
+        org.assertj.core.api.Assertions.assertThat(rows).hasSize(1);
+        var row = (Object[]) rows.get(0);
+        org.assertj.core.api.Assertions.assertThat(row[0]).isEqualTo("removed-member-it-001");
+        org.assertj.core.api.Assertions.assertThat(row[1]).isEqualTo("PROFESSOR");
+        org.assertj.core.api.Assertions.assertThat(((Number) row[2]).intValue()).isEqualTo(1);
+        org.assertj.core.api.Assertions.assertThat(((Number) row[3]).intValue()).isEqualTo(1);
+    }
+
     // O convite vale para o e-mail a que foi endereçado (#138), então quem aceita
     // é o convidado — autenticar como o convidante daria 403.
     @Test

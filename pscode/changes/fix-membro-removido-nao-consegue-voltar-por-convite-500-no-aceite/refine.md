@@ -47,6 +47,6 @@ com o papel novo e a data da volta.
 
 ## Subtasks
 
-- [ ] BE organização: aceite de convite reativa o vínculo removido (repositório + service) + testes unitários e IT
+- [x] BE organização: aceite de convite reativa o vínculo removido (repositório + service) + testes unitários e IT
 - [ ] BE turma: entrar por código e adicionar membro reativam o vínculo removido + testes unitários e IT
 - [ ] Validar na aplicação: membro removido volta por convite; aluno removido volta à turma pelo código

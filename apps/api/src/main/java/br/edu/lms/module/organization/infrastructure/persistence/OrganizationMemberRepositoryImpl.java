@@ -131,6 +131,33 @@ public class OrganizationMemberRepositoryImpl implements OrganizationMemberRepos
                 .toList();
     }
 
+    @Override
+    public Optional<OrganizationMember> findRemovedByOrgAndUser(String organizationId, String userId) {
+        return em.createQuery(
+                        "SELECT m FROM OrganizationMemberJpaEntity m " +
+                        "WHERE m.organizationId = :orgId AND m.userId = :userId AND m.deletedAt IS NOT NULL",
+                        OrganizationMemberJpaEntity.class)
+                .setParameter("orgId", organizationId)
+                .setParameter("userId", userId)
+                .getResultStream()
+                .findFirst()
+                .map(this::toDomain);
+    }
+
+    @Override
+    @Transactional
+    public void reactivate(String memberId, MemberRole role) {
+        // UPDATE explícito: joined_at é updatable = false na entidade, e um merge não
+        // gravaria a data da volta.
+        em.createQuery(
+                        "UPDATE OrganizationMemberJpaEntity m " +
+                        "SET m.deletedAt = NULL, m.role = :role, m.joinedAt = :now WHERE m.id = :id")
+                .setParameter("role", role.name())
+                .setParameter("now", java.time.LocalDateTime.now())
+                .setParameter("id", memberId)
+                .executeUpdate();
+    }
+
     private OrganizationMember toDomain(OrganizationMemberJpaEntity e) {
         return OrganizationMember.builder()
                 .id(e.getId())

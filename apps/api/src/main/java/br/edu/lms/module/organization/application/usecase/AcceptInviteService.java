@@ -48,14 +48,19 @@ public class AcceptInviteService implements AcceptInviteUseCase {
             throw new AlreadyAMemberException();
         }
 
-        var member = OrganizationMember.builder()
-                .id(UUID.randomUUID().toString())
-                .organizationId(invitation.getOrganizationId())
-                .userId(command.getUserId())
-                .role(invitation.getRole())
-                .build();
-
-        memberRepository.save(member);
+        // Remover é soft delete: a linha continua, e uq_member (org, user) não aceita
+        // outra. Quem volta tem o vínculo antigo reativado com o papel deste convite.
+        var removed = memberRepository.findRemovedByOrgAndUser(invitation.getOrganizationId(), command.getUserId());
+        if (removed.isPresent()) {
+            memberRepository.reactivate(removed.get().getId(), invitation.getRole());
+        } else {
+            memberRepository.save(OrganizationMember.builder()
+                    .id(UUID.randomUUID().toString())
+                    .organizationId(invitation.getOrganizationId())
+                    .userId(command.getUserId())
+                    .role(invitation.getRole())
+                    .build());
+        }
 
         var used = invitation.toBuilder().status(InvitationStatus.USED).build();
         invitationRepository.save(used);
