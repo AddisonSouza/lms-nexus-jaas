@@ -79,15 +79,21 @@ function AcceptInvitePage() {
     )
   }
 
-  const acceptErrorStatus = (acceptError as { response?: { status?: number } })?.response?.status
+  const acceptErrorResponse = (acceptError as { response?: { status?: number; data?: { error?: string } } })
+    ?.response
+  const acceptErrorStatus = acceptErrorResponse?.status
+  // 410 cobre dois fins de convite: o prazo venceu ou o admin cancelou (e, num
+  // reenvio, o link antigo também cai aqui). Só o código diz qual.
   const acceptErrorMessage =
     acceptErrorStatus === 409
       ? 'Você já é membro desta organização.'
-      : acceptErrorStatus === 410
-        ? 'Este convite expirou.'
-        : acceptError
-          ? 'Erro ao aceitar convite. Tente novamente.'
-          : null
+      : acceptErrorStatus === 410 && acceptErrorResponse?.data?.error === 'INVITATION_CANCELLED'
+        ? 'Este convite foi cancelado pelo administrador. Peça um novo convite.'
+        : acceptErrorStatus === 410
+          ? 'Este convite expirou.'
+          : acceptError
+            ? 'Erro ao aceitar convite. Tente novamente.'
+            : null
 
   return (
     <Card elevation="md" className="w-full max-w-sm items-start p-6">

@@ -90,6 +90,11 @@ export async function listInvitations(organizationId: string): Promise<Organizat
   return z.array(organizationInvitationSchema).parse(response.data)
 }
 
+/** Só um convite pendente pode ser cancelado; o link enviado deixa de valer. */
+export async function cancelInvitation(organizationId: string, invitationId: string): Promise<void> {
+  await api.delete(`/organizations/${organizationId}/invitations/${invitationId}`)
+}
+
 export async function changeMemberRole(
   organizationId: string,
   userId: string,

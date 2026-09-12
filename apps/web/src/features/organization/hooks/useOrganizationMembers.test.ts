@@ -7,6 +7,7 @@ import { useRemoveMember } from './useRemoveMember'
 import { useChangeMemberRole } from './useChangeMemberRole'
 import { useInviteMember } from './useInviteMember'
 import { useOrganizationInvitations } from './useOrganizationInvitations'
+import { useCancelInvitation } from './useCancelInvitation'
 import * as orgApi from '../api/organization-api'
 import { organizationKeys } from '../api/query-keys'
 
@@ -124,5 +125,17 @@ describe('member mutations', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(orgApi.removeMember).toHaveBeenCalledWith('org-1', 'user-1')
     expect(invalidate).toHaveBeenCalledWith({ queryKey: organizationKeys.members('org-1') })
+  })
+
+  it('cancels an invitation and refreshes the invitations', async () => {
+    vi.mocked(orgApi.cancelInvitation).mockResolvedValue(undefined)
+    const invalidate = vi.spyOn(queryClient, 'invalidateQueries')
+
+    const { result } = renderHook(() => useCancelInvitation('org-1'), { wrapper })
+    result.current.mutate('inv-1')
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(orgApi.cancelInvitation).toHaveBeenCalledWith('org-1', 'inv-1')
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: organizationKeys.invitations('org-1') })
   })
 })

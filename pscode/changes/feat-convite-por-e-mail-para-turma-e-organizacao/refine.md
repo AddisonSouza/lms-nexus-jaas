@@ -49,5 +49,5 @@ Entrar na turma continua sendo pelo código de 6 caracteres.
 - [x] BE: `DELETE /organizations/{id}/invitations/{invitationId}` + aceite de cancelado → 410 + testes
 - [x] Docs: endpoints e erros novos no `API_CONTRACT.md` (RF-06)
 - [x] FE: seção de convites na página de membros (lista + estado)
-- [ ] FE: ações reenviar e cancelar + mensagem de convite cancelado no aceite
+- [x] FE: ações reenviar e cancelar + mensagem de convite cancelado no aceite
 - [ ] Validar o golden path na aplicação (convidar → reenviar → link antigo recusado → cancelar)
