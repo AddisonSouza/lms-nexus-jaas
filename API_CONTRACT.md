@@ -202,8 +202,60 @@ não aparecem.
 
 | Código | Descrição |
 |---|---|
-| `201` | Convite criado. E-mail enviado ao convidado. Token válido por 7 dias. |
+Reconvidar é reenviar: se o e-mail já tem um convite pendente e não expirado
+nesta organização, ele é cancelado (`CANCELLED`) na mesma transação e um token
+novo é emitido e enviado. Só um link vale por vez.
+
+| Código | Descrição |
+|---|---|
+| `201` | Convite criado. E-mail enviado ao convidado. Token válido por 7 dias. Convite pendente anterior do mesmo e-mail cancelado. |
+| `403` | Não é `ADMIN_ORG` desta organização. |
 | `409` | Usuário já é membro. |
+
+---
+
+**`GET /organizations/{id}/invitations`** · `ADMIN_ORG`
+
+Lista os convites da organização em qualquer estado, do mais recente para o mais
+antigo. `status` é o estado efetivo: um convite `PENDING` com `expiresAt` vencido
+sai como `EXPIRED` (o banco nunca grava `EXPIRED`). `invitedByName` vem do módulo
+`identity` e é `null` se o convidante não existir mais. **O token não é
+devolvido**: o link é segredo do convidado.
+
+```json
+[
+  {
+    "id": "uuid do convite",
+    "email": "string",
+    "role": "GESTOR | PROFESSOR | ALUNO",
+    "status": "PENDING | USED | EXPIRED | CANCELLED",
+    "invitedByName": "string | null",
+    "createdAt": "2026-09-12T10:00:00Z",
+    "expiresAt": "2026-09-19T10:00:00Z"
+  }
+]
+```
+
+| Código | Descrição |
+|---|---|
+| `200` | Convites da organização. Array vazio se não houver. |
+| `401` | Não autenticado. |
+| `403` | Não é `ADMIN_ORG` desta organização (o `{id}` precisa bater com o claim `org`). |
+
+---
+
+**`DELETE /organizations/{id}/invitations/{invitationId}`** · `ADMIN_ORG`
+
+Cancela um convite pendente: o status vira `CANCELLED` e o link deixa de valer.
+Aceito, já cancelado ou expirado não pode ser cancelado.
+
+| Código | Descrição |
+|---|---|
+| `204` | Convite cancelado. |
+| `401` | Não autenticado. |
+| `403` | Não é `ADMIN_ORG` desta organização. |
+| `404` | Convite não encontrado nesta organização (`INVITATION_NOT_FOUND`) — inclusive o de outra organização. |
+| `409` | Convite não está pendente (`INVITATION_NOT_PENDING`). |
 
 ---
 
@@ -259,7 +311,7 @@ uma credencial. O e-mail é comparado sem diferenciar maiúsculas de minúsculas
 | `403` | Convite endereçado a outro e-mail (`INVITATION_NOT_FOR_THIS_USER`). |
 | `404` | Convite não encontrado (`INVITATION_NOT_FOUND`). |
 | `409` | Convite já utilizado (`INVITATION_ALREADY_USED`) ou usuário já é membro (`ALREADY_A_MEMBER`). |
-| `410` | Convite expirado (`INVITATION_EXPIRED`). |
+| `410` | Convite expirado (`INVITATION_EXPIRED`) ou cancelado pelo admin (`INVITATION_CANCELLED`). |
 
 ---
 
@@ -783,7 +835,7 @@ Todos os recursos usam `deleted_at TIMESTAMP NULL`. Queries filtram `WHERE delet
 | RF-03 | identity | Recuperação de Senha | ✅ | `POST /auth/forgot-password` · `POST /auth/reset-password` |
 | RF-04 | identity | Confirmação de E-mail | ✅ | `GET /auth/confirm-email` · `POST /auth/resend-confirmation` |
 | RF-05 | organization | Criação de Organização | ✅ | `POST /organizations` · `GET /organizations` |
-| RF-06 | organization | Gestão de Membros | ✅ | `POST /organizations/{id}/invitations` · `GET /invitations/{token}` · `GET /invitations/pending` · `POST /invitations/{token}/accept` · `GET /organizations/{id}/members` · `PATCH /organizations/{id}/members/{userId}` · `DELETE /organizations/{id}/members/{userId}` |
+| RF-06 | organization | Gestão de Membros | ✅ | `POST /organizations/{id}/invitations` · `GET /organizations/{id}/invitations` · `DELETE /organizations/{id}/invitations/{invitationId}` · `GET /invitations/{token}` · `GET /invitations/pending` · `POST /invitations/{token}/accept` · `GET /organizations/{id}/members` · `PATCH /organizations/{id}/members/{userId}` · `DELETE /organizations/{id}/members/{userId}` |
 | RF-07 | classroom | Gestão de Turmas | ✅ | `GET /classrooms` · `GET /classrooms/{id}` · `POST /classrooms` · `PUT /classrooms/{id}` · `DELETE /classrooms/{id}` · `GET /classrooms/{id}/members` · `POST /classrooms/{id}/members` · `DELETE /classrooms/{id}/members/{userId}` |
 | RF-08 | classroom | Ingresso via Código | 🔍 | `POST /classrooms/join` |
 | RF-09 | curriculum | Gestão de Disciplinas | 📋 | `POST /subjects` · `POST /subjects/{id}/classrooms` · `POST /subjects/{id}/teachers` |
