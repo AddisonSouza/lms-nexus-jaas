@@ -43,5 +43,10 @@ ou expirado).
 ## Subtasks
 
 - [x] FE: `PublicRoute` leva ao aceite quando há `?invite=` + testes do guard
-- [ ] FE: teste de login com `?invite=` montado com o `PublicRoute` real, chegando ao aceite
+- [x] FE: teste de login com `?invite=` montado com o `PublicRoute` real, chegando ao aceite
+  — **descartado na implementação:** com `<MemoryRouter>` a navegação é síncrona e
+  o teste passa até sem a correção; com `createMemoryRouter` (o data router da app)
+  ele quebra no jsdom (`AbortSignal` incompatível com o `Request` do Node), com ou
+  sem a correção. A regressão fica coberta pelos testes do `PublicRoute` (2 de 6
+  falham no guard antigo) e o caminho completo, pela validação no navegador.
 - [ ] Validar no navegador: link de convite cancelado, deslogado → login → tela de aceite com a mensagem de cancelado
