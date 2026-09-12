@@ -3,6 +3,7 @@ package br.edu.lms.module.classroom.domain.port.out;
 import br.edu.lms.module.classroom.domain.model.Classroom;
 import br.edu.lms.module.classroom.domain.model.ClassroomId;
 import br.edu.lms.module.classroom.domain.model.ClassroomMember;
+import br.edu.lms.module.classroom.domain.model.ClassroomMemberRole;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +18,12 @@ public interface ClassroomRepository {
     Optional<ClassroomMember> findMember(ClassroomId classroomId, String userId);
     ClassroomMember saveMember(ClassroomMember member);
     void softDeleteMember(ClassroomId classroomId, String userId);
+
+    /** O vínculo removido (soft delete) deste usuário na turma, se houver. */
+    Optional<ClassroomMember> findRemovedMember(ClassroomId classroomId, String userId);
+
+    /** Traz de volta um vínculo removido: ativo de novo, com o papel dado e ingresso agora. */
+    void reactivateMember(String memberId, ClassroomMemberRole role);
     List<ClassroomMember> findMembersByClassroom(ClassroomId classroomId, String organizationId);
     boolean isUserInOrganization(String userId, String organizationId);
     /**

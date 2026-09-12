@@ -13,6 +13,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -38,6 +39,19 @@ public class AddClassroomMemberService implements AddClassroomMemberUseCase {
         var existing = classroomRepository.findMember(command.getClassroomId(), command.getUserId());
         if (existing.isPresent()) {
             return toMemberResponse(existing.get());
+        }
+
+        // Remover é soft delete e uq_classroom_member não aceita outra linha: quem
+        // volta tem o vínculo antigo reativado com o papel pedido agora.
+        var removed = classroomRepository.findRemovedMember(command.getClassroomId(), command.getUserId());
+        if (removed.isPresent()) {
+            classroomRepository.reactivateMember(removed.get().getId(), command.getRole());
+            log.info("Member {} re-added to classroom {}", command.getUserId(), command.getClassroomId().getValue());
+            return toMemberResponse(removed.get().toBuilder()
+                    .role(command.getRole())
+                    .joinedAt(LocalDateTime.now())
+                    .deletedAt(null)
+                    .build());
         }
 
         var member = ClassroomMember.builder()

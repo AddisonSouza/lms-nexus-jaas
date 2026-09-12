@@ -40,6 +40,15 @@ public class JoinClassroomService implements JoinClassroomUseCase {
             return JoinClassroomResult.alreadyMember(toJoinResponse(classroom));
         }
 
+        // Remover é soft delete: a linha continua, e uq_classroom_member não aceita
+        // outra. Quem volta pelo código tem o vínculo antigo reativado como ALUNO.
+        var removed = classroomRepository.findRemovedMember(classroom.getId(), command.getUserId());
+        if (removed.isPresent()) {
+            classroomRepository.reactivateMember(removed.get().getId(), ClassroomMemberRole.ALUNO);
+            log.info("User {} rejoined classroom {} via invite code", command.getUserId(), classroom.getId().getValue());
+            return JoinClassroomResult.joined(toJoinResponse(classroom));
+        }
+
         var member = ClassroomMember.builder()
                 .id(UUID.randomUUID().toString())
                 .classroomId(classroom.getId())

@@ -88,6 +88,26 @@ class AddClassroomMemberServiceTest {
     }
 
     @Test
+    void shouldReactivateARemovedMembershipWithTheRequestedRole() {
+        var removed = ClassroomMember.builder()
+                .id("member-old")
+                .classroomId(classroomId).userId(userId).organizationId(orgId)
+                .role(ClassroomMemberRole.ALUNO).build();
+        when(classroomRepository.findById(classroomId, orgId)).thenReturn(Optional.of(activeClassroom()));
+        when(classroomRepository.isUserInOrganization(userId, orgId)).thenReturn(true);
+        when(classroomRepository.findMember(classroomId, userId)).thenReturn(Optional.empty());
+        when(classroomRepository.findRemovedMember(classroomId, userId)).thenReturn(Optional.of(removed));
+
+        var result = sut.execute(cmd(ClassroomMemberRole.PROFESSOR));
+
+        assertThat(result.getId()).isEqualTo("member-old");
+        assertThat(result.getRole()).isEqualTo(ClassroomMemberRole.PROFESSOR);
+        assertThat(result.getJoinedAt()).isNotNull();
+        verify(classroomRepository).reactivateMember("member-old", ClassroomMemberRole.PROFESSOR);
+        verify(classroomRepository, never()).saveMember(any());
+    }
+
+    @Test
     void shouldThrowWhenUserNotInOrganization() {
         when(classroomRepository.findById(classroomId, orgId)).thenReturn(Optional.of(activeClassroom()));
         when(classroomRepository.isUserInOrganization(userId, orgId)).thenReturn(false);
