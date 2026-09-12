@@ -130,7 +130,7 @@ Between the invitation link and the accept screen sits the confirmation email, p
 ---
 
 ### Requirement: The invitation survives the login screen
-A logged-out visitor opening an invitation SHALL be sent to login carrying the token, and be returned to the accept screen once signed in. Registration is reached from the login screen, which passes the token along.
+A logged-out visitor opening an invitation SHALL be sent to login carrying the token, and be returned to the accept screen once signed in — whatever state the invitation is in, since the accept screen is what explains it. Registration is reached from the login screen, which passes the token along. The guard on public pages SHALL follow `?invite=` too, so it never overrides that return with a redirect to the root.
 
 #### Scenario: Logged-out visitor opens the invitation link
 - **WHEN** an unauthenticated user opens `/invitations/<token>/accept`
@@ -143,6 +143,14 @@ A logged-out visitor opening an invitation SHALL be sent to login carrying the t
 #### Scenario: The invitee has no account yet
 - **WHEN** the user follows "Criar conta" from `/login?invite=<token>`
 - **THEN** the registration link carries `?invite=<token>` forward
+
+#### Scenario: Signing in from a link that is no longer pending
+- **WHEN** the user signs in from `/login?invite=<token>` and that invitation was cancelled, resent or expired
+- **THEN** the app lands on `/invitations/<token>/accept`, not on `/welcome`
+
+#### Scenario: Already signed in on a public page with an invitation
+- **WHEN** an authenticated user opens `/login?invite=<token>` or `/register?invite=<token>`
+- **THEN** the app redirects to `/invitations/<token>/accept`; without `?invite=` it redirects to the root
 
 ---
 
