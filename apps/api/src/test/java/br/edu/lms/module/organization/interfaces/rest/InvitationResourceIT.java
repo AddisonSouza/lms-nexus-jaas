@@ -141,6 +141,29 @@ class InvitationResourceIT {
                 .body("error", equalTo("ALREADY_A_MEMBER"));
     }
 
+    @Test
+    @TestSecurity(user = USER_ID, roles = {"ADMIN_ORG"})
+    @JwtSecurity(claims = {@Claim(key = "sub", value = USER_ID), @Claim(key = "org", value = ORG_ID)})
+    void invite_sameEmailAgain_cancelsThePendingInvitation() throws Exception {
+        for (var email : new String[]{"reinvited@test.com", "REINVITED@test.com"}) {
+            given()
+                    .contentType(ContentType.JSON)
+                    .body("{\"email\":\"%s\",\"role\":\"PROFESSOR\"}".formatted(email))
+                    .when().post("/organizations/{id}/invitations", ORG_ID)
+                    .then().statusCode(201);
+        }
+
+        tx.begin();
+        @SuppressWarnings("unchecked")
+        var statuses = (java.util.List<String>) em.createNativeQuery(
+                        "SELECT status FROM invitations WHERE organization_id = ? AND LOWER(email) = 'reinvited@test.com' ORDER BY created_at")
+                .setParameter(1, ORG_ID)
+                .getResultList();
+        tx.commit();
+
+        org.assertj.core.api.Assertions.assertThat(statuses).containsExactly("CANCELLED", "PENDING");
+    }
+
     // --- POST /invitations/{token}/accept ---
 
     @Test
@@ -205,6 +228,29 @@ class InvitationResourceIT {
                 .then()
                 .statusCode(409)
                 .body("error", equalTo("INVITATION_ALREADY_USED"));
+    }
+
+    @Test
+    @TestSecurity(user = USER_ID, roles = {})
+    @JwtSecurity(claims = {@Claim(key = "sub", value = USER_ID)})
+    void accept_cancelledToken_returns410() throws Exception {
+        var cancelledToken = "cancelled-token-it-001";
+        tx.begin();
+        em.createNativeQuery("""
+                INSERT INTO invitations (id, organization_id, email, role, token, status, invited_by, expires_at, created_at)
+                VALUES (UUID(), ?, 'cancelled@test.com', 'PROFESSOR', ?, 'CANCELLED', ?, DATE_ADD(NOW(6), INTERVAL 7 DAY), NOW(6))
+                """)
+                .setParameter(1, ORG_ID)
+                .setParameter(2, cancelledToken)
+                .setParameter(3, USER_ID)
+                .executeUpdate();
+        tx.commit();
+
+        given()
+                .when().post("/invitations/{token}/accept", cancelledToken)
+                .then()
+                .statusCode(410)
+                .body("error", equalTo("INVITATION_CANCELLED"));
     }
 
     // O convite vale para o e-mail a que foi endereçado (#138), então quem aceita

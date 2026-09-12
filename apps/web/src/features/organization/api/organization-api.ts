@@ -68,6 +68,33 @@ export async function inviteMember(organizationId: string, data: InviteMemberDat
   await api.post(`/organizations/${organizationId}/invitations`, data)
 }
 
+/** Estado efetivo: um convite pendente vencido já chega como EXPIRED. */
+export const invitationStatusSchema = z.enum(['PENDING', 'USED', 'EXPIRED', 'CANCELLED'])
+
+export type InvitationStatus = z.infer<typeof invitationStatusSchema>
+
+const organizationInvitationSchema = z.object({
+  id: z.string(),
+  email: z.string(),
+  role: memberRoleSchema,
+  status: invitationStatusSchema,
+  invitedByName: z.string().nullable(),
+  createdAt: z.string(),
+  expiresAt: z.string(),
+})
+
+export type OrganizationInvitation = z.infer<typeof organizationInvitationSchema>
+
+export async function listInvitations(organizationId: string): Promise<OrganizationInvitation[]> {
+  const response = await api.get(`/organizations/${organizationId}/invitations`)
+  return z.array(organizationInvitationSchema).parse(response.data)
+}
+
+/** Só um convite pendente pode ser cancelado; o link enviado deixa de valer. */
+export async function cancelInvitation(organizationId: string, invitationId: string): Promise<void> {
+  await api.delete(`/organizations/${organizationId}/invitations/${invitationId}`)
+}
+
 export async function changeMemberRole(
   organizationId: string,
   userId: string,

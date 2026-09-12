@@ -1,6 +1,7 @@
 package br.edu.lms.module.organization.infrastructure.persistence;
 
 import br.edu.lms.module.organization.domain.model.Invitation;
+import br.edu.lms.module.organization.domain.model.InvitationId;
 import br.edu.lms.module.organization.domain.port.out.InvitationRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
@@ -61,6 +62,49 @@ public class InvitationRepositoryImpl implements InvitationRepository {
                         "AND i.status = 'PENDING' AND i.expiresAt > :now " +
                         "ORDER BY i.createdAt DESC",
                         InvitationJpaEntity.class)
+                .setParameter("email", email.trim())
+                .setParameter("now", LocalDateTime.now())
+                .getResultStream()
+                .map(invitationMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public Optional<Invitation> findByIdInOrganization(InvitationId id, String organizationId) {
+        return em.createQuery(
+                        "SELECT i FROM InvitationJpaEntity i WHERE i.id = :id AND i.organizationId = :orgId",
+                        InvitationJpaEntity.class)
+                .setParameter("id", id.getValue())
+                .setParameter("orgId", organizationId)
+                .getResultStream()
+                .findFirst()
+                .map(invitationMapper::toDomain);
+    }
+
+    @Override
+    public List<Invitation> findByOrganization(String organizationId) {
+        return em.createQuery(
+                        "SELECT i FROM InvitationJpaEntity i " +
+                        "WHERE i.organizationId = :orgId ORDER BY i.createdAt DESC",
+                        InvitationJpaEntity.class)
+                .setParameter("orgId", organizationId)
+                .getResultStream()
+                .map(invitationMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<Invitation> findPendingByOrgAndEmail(String organizationId, String email) {
+        if (email == null || email.isBlank()) {
+            return List.of();
+        }
+
+        return em.createQuery(
+                        "SELECT i FROM InvitationJpaEntity i " +
+                        "WHERE i.organizationId = :orgId AND LOWER(i.email) = LOWER(:email) " +
+                        "AND i.status = 'PENDING' AND i.expiresAt > :now",
+                        InvitationJpaEntity.class)
+                .setParameter("orgId", organizationId)
                 .setParameter("email", email.trim())
                 .setParameter("now", LocalDateTime.now())
                 .getResultStream()

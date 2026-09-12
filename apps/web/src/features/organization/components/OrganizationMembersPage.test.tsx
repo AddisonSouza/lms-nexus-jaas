@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -41,9 +41,118 @@ const teacher = {
   owner: false,
 }
 
+const pendingInvite = {
+  id: 'inv-1',
+  email: 'convidado@test.com',
+  role: 'ALUNO' as const,
+  status: 'PENDING' as const,
+  invitedByName: 'Zelia Owner',
+  createdAt: '2026-09-10T10:00:00Z',
+  expiresAt: '2026-09-17T10:00:00Z',
+}
+
 beforeEach(() => {
   vi.clearAllMocks()
   vi.mocked(orgApi.listMembers).mockResolvedValue([teacher, owner])
+  vi.mocked(orgApi.listInvitations).mockResolvedValue([])
+})
+
+function invitationsSection() {
+  return screen.getByRole('region', { name: 'Convites' })
+}
+
+describe('OrganizationMembersPage — invitations', () => {
+  it('lists every invitation with a readable status and who sent it', async () => {
+    vi.mocked(orgApi.listInvitations).mockResolvedValue([
+      pendingInvite,
+      { ...pendingInvite, id: 'inv-2', email: 'aceitou@test.com', status: 'USED' },
+      { ...pendingInvite, id: 'inv-3', email: 'venceu@test.com', status: 'EXPIRED', invitedByName: null },
+      { ...pendingInvite, id: 'inv-4', email: 'desistiu@test.com', status: 'CANCELLED' },
+    ])
+    renderPage()
+
+    expect(await screen.findByText('convidado@test.com')).toBeTruthy()
+    const section = within(invitationsSection())
+    expect(section.getByText('Pendente')).toBeTruthy()
+    expect(section.getByText('Aceito')).toBeTruthy()
+    expect(section.getByText('Expirado')).toBeTruthy()
+    expect(section.getByText('Cancelado')).toBeTruthy()
+    expect(section.getAllByText('Aluno')).toHaveLength(4)
+    expect(section.getAllByText('Zelia Owner')).toHaveLength(3)
+    expect(section.getByText('—')).toBeTruthy()
+  })
+
+  it('fetches the invitations of the organization in the route', async () => {
+    renderPage()
+
+    await waitFor(() => expect(orgApi.listInvitations).toHaveBeenCalledWith('org-1'))
+  })
+
+  it('tells the admin when no invitation was sent', async () => {
+    renderPage()
+
+    expect(await screen.findByText('Nenhum convite enviado.')).toBeTruthy()
+  })
+
+  it('shows a retryable error for the invitations without hiding the members', async () => {
+    vi.mocked(orgApi.listInvitations).mockRejectedValue(new Error('boom'))
+    renderPage()
+
+    expect(await screen.findByText(/Não foi possível carregar os convites/)).toBeTruthy()
+    expect(screen.getByText('Ana Silva')).toBeTruthy()
+  })
+
+  it('resends an invitation with its email and role, then confirms it', async () => {
+    vi.mocked(orgApi.listInvitations).mockResolvedValue([pendingInvite])
+    vi.mocked(orgApi.inviteMember).mockResolvedValue(undefined)
+    renderPage()
+
+    await userEvent.click(await screen.findByLabelText('Reenviar convite para convidado@test.com'))
+
+    await waitFor(() =>
+      expect(orgApi.inviteMember).toHaveBeenCalledWith('org-1', {
+        email: 'convidado@test.com',
+        role: 'ALUNO',
+      }),
+    )
+    expect(await screen.findByText(/Convite enviado para convidado@test.com/)).toBeTruthy()
+  })
+
+  it('cancels a pending invitation only after the confirmation', async () => {
+    vi.mocked(orgApi.listInvitations).mockResolvedValue([pendingInvite])
+    vi.mocked(orgApi.cancelInvitation).mockResolvedValue(undefined)
+    renderPage()
+
+    await userEvent.click(await screen.findByLabelText('Cancelar convite para convidado@test.com'))
+    expect(orgApi.cancelInvitation).not.toHaveBeenCalled()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Cancelar convite' }))
+    await waitFor(() => expect(orgApi.cancelInvitation).toHaveBeenCalledWith('org-1', 'inv-1'))
+  })
+
+  it('offers cancel only for a pending invitation and no resend for an accepted one', async () => {
+    vi.mocked(orgApi.listInvitations).mockResolvedValue([
+      { ...pendingInvite, id: 'inv-2', email: 'aceitou@test.com', status: 'USED' },
+      { ...pendingInvite, id: 'inv-3', email: 'venceu@test.com', status: 'EXPIRED' },
+    ])
+    renderPage()
+
+    expect(await screen.findByLabelText('Reenviar convite para venceu@test.com')).toBeTruthy()
+    expect(screen.queryByLabelText('Cancelar convite para venceu@test.com')).toBeNull()
+    expect(screen.queryByLabelText('Reenviar convite para aceitou@test.com')).toBeNull()
+    expect(screen.queryByLabelText('Cancelar convite para aceitou@test.com')).toBeNull()
+  })
+
+  it('reports a failed cancellation on the affected row', async () => {
+    vi.mocked(orgApi.listInvitations).mockResolvedValue([pendingInvite])
+    vi.mocked(orgApi.cancelInvitation).mockRejectedValue({ response: { status: 409 } })
+    renderPage()
+
+    await userEvent.click(await screen.findByLabelText('Cancelar convite para convidado@test.com'))
+    await userEvent.click(screen.getByRole('button', { name: 'Cancelar convite' }))
+
+    expect(await screen.findByText('Não foi possível cancelar o convite.')).toBeTruthy()
+  })
 })
 
 describe('OrganizationMembersPage', () => {

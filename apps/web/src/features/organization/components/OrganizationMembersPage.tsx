@@ -1,12 +1,15 @@
 import { useState } from 'react'
-import { Users, Trash2, UserPlus, CheckCircle2 } from 'lucide-react'
+import { Users, Trash2, UserPlus, CheckCircle2, Mail, Send, Ban } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 import { useOrganizationMembers } from '../hooks/useOrganizationMembers'
 import { useRemoveMember } from '../hooks/useRemoveMember'
 import { useInviteMember } from '../hooks/useInviteMember'
 import { useChangeMemberRole } from '../hooks/useChangeMemberRole'
+import { useOrganizationInvitations } from '../hooks/useOrganizationInvitations'
+import { useCancelInvitation } from '../hooks/useCancelInvitation'
 import { roleLabels, assignableRoles, isAssignableRole } from '../roles'
-import type { OrganizationMember, AssignableRole } from '../api/organization-api'
+import { invitationStatusLabels, invitationStatusBadge } from '../invitations'
+import type { OrganizationMember, OrganizationInvitation, AssignableRole } from '../api/organization-api'
 import InviteMemberDialog from './InviteMemberDialog'
 import type { InviteMemberFormData } from '../schemas/inviteMemberSchema'
 import ConfirmDialog from '@components/shared/ConfirmDialog'
@@ -22,11 +25,52 @@ function OrganizationMembersPage() {
   const [showInvite, setShowInvite] = useState(false)
   const [invitedEmail, setInvitedEmail] = useState<string | null>(null)
   const [roleError, setRoleError] = useState<string | null>(null)
+  const [cancelTarget, setCancelTarget] = useState<OrganizationInvitation | null>(null)
+  const [invitationError, setInvitationError] = useState<{ id: string; message: string } | null>(null)
 
   const { data: members, isLoading, isError, isFetching, refetch } = useOrganizationMembers(organizationId)
   const removeMember = useRemoveMember(organizationId)
   const inviteMember = useInviteMember(organizationId)
   const changeRole = useChangeMemberRole(organizationId)
+  const invitationsQuery = useOrganizationInvitations(organizationId)
+  const invitations = invitationsQuery.data
+  const cancelInvitation = useCancelInvitation(organizationId)
+
+  // Reenviar é reconvidar: o back-end cancela o pendente anterior e manda um link novo.
+  const handleResend = (invitation: OrganizationInvitation) => {
+    if (!isAssignableRole(invitation.role)) return
+    setInvitationError(null)
+    setInvitedEmail(null)
+    inviteMember.mutate(
+      { email: invitation.email, role: invitation.role },
+      {
+        onSuccess: () => setInvitedEmail(invitation.email),
+        onError: (error) => {
+          const status = (error as { response?: { status?: number } }).response?.status
+          setInvitationError({
+            id: invitation.id,
+            message:
+              status === 409
+                ? 'Esse e-mail já pertence a um membro desta organização.'
+                : 'Não foi possível reenviar o convite.',
+          })
+        },
+      },
+    )
+  }
+
+  const handleConfirmCancel = () => {
+    if (!cancelTarget) return
+    const target = cancelTarget
+    setInvitationError(null)
+    cancelInvitation.mutate(target.id, {
+      onSuccess: () => setCancelTarget(null),
+      onError: () => {
+        setCancelTarget(null)
+        setInvitationError({ id: target.id, message: 'Não foi possível cancelar o convite.' })
+      },
+    })
+  }
 
   const handleRoleChange = (userId: string, role: AssignableRole) => {
     setRoleError(null)
@@ -68,7 +112,7 @@ function OrganizationMembersPage() {
       {invitedEmail && (
         <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
           <CheckCircle2 className="h-4 w-4 text-accent" />
-          Convite enviado para {invitedEmail}. Ele aparece na lista depois de aceitar.
+          Convite enviado para {invitedEmail}.
         </p>
       )}
 
@@ -149,12 +193,106 @@ function OrganizationMembersPage() {
         </Card>
       )}
 
+      <section aria-labelledby="invitations-heading" className="space-y-3">
+        <div className="flex items-center gap-2">
+          <Mail className="h-5 w-5 text-accent" />
+          <h3 id="invitations-heading" className="mb-0">
+            Convites
+          </h3>
+        </div>
+
+        {invitationsQuery.isLoading ? (
+          <p className="text-muted-foreground">Carregando convites...</p>
+        ) : invitationsQuery.isError ? (
+          <ListErrorState
+            subject="os convites"
+            onRetry={() => void invitationsQuery.refetch()}
+            isRetrying={invitationsQuery.isFetching}
+          />
+        ) : invitations?.length === 0 ? (
+          <p className="text-muted-foreground">Nenhum convite enviado.</p>
+        ) : (
+          <Card elevation="sm" className="overflow-hidden p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>E-mail</TableHead>
+                  <TableHead>Papel</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Convidado por</TableHead>
+                  <TableHead>Enviado em</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {invitations?.map((invitation) => (
+                  <TableRow key={invitation.id}>
+                    <TableCell className="font-medium">{invitation.email}</TableCell>
+                    <TableCell className="text-muted-foreground">{roleLabels[invitation.role]}</TableCell>
+                    <TableCell>
+                      <Badge variant={invitationStatusBadge[invitation.status]}>
+                        {invitationStatusLabels[invitation.status]}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{invitation.invitedByName ?? '—'}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {new Date(invitation.createdAt).toLocaleDateString('pt-BR')}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-3">
+                        {/* Aceito já virou membro: reenviar só daria 409. */}
+                        {invitation.status !== 'USED' && isAssignableRole(invitation.role) && (
+                          <button
+                            onClick={() => handleResend(invitation)}
+                            disabled={inviteMember.isPending}
+                            className="text-muted-foreground hover:text-accent disabled:opacity-60"
+                            title="Reenviar convite"
+                            aria-label={`Reenviar convite para ${invitation.email}`}
+                          >
+                            <Send className="h-4 w-4" />
+                          </button>
+                        )}
+                        {/* Só o pendente tem um link valendo para desfazer — o back-end responde 409 aos demais. */}
+                        {invitation.status === 'PENDING' && (
+                          <button
+                            onClick={() => setCancelTarget(invitation)}
+                            className="text-muted-foreground hover:text-destructive"
+                            title="Cancelar convite"
+                            aria-label={`Cancelar convite para ${invitation.email}`}
+                          >
+                            <Ban className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
+                      {invitationError?.id === invitation.id && (
+                        <p role="alert" className="mt-1 text-xs text-destructive">
+                          {invitationError.message}
+                        </p>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Card>
+        )}
+      </section>
+
       <InviteMemberDialog
         open={showInvite}
         onClose={() => setShowInvite(false)}
         onSubmit={handleInvite}
         isPending={inviteMember.isPending}
         error={inviteMember.error}
+      />
+
+      <ConfirmDialog
+        open={!!cancelTarget}
+        title="Cancelar convite"
+        description={`Cancelar o convite para ${cancelTarget?.email ?? 'este e-mail'}? O link enviado deixa de valer.`}
+        confirmLabel="Cancelar convite"
+        onConfirm={handleConfirmCancel}
+        onCancel={() => setCancelTarget(null)}
       />
 
       <ConfirmDialog

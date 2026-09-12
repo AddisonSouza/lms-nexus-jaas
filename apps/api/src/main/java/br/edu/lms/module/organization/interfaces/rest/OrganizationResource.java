@@ -3,9 +3,11 @@ package br.edu.lms.module.organization.interfaces.rest;
 import br.edu.lms.module.organization.application.dto.CreateOrganizationCommand;
 import br.edu.lms.module.organization.application.dto.InviteMemberCommand;
 import br.edu.lms.module.organization.application.dto.OrganizationResponse;
+import br.edu.lms.module.organization.domain.port.in.CancelInvitationUseCase;
 import br.edu.lms.module.organization.domain.port.in.ChangeMemberRoleUseCase;
 import br.edu.lms.module.organization.domain.port.in.CreateOrganizationUseCase;
 import br.edu.lms.module.organization.domain.port.in.InviteMemberUseCase;
+import br.edu.lms.module.organization.domain.port.in.ListOrganizationInvitationsUseCase;
 import br.edu.lms.module.organization.domain.port.in.ListOrganizationMembersUseCase;
 import br.edu.lms.module.organization.domain.port.in.ListUserOrganizationsUseCase;
 import br.edu.lms.module.organization.domain.port.in.RemoveMemberUseCase;
@@ -37,6 +39,8 @@ public class OrganizationResource {
     private final InviteMemberUseCase inviteMemberUseCase;
     private final ListUserOrganizationsUseCase listUserOrganizationsUseCase;
     private final ListOrganizationMembersUseCase listOrganizationMembersUseCase;
+    private final ListOrganizationInvitationsUseCase listOrganizationInvitationsUseCase;
+    private final CancelInvitationUseCase cancelInvitationUseCase;
     private final ChangeMemberRoleUseCase changeMemberRoleUseCase;
     private final JsonWebToken jwt;
 
@@ -84,6 +88,36 @@ public class OrganizationResource {
                 .invitedBy(jwt.getSubject())
                 .build());
         return Response.status(Response.Status.CREATED).build();
+    }
+
+    @GET
+    @Path("/{id}/invitations")
+    @RolesAllowed("ADMIN_ORG")
+    @Operation(summary = "Listar convites da organização")
+    @APIResponse(responseCode = "200", description = "Convites em qualquer estado, do mais recente para o mais antigo")
+    @APIResponse(responseCode = "403", description = "Sem permissão")
+    public Response listInvitations(@PathParam("id") String organizationId) {
+        if (!isAdminOf(organizationId)) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
+        return Response.ok(listOrganizationInvitationsUseCase.execute(organizationId)).build();
+    }
+
+    @DELETE
+    @Path("/{id}/invitations/{invitationId}")
+    @RolesAllowed("ADMIN_ORG")
+    @Operation(summary = "Cancelar um convite pendente")
+    @APIResponse(responseCode = "204", description = "Convite cancelado; o link deixa de valer")
+    @APIResponse(responseCode = "403", description = "Sem permissão")
+    @APIResponse(responseCode = "404", description = "Convite não encontrado nesta organização")
+    @APIResponse(responseCode = "409", description = "Convite não está pendente")
+    public Response cancelInvitation(@PathParam("id") String organizationId,
+                                     @PathParam("invitationId") String invitationId) {
+        if (!isAdminOf(organizationId)) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
+        cancelInvitationUseCase.execute(organizationId, invitationId);
+        return Response.noContent().build();
     }
 
     @GET

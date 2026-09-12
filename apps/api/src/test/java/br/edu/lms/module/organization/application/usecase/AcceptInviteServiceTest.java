@@ -3,6 +3,7 @@ package br.edu.lms.module.organization.application.usecase;
 import br.edu.lms.module.organization.application.dto.AcceptInviteCommand;
 import br.edu.lms.module.organization.domain.exception.AlreadyAMemberException;
 import br.edu.lms.module.organization.domain.exception.InvitationAlreadyUsedException;
+import br.edu.lms.module.organization.domain.exception.InvitationCancelledException;
 import br.edu.lms.module.organization.domain.exception.InvitationExpiredException;
 import br.edu.lms.module.organization.domain.exception.InvitationNotForThisUserException;
 import br.edu.lms.module.organization.domain.exception.InvitationNotFoundException;
@@ -86,6 +87,17 @@ class AcceptInviteServiceTest {
 
         assertThatThrownBy(() -> sut.execute(cmd()))
                 .isInstanceOf(InvitationAlreadyUsedException.class);
+
+        verify(memberRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldThrowWhenInvitationWasCancelled() {
+        var cancelled = pendingInvitation().cancel();
+        when(invitationRepository.findByToken("test-token")).thenReturn(Optional.of(cancelled));
+
+        assertThatThrownBy(() -> sut.execute(cmd()))
+                .isInstanceOf(InvitationCancelledException.class);
 
         verify(memberRepository, never()).save(any());
     }

@@ -108,6 +108,23 @@ describe('AcceptInvitePage', () => {
       })
     })
 
+    it('tells the invitee the invitation was cancelled instead of expired (410 INVITATION_CANCELLED)', async () => {
+      vi.mocked(invitationApi.getInvitationInfo).mockResolvedValue(mockInfo)
+      vi.mocked(invitationApi.acceptInvitation).mockRejectedValue({
+        response: { status: 410, data: { error: 'INVITATION_CANCELLED' } },
+      })
+
+      renderPage()
+
+      await waitFor(() => screen.getByRole('button', { name: /aceitar convite/i }))
+      await userEvent.click(screen.getByRole('button', { name: /aceitar convite/i }))
+
+      await waitFor(() => {
+        expect(screen.getByText(/cancelado pelo administrador/i)).toBeTruthy()
+      })
+      expect(screen.queryByText(/expirou/i)).toBeNull()
+    })
+
     it('shows error when invitation not found (404)', async () => {
       vi.mocked(invitationApi.getInvitationInfo).mockRejectedValue({ response: { status: 404 } })
 
