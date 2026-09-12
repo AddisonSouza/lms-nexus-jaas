@@ -49,4 +49,4 @@ ou expirado).
   ele quebra no jsdom (`AbortSignal` incompatível com o `Request` do Node), com ou
   sem a correção. A regressão fica coberta pelos testes do `PublicRoute` (2 de 6
   falham no guard antigo) e o caminho completo, pela validação no navegador.
-- [ ] Validar no navegador: link de convite cancelado, deslogado → login → tela de aceite com a mensagem de cancelado
+- [x] Validar no navegador: link de convite cancelado, deslogado → login → tela de aceite com a mensagem de cancelado
