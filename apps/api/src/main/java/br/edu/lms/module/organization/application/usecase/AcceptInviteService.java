@@ -29,6 +29,9 @@ public class AcceptInviteService implements AcceptInviteUseCase {
         var invitation = invitationRepository.findByToken(command.getToken())
                 .orElseThrow(InvitationNotFoundException::new);
 
+        if (invitation.getStatus() == InvitationStatus.CANCELLED) {
+            throw new InvitationCancelledException();
+        }
         if (!invitation.isPending()) {
             throw new InvitationAlreadyUsedException();
         }

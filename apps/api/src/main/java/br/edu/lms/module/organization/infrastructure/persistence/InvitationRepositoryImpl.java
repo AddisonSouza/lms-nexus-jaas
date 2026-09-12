@@ -1,6 +1,7 @@
 package br.edu.lms.module.organization.infrastructure.persistence;
 
 import br.edu.lms.module.organization.domain.model.Invitation;
+import br.edu.lms.module.organization.domain.model.InvitationId;
 import br.edu.lms.module.organization.domain.port.out.InvitationRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
@@ -66,6 +67,18 @@ public class InvitationRepositoryImpl implements InvitationRepository {
                 .getResultStream()
                 .map(invitationMapper::toDomain)
                 .toList();
+    }
+
+    @Override
+    public Optional<Invitation> findByIdInOrganization(InvitationId id, String organizationId) {
+        return em.createQuery(
+                        "SELECT i FROM InvitationJpaEntity i WHERE i.id = :id AND i.organizationId = :orgId",
+                        InvitationJpaEntity.class)
+                .setParameter("id", id.getValue())
+                .setParameter("orgId", organizationId)
+                .getResultStream()
+                .findFirst()
+                .map(invitationMapper::toDomain);
     }
 
     @Override

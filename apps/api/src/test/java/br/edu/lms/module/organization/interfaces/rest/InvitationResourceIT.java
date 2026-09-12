@@ -230,6 +230,29 @@ class InvitationResourceIT {
                 .body("error", equalTo("INVITATION_ALREADY_USED"));
     }
 
+    @Test
+    @TestSecurity(user = USER_ID, roles = {})
+    @JwtSecurity(claims = {@Claim(key = "sub", value = USER_ID)})
+    void accept_cancelledToken_returns410() throws Exception {
+        var cancelledToken = "cancelled-token-it-001";
+        tx.begin();
+        em.createNativeQuery("""
+                INSERT INTO invitations (id, organization_id, email, role, token, status, invited_by, expires_at, created_at)
+                VALUES (UUID(), ?, 'cancelled@test.com', 'PROFESSOR', ?, 'CANCELLED', ?, DATE_ADD(NOW(6), INTERVAL 7 DAY), NOW(6))
+                """)
+                .setParameter(1, ORG_ID)
+                .setParameter(2, cancelledToken)
+                .setParameter(3, USER_ID)
+                .executeUpdate();
+        tx.commit();
+
+        given()
+                .when().post("/invitations/{token}/accept", cancelledToken)
+                .then()
+                .statusCode(410)
+                .body("error", equalTo("INVITATION_CANCELLED"));
+    }
+
     // O convite vale para o e-mail a que foi endereçado (#138), então quem aceita
     // é o convidado — autenticar como o convidante daria 403.
     @Test
