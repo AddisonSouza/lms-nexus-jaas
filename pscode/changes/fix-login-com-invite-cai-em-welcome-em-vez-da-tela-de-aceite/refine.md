@@ -42,6 +42,6 @@ ou expirado).
 
 ## Subtasks
 
-- [ ] FE: `PublicRoute` leva ao aceite quando há `?invite=` + testes do guard
+- [x] FE: `PublicRoute` leva ao aceite quando há `?invite=` + testes do guard
 - [ ] FE: teste de login com `?invite=` montado com o `PublicRoute` real, chegando ao aceite
 - [ ] Validar no navegador: link de convite cancelado, deslogado → login → tela de aceite com a mensagem de cancelado
