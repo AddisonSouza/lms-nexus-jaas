@@ -143,3 +143,46 @@ A logged-out visitor opening an invitation SHALL be sent to login carrying the t
 #### Scenario: The invitee has no account yet
 - **WHEN** the user follows "Criar conta" from `/login?invite=<token>`
 - **THEN** the registration link carries `?invite=<token>` forward
+
+---
+
+### Requirement: Only one invitation link is valid per email
+Re-inviting an email SHALL cancel its pending, unexpired invitation in the same organization, in the same transaction, before issuing and mailing a new token. Resending is re-inviting.
+
+#### Scenario: The admin resends an invitation
+- **WHEN** `POST /organizations/{id}/invitations` targets an email that already has a pending invitation there, in any letter case
+- **THEN** the previous invitation becomes `CANCELLED` and a new `PENDING` one is created with a different token
+
+---
+
+### Requirement: The admin sees every invitation of the organization
+`GET /organizations/{id}/invitations` SHALL list the organization's invitations in any state, newest first, with email, role, effective status, inviter name, `createdAt` and `expiresAt`. The effective status reports a `PENDING` invitation past its expiry as `EXPIRED`; `EXPIRED` is never stored. The token SHALL NOT be returned.
+
+#### Scenario: Invitations in every state
+- **WHEN** the organization has pending, expired, used and cancelled invitations
+- **THEN** 200 lists them newest first as `PENDING`, `EXPIRED`, `USED`, `CANCELLED`, without a `token` field
+
+#### Scenario: Another organization's admin
+- **WHEN** the JWT `org` claim differs from `{id}`, or the caller is not `ADMIN_ORG`
+- **THEN** 403
+
+---
+
+### Requirement: The admin cancels a pending invitation
+`DELETE /organizations/{id}/invitations/{invitationId}` SHALL cancel a pending, unexpired invitation. Accepting a cancelled invitation SHALL answer `410 INVITATION_CANCELLED`, and the accept screen SHALL say the admin cancelled it rather than that it expired.
+
+#### Scenario: Pending invitation cancelled
+- **WHEN** the admin deletes a pending invitation of their organization
+- **THEN** 204 and the invitation is `CANCELLED`
+
+#### Scenario: Invitation no longer pending
+- **WHEN** the invitation is used, cancelled or expired
+- **THEN** 409 `INVITATION_NOT_PENDING` and nothing changes
+
+#### Scenario: Invitation of another organization
+- **WHEN** the invitation id belongs to a different organization
+- **THEN** 404 `INVITATION_NOT_FOUND`, revealing nothing about it
+
+#### Scenario: The invitee opens a cancelled link
+- **WHEN** an authenticated user accepts a cancelled invitation
+- **THEN** 410 `INVITATION_CANCELLED`, no membership is created, and the page shows "Este convite foi cancelado pelo administrador"
