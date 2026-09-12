@@ -6,6 +6,7 @@ import br.edu.lms.module.organization.application.dto.OrganizationResponse;
 import br.edu.lms.module.organization.domain.port.in.ChangeMemberRoleUseCase;
 import br.edu.lms.module.organization.domain.port.in.CreateOrganizationUseCase;
 import br.edu.lms.module.organization.domain.port.in.InviteMemberUseCase;
+import br.edu.lms.module.organization.domain.port.in.ListOrganizationInvitationsUseCase;
 import br.edu.lms.module.organization.domain.port.in.ListOrganizationMembersUseCase;
 import br.edu.lms.module.organization.domain.port.in.ListUserOrganizationsUseCase;
 import br.edu.lms.module.organization.domain.port.in.RemoveMemberUseCase;
@@ -37,6 +38,7 @@ public class OrganizationResource {
     private final InviteMemberUseCase inviteMemberUseCase;
     private final ListUserOrganizationsUseCase listUserOrganizationsUseCase;
     private final ListOrganizationMembersUseCase listOrganizationMembersUseCase;
+    private final ListOrganizationInvitationsUseCase listOrganizationInvitationsUseCase;
     private final ChangeMemberRoleUseCase changeMemberRoleUseCase;
     private final JsonWebToken jwt;
 
@@ -84,6 +86,19 @@ public class OrganizationResource {
                 .invitedBy(jwt.getSubject())
                 .build());
         return Response.status(Response.Status.CREATED).build();
+    }
+
+    @GET
+    @Path("/{id}/invitations")
+    @RolesAllowed("ADMIN_ORG")
+    @Operation(summary = "Listar convites da organização")
+    @APIResponse(responseCode = "200", description = "Convites em qualquer estado, do mais recente para o mais antigo")
+    @APIResponse(responseCode = "403", description = "Sem permissão")
+    public Response listInvitations(@PathParam("id") String organizationId) {
+        if (!isAdminOf(organizationId)) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
+        return Response.ok(listOrganizationInvitationsUseCase.execute(organizationId)).build();
     }
 
     @GET

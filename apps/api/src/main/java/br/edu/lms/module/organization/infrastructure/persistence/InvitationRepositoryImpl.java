@@ -69,6 +69,18 @@ public class InvitationRepositoryImpl implements InvitationRepository {
     }
 
     @Override
+    public List<Invitation> findByOrganization(String organizationId) {
+        return em.createQuery(
+                        "SELECT i FROM InvitationJpaEntity i " +
+                        "WHERE i.organizationId = :orgId ORDER BY i.createdAt DESC",
+                        InvitationJpaEntity.class)
+                .setParameter("orgId", organizationId)
+                .getResultStream()
+                .map(invitationMapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public List<Invitation> findPendingByOrgAndEmail(String organizationId, String email) {
         if (email == null || email.isBlank()) {
             return List.of();

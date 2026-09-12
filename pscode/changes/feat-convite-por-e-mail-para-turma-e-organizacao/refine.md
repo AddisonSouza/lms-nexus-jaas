@@ -45,7 +45,7 @@ Entrar na turma continua sendo pelo código de 6 caracteres.
 ## Subtasks
 
 - [x] BE: estado `CANCELLED` e reconvite que cancela o pendente anterior + testes
-- [ ] BE: `GET /organizations/{id}/invitations` com estado calculado + testes
+- [x] BE: `GET /organizations/{id}/invitations` com estado calculado + testes
 - [ ] BE: `DELETE /organizations/{id}/invitations/{invitationId}` + aceite de cancelado → 410 + testes
 - [ ] Docs: endpoints e erros novos no `API_CONTRACT.md` (RF-06)
 - [ ] FE: seção de convites na página de membros (lista + estado)

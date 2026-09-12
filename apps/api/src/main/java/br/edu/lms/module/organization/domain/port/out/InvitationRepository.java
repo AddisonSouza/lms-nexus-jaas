@@ -21,4 +21,7 @@ public interface InvitationRepository {
      * Comparação sem diferenciar caixa.
      */
     List<Invitation> findPendingByOrgAndEmail(String organizationId, String email);
+
+    /** Todos os convites da organização, em qualquer estado, do mais recente para o mais antigo. */
+    List<Invitation> findByOrganization(String organizationId);
 }
