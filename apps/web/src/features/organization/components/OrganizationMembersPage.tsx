@@ -1,11 +1,13 @@
 import { useState } from 'react'
-import { Users, Trash2, UserPlus, CheckCircle2 } from 'lucide-react'
+import { Users, Trash2, UserPlus, CheckCircle2, Mail } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 import { useOrganizationMembers } from '../hooks/useOrganizationMembers'
 import { useRemoveMember } from '../hooks/useRemoveMember'
 import { useInviteMember } from '../hooks/useInviteMember'
 import { useChangeMemberRole } from '../hooks/useChangeMemberRole'
+import { useOrganizationInvitations } from '../hooks/useOrganizationInvitations'
 import { roleLabels, assignableRoles, isAssignableRole } from '../roles'
+import { invitationStatusLabels, invitationStatusBadge } from '../invitations'
 import type { OrganizationMember, AssignableRole } from '../api/organization-api'
 import InviteMemberDialog from './InviteMemberDialog'
 import type { InviteMemberFormData } from '../schemas/inviteMemberSchema'
@@ -27,6 +29,8 @@ function OrganizationMembersPage() {
   const removeMember = useRemoveMember(organizationId)
   const inviteMember = useInviteMember(organizationId)
   const changeRole = useChangeMemberRole(organizationId)
+  const invitationsQuery = useOrganizationInvitations(organizationId)
+  const invitations = invitationsQuery.data
 
   const handleRoleChange = (userId: string, role: AssignableRole) => {
     setRoleError(null)
@@ -68,7 +72,7 @@ function OrganizationMembersPage() {
       {invitedEmail && (
         <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
           <CheckCircle2 className="h-4 w-4 text-accent" />
-          Convite enviado para {invitedEmail}. Ele aparece na lista depois de aceitar.
+          Convite enviado para {invitedEmail}.
         </p>
       )}
 
@@ -148,6 +152,58 @@ function OrganizationMembersPage() {
           </Table>
         </Card>
       )}
+
+      <section aria-labelledby="invitations-heading" className="space-y-3">
+        <div className="flex items-center gap-2">
+          <Mail className="h-5 w-5 text-accent" />
+          <h3 id="invitations-heading" className="mb-0">
+            Convites
+          </h3>
+        </div>
+
+        {invitationsQuery.isLoading ? (
+          <p className="text-muted-foreground">Carregando convites...</p>
+        ) : invitationsQuery.isError ? (
+          <ListErrorState
+            subject="os convites"
+            onRetry={() => void invitationsQuery.refetch()}
+            isRetrying={invitationsQuery.isFetching}
+          />
+        ) : invitations?.length === 0 ? (
+          <p className="text-muted-foreground">Nenhum convite enviado.</p>
+        ) : (
+          <Card elevation="sm" className="overflow-hidden p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>E-mail</TableHead>
+                  <TableHead>Papel</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Convidado por</TableHead>
+                  <TableHead>Enviado em</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {invitations?.map((invitation) => (
+                  <TableRow key={invitation.id}>
+                    <TableCell className="font-medium">{invitation.email}</TableCell>
+                    <TableCell className="text-muted-foreground">{roleLabels[invitation.role]}</TableCell>
+                    <TableCell>
+                      <Badge variant={invitationStatusBadge[invitation.status]}>
+                        {invitationStatusLabels[invitation.status]}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{invitation.invitedByName ?? '—'}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {new Date(invitation.createdAt).toLocaleDateString('pt-BR')}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Card>
+        )}
+      </section>
 
       <InviteMemberDialog
         open={showInvite}

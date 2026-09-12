@@ -6,6 +6,7 @@ import { useOrganizationMembers } from './useOrganizationMembers'
 import { useRemoveMember } from './useRemoveMember'
 import { useChangeMemberRole } from './useChangeMemberRole'
 import { useInviteMember } from './useInviteMember'
+import { useOrganizationInvitations } from './useOrganizationInvitations'
 import * as orgApi from '../api/organization-api'
 import { organizationKeys } from '../api/query-keys'
 
@@ -58,6 +59,34 @@ describe('useOrganizationMembers', () => {
   })
 })
 
+describe('useOrganizationInvitations', () => {
+  it('exposes the invitations of the organization', async () => {
+    vi.mocked(orgApi.listInvitations).mockResolvedValue([
+      {
+        id: 'inv-1',
+        email: 'convidado@test.com',
+        role: 'ALUNO',
+        status: 'PENDING',
+        invitedByName: 'Ana Silva',
+        createdAt: '2026-09-10T10:00:00Z',
+        expiresAt: '2026-09-17T10:00:00Z',
+      },
+    ])
+
+    const { result } = renderHook(() => useOrganizationInvitations('org-1'), { wrapper })
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(orgApi.listInvitations).toHaveBeenCalledWith('org-1')
+    expect(result.current.data?.[0].status).toBe('PENDING')
+  })
+
+  it('does not fetch without an organization', () => {
+    renderHook(() => useOrganizationInvitations(''), { wrapper })
+
+    expect(orgApi.listInvitations).not.toHaveBeenCalled()
+  })
+})
+
 describe('member mutations', () => {
   it('invites a member and refreshes the list', async () => {
     vi.mocked(orgApi.inviteMember).mockResolvedValue(undefined)
@@ -69,6 +98,8 @@ describe('member mutations', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(orgApi.inviteMember).toHaveBeenCalledWith('org-1', { email: 'novo@test.com', role: 'ALUNO' })
     expect(invalidate).toHaveBeenCalledWith({ queryKey: organizationKeys.members('org-1') })
+    // O convite novo aparece na lista na hora — e, num reenvio, o anterior já como cancelado.
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: organizationKeys.invitations('org-1') })
   })
 
   it('changes a role and refreshes the list', async () => {

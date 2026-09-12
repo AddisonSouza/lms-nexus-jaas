@@ -8,6 +8,8 @@ export function useInviteMember(organizationId: string) {
     mutationFn: (data: InviteMemberData) => inviteMember(organizationId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: organizationKeys.members(organizationId) })
+      // O convite novo entra na lista na hora; num reenvio, o anterior já aparece cancelado.
+      queryClient.invalidateQueries({ queryKey: organizationKeys.invitations(organizationId) })
     },
   })
 }

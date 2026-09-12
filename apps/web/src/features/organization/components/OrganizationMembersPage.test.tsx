@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -41,9 +41,66 @@ const teacher = {
   owner: false,
 }
 
+const pendingInvite = {
+  id: 'inv-1',
+  email: 'convidado@test.com',
+  role: 'ALUNO' as const,
+  status: 'PENDING' as const,
+  invitedByName: 'Zelia Owner',
+  createdAt: '2026-09-10T10:00:00Z',
+  expiresAt: '2026-09-17T10:00:00Z',
+}
+
 beforeEach(() => {
   vi.clearAllMocks()
   vi.mocked(orgApi.listMembers).mockResolvedValue([teacher, owner])
+  vi.mocked(orgApi.listInvitations).mockResolvedValue([])
+})
+
+function invitationsSection() {
+  return screen.getByRole('region', { name: 'Convites' })
+}
+
+describe('OrganizationMembersPage — invitations', () => {
+  it('lists every invitation with a readable status and who sent it', async () => {
+    vi.mocked(orgApi.listInvitations).mockResolvedValue([
+      pendingInvite,
+      { ...pendingInvite, id: 'inv-2', email: 'aceitou@test.com', status: 'USED' },
+      { ...pendingInvite, id: 'inv-3', email: 'venceu@test.com', status: 'EXPIRED', invitedByName: null },
+      { ...pendingInvite, id: 'inv-4', email: 'desistiu@test.com', status: 'CANCELLED' },
+    ])
+    renderPage()
+
+    expect(await screen.findByText('convidado@test.com')).toBeTruthy()
+    const section = within(invitationsSection())
+    expect(section.getByText('Pendente')).toBeTruthy()
+    expect(section.getByText('Aceito')).toBeTruthy()
+    expect(section.getByText('Expirado')).toBeTruthy()
+    expect(section.getByText('Cancelado')).toBeTruthy()
+    expect(section.getAllByText('Aluno')).toHaveLength(4)
+    expect(section.getAllByText('Zelia Owner')).toHaveLength(3)
+    expect(section.getByText('—')).toBeTruthy()
+  })
+
+  it('fetches the invitations of the organization in the route', async () => {
+    renderPage()
+
+    await waitFor(() => expect(orgApi.listInvitations).toHaveBeenCalledWith('org-1'))
+  })
+
+  it('tells the admin when no invitation was sent', async () => {
+    renderPage()
+
+    expect(await screen.findByText('Nenhum convite enviado.')).toBeTruthy()
+  })
+
+  it('shows a retryable error for the invitations without hiding the members', async () => {
+    vi.mocked(orgApi.listInvitations).mockRejectedValue(new Error('boom'))
+    renderPage()
+
+    expect(await screen.findByText(/Não foi possível carregar os convites/)).toBeTruthy()
+    expect(screen.getByText('Ana Silva')).toBeTruthy()
+  })
 })
 
 describe('OrganizationMembersPage', () => {
