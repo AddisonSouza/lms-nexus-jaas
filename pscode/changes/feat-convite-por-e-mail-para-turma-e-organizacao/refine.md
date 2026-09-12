@@ -50,4 +50,4 @@ Entrar na turma continua sendo pelo código de 6 caracteres.
 - [x] Docs: endpoints e erros novos no `API_CONTRACT.md` (RF-06)
 - [x] FE: seção de convites na página de membros (lista + estado)
 - [x] FE: ações reenviar e cancelar + mensagem de convite cancelado no aceite
-- [ ] Validar o golden path na aplicação (convidar → reenviar → link antigo recusado → cancelar)
+- [x] Validar o golden path na aplicação (convidar → reenviar → link antigo recusado → cancelar)
