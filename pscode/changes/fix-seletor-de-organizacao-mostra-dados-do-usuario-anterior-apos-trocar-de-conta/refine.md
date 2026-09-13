@@ -37,5 +37,5 @@ guardados da sessão, para a nova conta começar do zero.
 
 ## Subtasks
 
-- [ ] FE: `useLogout` limpa o cache do React Query ao sair (também se o servidor falhar) + testes
+- [x] FE: `useLogout` limpa o cache do React Query ao sair (também se o servidor falhar) + testes
 - [ ] Validar no navegador: conta A sai → conta B entra → seletor e turmas mostram só dados de B

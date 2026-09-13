@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import MinimalHeader from './MinimalHeader'
 
 let mockAuth = { isAuthenticated: false, userId: null as string | null, clearToken: vi.fn() }
@@ -18,10 +19,13 @@ beforeEach(() => {
 })
 
 function renderHeader() {
+  // O Sair usa o useLogout, que esvazia o cache do React Query (#217).
   return render(
-    <MemoryRouter>
-      <MinimalHeader />
-    </MemoryRouter>,
+    <QueryClientProvider client={new QueryClient()}>
+      <MemoryRouter>
+        <MinimalHeader />
+      </MemoryRouter>
+    </QueryClientProvider>,
   )
 }
 
