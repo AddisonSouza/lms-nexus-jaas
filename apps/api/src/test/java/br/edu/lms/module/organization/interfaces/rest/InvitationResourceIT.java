@@ -1,5 +1,6 @@
 package br.edu.lms.module.organization.interfaces.rest;
 
+import io.quarkus.mailer.MockMailbox;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import io.quarkus.test.security.jwt.Claim;
@@ -26,9 +27,11 @@ class InvitationResourceIT {
 
     @Inject EntityManager em;
     @Inject UserTransaction tx;
+    @Inject MockMailbox mailbox;
 
     @BeforeEach
     void setUp() throws Exception {
+        mailbox.clear();
         tx.begin();
         em.createNativeQuery("INSERT IGNORE INTO users (id, full_name, email, password_hash, status) VALUES (?,?,?,?,?)")
                 .setParameter(1, USER_ID)
@@ -162,6 +165,40 @@ class InvitationResourceIT {
         tx.commit();
 
         org.assertj.core.api.Assertions.assertThat(statuses).containsExactly("CANCELLED", "PENDING");
+    }
+
+    // O convite sai do layout orgânico compartilhado (templates/mail), com o
+    // mesmo assunto, link e prazo de antes (#73).
+    @Test
+    @TestSecurity(user = USER_ID, roles = {"ADMIN_ORG"})
+    @JwtSecurity(claims = {@Claim(key = "sub", value = USER_ID), @Claim(key = "org", value = ORG_ID)})
+    void invite_sendsTheOrganicTemplateWithTheAcceptLink() throws Exception {
+        given()
+                .contentType(ContentType.JSON)
+                .body("""
+                        {"email":"mail-invited@test.com","role":"PROFESSOR"}
+                        """)
+                .when().post("/organizations/{id}/invitations", ORG_ID)
+                .then().statusCode(201);
+
+        tx.begin();
+        var token = (String) em.createNativeQuery(
+                        "SELECT token FROM invitations WHERE organization_id = ? AND email = ?")
+                .setParameter(1, ORG_ID)
+                .setParameter(2, "mail-invited@test.com")
+                .getSingleResult();
+        tx.commit();
+
+        var mails = mailbox.getMailsSentTo("mail-invited@test.com");
+        org.assertj.core.api.Assertions.assertThat(mails).hasSize(1);
+        org.assertj.core.api.Assertions.assertThat(mails.get(0).getSubject())
+                .isEqualTo("Convite para organização — LMS Nexus");
+        org.assertj.core.api.Assertions.assertThat(mails.get(0).getHtml())
+                .contains("href=\"http://localhost:5173/invitations/" + token + "/accept\"")
+                .contains("Aceitar convite")
+                .contains("O link expira em 7 dias")
+                .contains("Nexus")
+                .contains("background-color:#c67139");
     }
 
     // --- POST /invitations/{token}/accept ---
