@@ -46,6 +46,6 @@ link sem estar logado.
 
 ## Subtasks
 
-- [ ] FE: `authStore` ganha `signOut()`/`signedOutByUser` e o `useLogout` passa a usá-lo + testes
+- [x] FE: `authStore` ganha `signOut()`/`signedOutByUser` e o `useLogout` passa a usá-lo + testes
 - [ ] FE: `AcceptInvitePage` não leva o convite ao login depois de um Sair explícito + testes
 - [ ] Validar no navegador: Sair na tela de aceite → `/login` limpo → outra conta entra no app, não no convite
