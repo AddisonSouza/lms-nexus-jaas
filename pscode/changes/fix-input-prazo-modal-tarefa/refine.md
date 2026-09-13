@@ -43,4 +43,4 @@ data. O que é enviado para a API não muda.
 - [x] Criar `components/ui/datetime-field.tsx` (data + hora → ISO local, sugestão de 23:59)
 - [x] Cobrir o componente com teste unitário
 - [x] Usar o componente no campo Prazo do `TaskFormDialog` via `Controller`
-- [ ] Validar no app: criar tarefa com prazo, sem segundos, e conferir o valor salvo
+- [x] Validar no app: criar tarefa com prazo, sem segundos, e conferir o valor salvo
