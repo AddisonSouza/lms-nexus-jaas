@@ -33,15 +33,19 @@ function AcceptInvitePage() {
   // silent-refresh por conta própria: sem isso, quem clica no link do e-mail já
   // logado é mandado para o cadastro antes de a sessão ser restaurada.
   const isBootstrapping = useAuthStore((s) => s.isBootstrapping)
+  // Quem clicou em Sair aqui escolheu ir embora: o convite não vai junto para o
+  // login. Sem isso, este efeito vencia o navigate('/login') do useLogout, e a
+  // próxima conta a entrar caía no convite de outra pessoa (#210).
+  const signedOutByUser = useAuthStore((s) => s.signedOutByUser)
 
   useEffect(() => {
-    if (!isBootstrapping && !isAuthenticated) {
+    if (!isBootstrapping && !isAuthenticated && !signedOutByUser) {
       // Login, e não cadastro: o convidado costuma já ter conta, e quem não tem
       // chega ao cadastro pelo link da própria tela de login, que leva o convite
       // adiante.
       navigate(`/login?invite=${encodeURIComponent(token)}`, { replace: true })
     }
-  }, [isBootstrapping, isAuthenticated, token, navigate])
+  }, [isBootstrapping, isAuthenticated, signedOutByUser, token, navigate])
 
   const { data: invitation, isPending: isLoadingInfo, isError } = useQuery({
     queryKey: ['invitation', token],
