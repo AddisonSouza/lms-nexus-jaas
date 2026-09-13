@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useLogout } from './useLogout'
 
 const logoutUser = vi.fn()
@@ -26,14 +27,21 @@ function LogoutButton() {
   return <button onClick={logout}>Sair</button>
 }
 
+let queryClient: QueryClient
+
 function renderHook() {
+  queryClient = new QueryClient()
+  // Dados da conta que está saindo, como a lista do seletor de organização.
+  queryClient.setQueryData(['organizations', 'list'], [{ id: 'org-a', name: 'Escola A' }])
   return render(
-    <MemoryRouter initialEntries={['/welcome']}>
-      <Routes>
-        <Route path="/welcome" element={<LogoutButton />} />
-        <Route path="/login" element={<div>login page</div>} />
-      </Routes>
-    </MemoryRouter>,
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={['/welcome']}>
+        <Routes>
+          <Route path="/welcome" element={<LogoutButton />} />
+          <Route path="/login" element={<div>login page</div>} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
   )
 }
 
@@ -52,6 +60,18 @@ describe('useLogout', () => {
     expect(clearToken).not.toHaveBeenCalled()
   })
 
+  // As chaves de query não dependem do usuário: sem limpar, a próxima conta via
+  // as organizações desta no seletor (#217).
+  it('clears the cached data of the account that signed out', async () => {
+    const user = userEvent.setup()
+    renderHook()
+
+    await user.click(screen.getByRole('button', { name: 'Sair' }))
+
+    await waitFor(() => expect(screen.getByText('login page')).toBeTruthy())
+    expect(queryClient.getQueryCache().getAll()).toHaveLength(0)
+  })
+
   it('still clears the session locally when the server call fails', async () => {
     logoutUser.mockRejectedValue(new Error('network down'))
     const user = userEvent.setup()
@@ -61,5 +81,6 @@ describe('useLogout', () => {
 
     await waitFor(() => expect(screen.getByText('login page')).toBeTruthy())
     expect(signOut).toHaveBeenCalledTimes(1)
+    expect(queryClient.getQueryCache().getAll()).toHaveLength(0)
   })
 })

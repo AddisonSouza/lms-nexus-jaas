@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { logoutUser } from '../api/auth-api'
 import { useAuthStore } from '@store/authStore'
@@ -9,9 +10,14 @@ import { useAuthStore } from '@store/authStore'
  *
  * Usa `signOut()`, e não `clearToken()`, para as telas saberem que a pessoa
  * escolheu sair: a de aceite de convite não deve levar o convite ao login (#210).
+ *
+ * Também esvazia o cache do React Query: as chaves não dependem do usuário, e a
+ * próxima conta a entrar leria os dados desta — como as organizações no seletor
+ * (#217).
  */
 export function useLogout() {
   const signOut = useAuthStore((s) => s.signOut)
+  const queryClient = useQueryClient()
   const navigate = useNavigate()
 
   return async () => {
@@ -22,6 +28,7 @@ export function useLogout() {
       // não virar uma rejeição não tratada no handler do clique.
     } finally {
       signOut()
+      queryClient.clear()
       navigate('/login', { replace: true })
     }
   }

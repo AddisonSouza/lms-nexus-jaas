@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import SetupShell from './SetupShell'
 
 const logoutUser = vi.fn()
@@ -30,15 +31,18 @@ beforeEach(() => {
 })
 
 function renderShell() {
+  // O Sair do cabeçalho esvazia o cache do React Query (#217).
   return render(
-    <MemoryRouter initialEntries={['/welcome']}>
-      <Routes>
-        <Route element={<SetupShell />}>
-          <Route path="/welcome" element={<div>welcome content</div>} />
-        </Route>
-        <Route path="/login" element={<div>login page</div>} />
-      </Routes>
-    </MemoryRouter>,
+    <QueryClientProvider client={new QueryClient()}>
+      <MemoryRouter initialEntries={['/welcome']}>
+        <Routes>
+          <Route element={<SetupShell />}>
+            <Route path="/welcome" element={<div>welcome content</div>} />
+          </Route>
+          <Route path="/login" element={<div>login page</div>} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
   )
 }
 
