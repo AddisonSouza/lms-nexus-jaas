@@ -57,4 +57,8 @@ O sistema SHALL exibir no `Header` o nome ou email do usuário autenticado e um 
 
 #### Scenario: Clique em logout
 - **WHEN** usuário clica em "Sair" no Header
-- **THEN** sistema chama `POST /auth/logout`, limpa o `authStore` e redireciona para `/login`
+- **THEN** sistema chama `POST /auth/logout`, limpa o `authStore` e o cache do React Query e redireciona para `/login`
+
+#### Scenario: Outra conta entra depois do Sair
+- **WHEN** usuário sai e outra conta entra sem recarregar a página
+- **THEN** o seletor de organização e as demais telas mostram só os dados da nova conta, nunca os da anterior
