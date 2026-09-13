@@ -9,6 +9,10 @@ An authenticated user with role ALUNO SHALL be able to join a classroom by submi
 - **WHEN** an ALUNO submits a valid invite code for a classroom they already belong to
 - **THEN** the system returns 200 with the classroom data without creating a duplicate member record
 
+#### Scenario: Removed member joins again
+- **WHEN** a user who was removed from the classroom (membership with `deleted_at`) submits its invite code
+- **THEN** the system reactivates that membership — `deleted_at` cleared, `role=ALUNO`, a new `joined_at` — and returns 201, without creating another record (`uq_classroom_member` ignores `deleted_at`)
+
 #### Scenario: Invalid invite code
 - **WHEN** a user submits a code that does not match any classroom
 - **THEN** the system returns 404 with a clear error message
