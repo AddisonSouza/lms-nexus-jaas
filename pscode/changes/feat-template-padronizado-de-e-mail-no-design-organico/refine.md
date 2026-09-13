@@ -45,4 +45,4 @@ marca e um botão claro de ação — sem mudar quem recebe, o assunto nem os li
 
 - [x] BE: layout `mail/layout.html` + template do convite; `InvitationMailService` renderiza pelo Qute + IT com `MockMailbox`
 - [x] BE: templates de confirmação e redefinição; `QuarkusMailAdapter` pelo Qute e link de confirmação via `lms.app.base-url` + ITs com `MockMailbox`
-- [ ] Validar no Mailpit: disparar os três e-mails e conferir visual, links e prazos
+- [x] Validar no Mailpit: disparar os três e-mails e conferir visual, links e prazos
