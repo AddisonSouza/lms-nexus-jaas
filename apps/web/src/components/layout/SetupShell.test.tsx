@@ -6,11 +6,13 @@ import SetupShell from './SetupShell'
 
 const logoutUser = vi.fn()
 const clearToken = vi.fn()
+const signOut = vi.fn()
 
 let mockAuth = {
   isAuthenticated: true,
   userId: 'ea1bfa5b-1111-2222-3333-444455556666',
   clearToken,
+  signOut,
 }
 
 vi.mock('@features/auth/api/auth-api', () => ({
@@ -24,7 +26,7 @@ vi.mock('@store/authStore', () => ({
 beforeEach(() => {
   vi.clearAllMocks()
   logoutUser.mockResolvedValue(undefined)
-  mockAuth = { isAuthenticated: true, userId: 'ea1bfa5b-1111-2222-3333-444455556666', clearToken }
+  mockAuth = { isAuthenticated: true, userId: 'ea1bfa5b-1111-2222-3333-444455556666', clearToken, signOut }
 })
 
 function renderShell() {
@@ -55,6 +57,8 @@ describe('SetupShell', () => {
     await user.click(screen.getByTitle('Sair'))
 
     await waitFor(() => expect(screen.getByText('login page')).toBeTruthy())
-    expect(clearToken).toHaveBeenCalledTimes(1)
+    // Sair é uma saída escolhida: signOut, e não clearToken (#210).
+    expect(signOut).toHaveBeenCalledTimes(1)
+    expect(clearToken).not.toHaveBeenCalled()
   })
 })

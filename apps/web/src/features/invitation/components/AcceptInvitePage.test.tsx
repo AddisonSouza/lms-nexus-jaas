@@ -18,17 +18,20 @@ vi.mock('react-router-dom', async (importOriginal) => {
 
 let mockIsAuthenticated = true
 let mockIsBootstrapping = false
+let mockSignedOutByUser = false
 
 vi.mock('@store/authStore', () => ({
   useAuthStore: vi.fn(
     (selector: (s: {
       isAuthenticated: boolean
       isBootstrapping: boolean
+      signedOutByUser: boolean
       setToken: (t: string) => void
     }) => unknown) =>
       selector({
         isAuthenticated: mockIsAuthenticated,
         isBootstrapping: mockIsBootstrapping,
+        signedOutByUser: mockSignedOutByUser,
         setToken: vi.fn(),
       }),
   ),
@@ -62,6 +65,7 @@ beforeEach(() => {
   mockNavigate.mockReset()
   mockIsAuthenticated = true
   mockIsBootstrapping = false
+  mockSignedOutByUser = false
 })
 
 describe('AcceptInvitePage', () => {
@@ -143,6 +147,17 @@ describe('AcceptInvitePage', () => {
       renderPage('tok123')
 
       expect(mockNavigate).toHaveBeenCalledWith('/login?invite=tok123', { replace: true })
+    })
+
+    // Sair aqui levava a /login?invite=, e a próxima conta a entrar caía no
+    // convite de outra pessoa (#210). Quem saiu vai ao login pelo useLogout.
+    it('does not carry the invitation to login after the user signed out', () => {
+      mockIsAuthenticated = false
+      mockSignedOutByUser = true
+
+      renderPage('tok123')
+
+      expect(mockNavigate).not.toHaveBeenCalled()
     })
   })
 
