@@ -73,6 +73,29 @@ class AcceptInviteServiceTest {
     }
 
     @Test
+    void shouldReactivateARemovedMembershipInsteadOfInsertingAnother() {
+        var removed = OrganizationMember.builder()
+                .id("member-old")
+                .organizationId("org-1")
+                .userId("user-1")
+                .role(MemberRole.ALUNO)
+                .build();
+        when(invitationRepository.findByToken("test-token")).thenReturn(Optional.of(pendingInvitation()));
+        when(userDirectory.findEmailById("user-1")).thenReturn(Optional.of("user@test.com"));
+        when(memberRepository.existsActiveByOrgAndUser("org-1", "user-1")).thenReturn(false);
+        when(memberRepository.findRemovedByOrgAndUser("org-1", "user-1")).thenReturn(Optional.of(removed));
+
+        sut.execute(cmd());
+
+        verify(memberRepository).reactivate("member-old", MemberRole.PROFESSOR);
+        verify(memberRepository, never()).save(any());
+
+        var invCaptor = ArgumentCaptor.forClass(Invitation.class);
+        verify(invitationRepository).save(invCaptor.capture());
+        assertThat(invCaptor.getValue().getStatus()).isEqualTo(InvitationStatus.USED);
+    }
+
+    @Test
     void shouldThrowWhenTokenNotFound() {
         when(invitationRepository.findByToken("test-token")).thenReturn(Optional.empty());
 

@@ -16,4 +16,10 @@ public interface OrganizationMemberRepository {
     List<UserOrganization> findUserOrganizations(String userId);
     void updateRole(String memberId, MemberRole role);
     void softDelete(String memberId);
+
+    /** O vínculo removido (soft delete) deste usuário na organização, se houver. */
+    Optional<OrganizationMember> findRemovedByOrgAndUser(String organizationId, String userId);
+
+    /** Traz de volta um vínculo removido: ativo de novo, com o papel dado e ingresso agora. */
+    void reactivate(String memberId, MemberRole role);
 }

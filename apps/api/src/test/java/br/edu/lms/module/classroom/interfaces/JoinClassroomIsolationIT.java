@@ -144,4 +144,29 @@ class JoinClassroomIsolationIT {
         assertThat(second.jsonPath().getString("inviteCode")).isNull();
         assertThat(membershipsInOrg(ORG_ALFA)).isEqualTo(1);
     }
+
+    // Remover é soft delete e uq_classroom_member ignora o deleted_at: voltar pelo
+    // código inseria outra linha e respondia 500 (#204).
+    @Test
+    void join_afterBeingRemoved_rejoinsWithTheSameMembership() throws Exception {
+        var token = login();
+        assertThat(join(token, CODE_ALFA).statusCode()).isEqualTo(201);
+
+        tx.begin();
+        em.createNativeQuery("UPDATE classroom_members SET deleted_at = NOW(6) WHERE user_id = ? AND classroom_id = ?")
+                .setParameter(1, USER_ID).setParameter(2, CLASSROOM_ALFA)
+                .executeUpdate();
+        tx.commit();
+
+        var rejoin = join(token, CODE_ALFA);
+
+        assertThat(rejoin.statusCode()).isEqualTo(201);
+        assertThat(rejoin.jsonPath().getString("inviteCode")).isNull();
+        assertThat(membershipsInOrg(ORG_ALFA)).isEqualTo(1);
+        var active = ((Number) em.createNativeQuery(
+                        "SELECT COUNT(*) FROM classroom_members WHERE user_id = ? AND classroom_id = ? AND deleted_at IS NULL")
+                .setParameter(1, USER_ID).setParameter(2, CLASSROOM_ALFA)
+                .getSingleResult()).longValue();
+        assertThat(active).isEqualTo(1);
+    }
 }

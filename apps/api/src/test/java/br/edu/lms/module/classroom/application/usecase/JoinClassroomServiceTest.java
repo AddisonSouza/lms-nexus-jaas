@@ -94,6 +94,24 @@ class JoinClassroomServiceTest {
     }
 
     @Test
+    void shouldReactivateARemovedMembershipInsteadOfInsertingAnother() {
+        var removed = ClassroomMember.builder()
+                .id("member-old")
+                .classroomId(classroomId).userId(USER_ID).organizationId(ORG_ID)
+                .role(ClassroomMemberRole.ALUNO).build();
+        when(classroomRepository.findByInviteCode(CODE, ORG_ID)).thenReturn(Optional.of(activeClassroom()));
+        when(classroomRepository.findMember(classroomId, USER_ID)).thenReturn(Optional.empty());
+        when(classroomRepository.findRemovedMember(classroomId, USER_ID)).thenReturn(Optional.of(removed));
+
+        var result = sut.execute(cmd());
+
+        assertThat(result.alreadyMember()).isFalse();
+        assertThat(result.classroom().getInviteCode()).isNull();
+        verify(classroomRepository).reactivateMember("member-old", ClassroomMemberRole.ALUNO);
+        verify(classroomRepository, never()).saveMember(any());
+    }
+
+    @Test
     void shouldThrowWhenInviteCodeInvalid() {
         when(classroomRepository.findByInviteCode(CODE, ORG_ID)).thenReturn(Optional.empty());
 

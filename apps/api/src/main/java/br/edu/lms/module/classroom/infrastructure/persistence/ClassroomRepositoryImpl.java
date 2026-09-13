@@ -3,6 +3,7 @@ package br.edu.lms.module.classroom.infrastructure.persistence;
 import br.edu.lms.module.classroom.domain.model.Classroom;
 import br.edu.lms.module.classroom.domain.model.ClassroomId;
 import br.edu.lms.module.classroom.domain.model.ClassroomMember;
+import br.edu.lms.module.classroom.domain.model.ClassroomMemberRole;
 import br.edu.lms.module.classroom.domain.port.out.ClassroomRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
@@ -98,6 +99,33 @@ public class ClassroomRepositoryImpl implements ClassroomRepository {
         var entity = classroomMapper.toMemberEntity(member);
         em.merge(entity);
         return member;
+    }
+
+    @Override
+    public Optional<ClassroomMember> findRemovedMember(ClassroomId classroomId, String userId) {
+        return em.createQuery(
+                        "SELECT m FROM ClassroomMemberJpaEntity m " +
+                        "WHERE m.classroomId = :cid AND m.userId = :uid AND m.deletedAt IS NOT NULL",
+                        ClassroomMemberJpaEntity.class)
+                .setParameter("cid", classroomId.getValue())
+                .setParameter("uid", userId)
+                .getResultStream()
+                .findFirst()
+                .map(classroomMapper::toMemberDomain);
+    }
+
+    @Override
+    @Transactional
+    public void reactivateMember(String memberId, ClassroomMemberRole role) {
+        // UPDATE explícito: joined_at é updatable = false na entidade, e um merge não
+        // gravaria a data da volta.
+        em.createQuery(
+                        "UPDATE ClassroomMemberJpaEntity m " +
+                        "SET m.deletedAt = NULL, m.role = :role, m.joinedAt = :now WHERE m.id = :id")
+                .setParameter("role", role.name())
+                .setParameter("now", LocalDateTime.now())
+                .setParameter("id", memberId)
+                .executeUpdate();
     }
 
     @Override
