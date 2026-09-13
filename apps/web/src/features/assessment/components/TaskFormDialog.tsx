@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from 'lucide-react'
 import { taskSchema, type TaskFormData } from '../schemas/task.schema'
@@ -11,6 +11,7 @@ import {
   DialogFooter,
 } from '@components/ui/dialog'
 import { Input } from '@components/ui/input'
+import { DateTimeField } from '@components/ui/datetime-field'
 import { Textarea } from '@components/ui/textarea'
 import { Button } from '@components/ui/button'
 
@@ -25,7 +26,7 @@ interface Props {
 function TaskFormDialog({ open, subjectId, onClose, onSubmit, isPending }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<TaskFormData>({
+  const { register, handleSubmit, reset, setValue, control, formState: { errors } } = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
     defaultValues: { subjectId, title: '', description: '', deadline: '', maxScore: null, files: [] },
   })
@@ -60,9 +61,23 @@ function TaskFormDialog({ open, subjectId, onClose, onSubmit, isPending }: Props
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
+            <div className="col-span-2 space-y-1">
               <label htmlFor="deadline" className="text-xs text-muted-foreground">Prazo *</label>
-              <Input id="deadline" {...register('deadline')} type="datetime-local" />
+              <Controller
+                name="deadline"
+                control={control}
+                render={({ field }) => (
+                  <DateTimeField
+                    id="deadline"
+                    ref={field.ref}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    dateLabel="Data do prazo"
+                    timeLabel="Hora do prazo"
+                  />
+                )}
+              />
               {errors.deadline && <p className="text-xs text-destructive">{errors.deadline.message}</p>}
             </div>
 

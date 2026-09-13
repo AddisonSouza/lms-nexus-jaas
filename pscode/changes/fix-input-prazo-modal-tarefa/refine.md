@@ -40,7 +40,7 @@ data. O que é enviado para a API não muda.
 - Calendário custom em popover e nova dependência de date picker.
 
 ## Subtasks
-- [ ] Criar `components/ui/datetime-field.tsx` (data + hora → ISO local, sugestão de 23:59)
-- [ ] Cobrir o componente com teste unitário
-- [ ] Usar o componente no campo Prazo do `TaskFormDialog` via `Controller`
+- [x] Criar `components/ui/datetime-field.tsx` (data + hora → ISO local, sugestão de 23:59)
+- [x] Cobrir o componente com teste unitário
+- [x] Usar o componente no campo Prazo do `TaskFormDialog` via `Controller`
 - [ ] Validar no app: criar tarefa com prazo, sem segundos, e conferir o valor salvo
