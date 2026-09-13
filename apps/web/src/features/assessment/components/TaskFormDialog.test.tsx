@@ -37,8 +37,9 @@ describe('TaskFormDialog', () => {
     await userEvent.type(screen.getByPlaceholderText(/lista de exercícios/i), 'Tarefa X')
     await userEvent.type(screen.getByPlaceholderText(/markdown/i), 'Enunciado')
 
-    const deadlineInput = screen.getByLabelText(/prazo/i)
-    await userEvent.type(deadlineInput, '2020-01-01T10:00')
+    await userEvent.type(screen.getByLabelText(/data do prazo/i), '2020-01-01')
+    await userEvent.clear(screen.getByLabelText(/hora do prazo/i))
+    await userEvent.type(screen.getByLabelText(/hora do prazo/i), '10:00')
 
     await userEvent.click(screen.getByRole('button', { name: /criar tarefa/i }))
     await waitFor(() => {

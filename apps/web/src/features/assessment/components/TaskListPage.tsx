@@ -76,7 +76,10 @@ function TaskListPage() {
               <div>
                 <p className="font-semibold">{task.title}</p>
                 <p className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
-                  Prazo: {new Date(task.deadline).toLocaleString('pt-BR')}
+                  Prazo: {new Date(task.deadline).toLocaleString('pt-BR', {
+                    dateStyle: 'short',
+                    timeStyle: 'short',
+                  })}
                   <Badge variant={task.status === 'PUBLISHED' ? 'accent-2' : 'neutral'}>
                     {task.status}
                   </Badge>
