@@ -4,7 +4,10 @@ import br.edu.lms.module.identity.domain.model.Email;
 import br.edu.lms.module.identity.domain.port.out.EmailPort;
 import io.quarkus.mailer.Mail;
 import io.quarkus.mailer.Mailer;
+import io.quarkus.qute.Location;
+import io.quarkus.qute.Template;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -22,13 +25,28 @@ public class QuarkusMailAdapter implements EmailPort {
     @ConfigProperty(name = "lms.auth.password-reset.url", defaultValue = "http://localhost:5173/reset-password")
     String passwordResetBaseUrl;
 
+    @ConfigProperty(name = "lms.app.base-url", defaultValue = "http://localhost:5173")
+    String baseUrl;
+
+    // Layout compartilhado dos e-mails (templates/mail/layout.html).
+    @Inject
+    @Location("mail/confirm-email.html")
+    Template confirmEmailTemplate;
+
+    @Inject
+    @Location("mail/password-reset.html")
+    Template passwordResetTemplate;
+
     @Override
     public void sendConfirmationEmail(Email to, String token) {
-        var confirmationUrl = "http://localhost:5173/confirm-email?token=" + token;
+        var confirmationUrl = baseUrl + "/confirm-email?token=" + token;
         mailer.send(Mail.withHtml(
                 to.getValue(),
                 "Confirme seu e-mail — LMS Nexus",
-                buildConfirmationEmailBody(confirmationUrl, confirmationTtlHours)
+                confirmEmailTemplate
+                        .data("actionUrl", confirmationUrl)
+                        .data("ttlHours", confirmationTtlHours)
+                        .render()
         ));
         log.debug("Confirmation email sent to {}", to.getValue());
     }
@@ -39,34 +57,8 @@ public class QuarkusMailAdapter implements EmailPort {
         mailer.send(Mail.withHtml(
                 to.getValue(),
                 "Redefinição de senha — LMS Nexus",
-                buildPasswordResetEmailBody(resetUrl)
+                passwordResetTemplate.data("actionUrl", resetUrl).render()
         ));
         log.debug("Password reset email sent to {}", to.getValue());
-    }
-
-    private String buildConfirmationEmailBody(String url, int ttlHours) {
-        return """
-                <html>
-                <body>
-                  <h2>Bem-vindo ao LMS Nexus!</h2>
-                  <p>Clique no link abaixo para confirmar seu e-mail. O link expira em %d horas.</p>
-                  <a href="%s">Confirmar e-mail</a>
-                  <p>Se você não criou uma conta, ignore este e-mail.</p>
-                </body>
-                </html>
-                """.formatted(ttlHours, url);
-    }
-
-    private String buildPasswordResetEmailBody(String url) {
-        return """
-                <html>
-                <body>
-                  <h2>Redefinição de senha — LMS Nexus</h2>
-                  <p>Clique no link abaixo para redefinir sua senha. O link expira em 1 hora.</p>
-                  <a href="%s">Redefinir senha</a>
-                  <p>Se você não solicitou a redefinição, ignore este e-mail.</p>
-                </body>
-                </html>
-                """.formatted(url);
     }
 }
