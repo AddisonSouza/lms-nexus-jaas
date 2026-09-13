@@ -13,6 +13,10 @@
 - **WHEN** the same user is added to the same classroom again with the same role
 - **THEN** the system returns HTTP 200 without creating a duplicate entry
 
+#### Scenario: Re-adding a removed member
+- **WHEN** an authorized actor adds a user who was removed from the classroom (membership with `deleted_at`)
+- **THEN** the removed membership is reactivated with the requested role and a new `joined_at`, keeping its id, instead of inserting another entry (`uq_classroom_member` ignores `deleted_at`)
+
 #### Scenario: Add member to archived classroom
 - **WHEN** an authorized actor attempts to add a member to an `ARCHIVED` classroom
 - **THEN** the system returns HTTP 422

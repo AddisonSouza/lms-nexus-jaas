@@ -42,6 +42,10 @@ Usuário autenticado aceita convite via token. O sistema valida token (existênc
 - **WHEN** aceite de token válido mas usuário já é membro ativo da org
 - **THEN** 409 `{"error": "ALREADY_A_MEMBER"}`
 
+#### Scenario: Membro removido volta pelo convite
+- **WHEN** aceite de token válido por um usuário que foi removido da org (vínculo com `deleted_at`)
+- **THEN** 204; o vínculo removido é reativado — `deleted_at` limpo, papel do convite, `joined_at` da volta — sem criar outra linha (`uq_member` ignora `deleted_at`); token marcado `USED`
+
 #### Scenario: Usuário não autenticado
 - **WHEN** `POST /invitations/{token}/accept` sem JWT
 - **THEN** 401; frontend redireciona para `/register?invite={token}`
