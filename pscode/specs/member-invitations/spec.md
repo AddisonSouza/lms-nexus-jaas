@@ -156,6 +156,10 @@ A logged-out visitor opening an invitation SHALL be sent to login carrying the t
 - **WHEN** an authenticated user opens `/login?invite=<token>` or `/register?invite=<token>`
 - **THEN** the app redirects to `/invitations/<token>/accept`; without `?invite=` it redirects to the root
 
+#### Scenario: Signing out on the accept screen
+- **WHEN** an authenticated user on `/invitations/<token>/accept` clicks "Sair"
+- **THEN** the app goes to `/login` without `?invite=`, so the next account to sign in lands in the app, not on that invitation; losing the session any other way still keeps the token
+
 ---
 
 ### Requirement: Only one invitation link is valid per email
