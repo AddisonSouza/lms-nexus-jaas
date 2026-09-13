@@ -47,3 +47,14 @@ O sistema SHALL preservar todo o comportamento, chamadas de API, validações e 
 #### Scenario: Suíte de testes de frontend após o reskin
 - **WHEN** a suíte Vitest do frontend é executada após a aplicação dos novos primitivos e tokens
 - **THEN** todos os testes que validam comportamento (submissão de formulário, navegação, chamadas de API mockadas) continuam passando, com ajustes permitidos apenas em asserções sobre classes/estrutura de DOM que dependiam do markup antigo
+
+### Requirement: E-mails transacionais no layout Organic
+O sistema SHALL renderizar os e-mails transacionais (confirmação de e-mail, redefinição de senha e convite para organização) a partir do layout Qute compartilhado `apps/api/src/main/resources/templates/mail/layout.html`, no tema claro do Organic — marca no topo, cartão, botão pill de ação e rodapé —, escrito como HTML de e-mail (tabelas e CSS inline, sem `<style>` nem fontes web) porque Gmail e Outlook os descartam. Cada e-mail SHALL preencher apenas os blocos `title`, `body`, `actionLabel` e `note` e passar o dado `actionUrl`, sem montar HTML em código Java.
+
+#### Scenario: E-mail enviado com a identidade visual
+- **WHEN** o sistema envia a confirmação de e-mail, a redefinição de senha ou o convite
+- **THEN** o HTML recebido traz a marca "Nexus", o cartão do Organic e o botão de ação apontando para o link do respectivo token
+
+#### Scenario: Cliente de e-mail que não exibe o botão
+- **WHEN** o destinatário abre o e-mail em um cliente que bloqueia ou não renderiza o botão
+- **THEN** o mesmo endereço aparece logo abaixo em texto, como link copiável
