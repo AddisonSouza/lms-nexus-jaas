@@ -5,6 +5,10 @@ No momento do cadastro (`RegisterUserService`), o token UUID gerado SHALL ser sa
 - **WHEN** `RegisterUserService.execute()` completa com sucesso
 - **THEN** `EmailConfirmationTokenRepository.save(token, userId, Duration.ofHours(24))` é chamado antes de `emailPort.sendConfirmationEmail()`
 
+#### Scenario: Origem do link de confirmação
+- **WHEN** o e-mail de confirmação é montado
+- **THEN** a URL do botão é `{lms.app.base-url}/confirm-email?token={token}` (padrão `http://localhost:5173`), sem host fixo no código
+
 #### Scenario: Token expirado após 24h
 - **WHEN** 24 horas se passam após o cadastro
 - **THEN** a chave Redis `ect:{token}` não existe mais (TTL expirado automaticamente)
