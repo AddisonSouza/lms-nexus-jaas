@@ -29,4 +29,4 @@ interno do papel (`ADMIN_ORG`). Passa a mostrar quem entrou e o papel por extens
 
 ## Subtasks
 - [x] Back: descrição de novo membro com nome + papel legível e fallback, com IT cobrindo nome e fallback
-- [ ] Testes: atualizar `GetAdminDashboardServiceTest` e fixture de `ActivityFeed.test.tsx` para o novo texto
+- [x] Testes: atualizar `GetAdminDashboardServiceTest` e fixture de `ActivityFeed.test.tsx` para o novo texto
