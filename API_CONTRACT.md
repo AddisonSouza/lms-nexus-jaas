@@ -30,7 +30,9 @@ Todas as rotas protegidas exigem `Authorization: Bearer <access_token>`.
 | Access Token (JWT RS256) | Memória (`authStore`) | 15 min |
 | Refresh Token (UUID) | `httpOnly` cookie + Redis | 7 dias |
 
-**Claims do JWT:** `sub` (userId) · `org` (organizationId) · `groups` (roles)
+**Claims do JWT:** `sub` (userId) · `name` (nome completo) · `email` · `org` (organizationId) · `groups` (roles)
+
+`name` e `email` são relidos do usuário a cada login, refresh e troca de organização — o front os exibe no header, e uma alteração só aparece no próximo token.
 
 ---
 
