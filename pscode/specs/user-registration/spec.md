@@ -16,9 +16,9 @@ The system SHALL allow any unauthenticated person to create an account by provid
 - **AND** no new user is created
 
 #### Scenario: Weak password
-- **WHEN** user submits a password with fewer than 8 characters
-- **THEN** system returns `422 Unprocessable Entity` with a validation message
-- **AND** no user is created
+- **WHEN** a request to `POST /auth/register` carries a password without at least 8 characters, an uppercase letter, a lowercase letter, a digit and a symbol — even when sent straight to the API, bypassing the form
+- **THEN** system returns `422 Unprocessable Entity` whose message names only the missing criteria (e.g. "A senha precisa de: uma maiúscula, um símbolo") or "Senha deve ter no mínimo 8 caracteres"
+- **AND** no user is created and no confirmation e-mail is sent
 
 #### Scenario: Missing required fields
 - **WHEN** user submits the form with any required field empty (full name, e-mail, or password)

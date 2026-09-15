@@ -19,7 +19,7 @@ O sistema deve permitir que um usuário solicite a redefinição de senha inform
 ### REQ-PWRESET-02 — Confirmar reset de senha
 
 #### Scenario: Token válido, senhas conferem
-- **WHEN** `POST /auth/reset-password` com token válido (não expirado, não usado) e nova senha ≥ 8 chars
+- **WHEN** `POST /auth/reset-password` com token válido (não expirado, não usado) e nova senha segura (mín. 8 caracteres com maiúscula, minúscula, número e símbolo)
 - **THEN** senha atualizada com BCrypt (fator 12), token invalidado, todos os Refresh Tokens do usuário deletados, retorna `204`
 
 #### Scenario: Token expirado
@@ -33,3 +33,7 @@ O sistema deve permitir que um usuário solicite a redefinição de senha inform
 #### Scenario: Token inexistente
 - **WHEN** `POST /auth/reset-password` com token que nunca existiu
 - **THEN** retorna `400 Bad Request`
+
+#### Scenario: Nova senha fraca
+- **WHEN** `POST /auth/reset-password` com nova senha sem algum dos critérios de senha segura
+- **THEN** retorna `422 Unprocessable Entity` listando só os critérios que faltam, validado antes do token

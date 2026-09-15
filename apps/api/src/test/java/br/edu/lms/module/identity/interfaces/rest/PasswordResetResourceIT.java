@@ -98,7 +98,7 @@ class PasswordResetResourceIT {
         given()
                 .contentType(ContentType.JSON)
                 .body("""
-                        {"token":"invalid-token","newPassword":"newpassword123"}
+                        {"token":"invalid-token","newPassword":"NewPassword@123"}
                         """)
                 .when().post("/auth/reset-password")
                 .then()

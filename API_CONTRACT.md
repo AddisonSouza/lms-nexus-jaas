@@ -57,15 +57,18 @@ Todas as rotas protegidas exigem `Authorization: Bearer <access_token>`.
 {
   "fullName": "string (obrigatório, máx 150)",
   "email": "string (obrigatório, formato e-mail)",
-  "password": "string (obrigatório, mín 8 chars)"
+  "password": "string (obrigatório, senha segura)"
 }
 ```
+
+**Senha segura:** mínimo 8 caracteres, com ao menos uma maiúscula, uma
+minúscula, um número e um símbolo. Validada pela API, não só pelo front.
 
 | Código | Descrição |
 |---|---|
 | `201` | Usuário criado com status `PENDING_CONFIRMATION`. E-mail de confirmação enviado. |
 | `409` | E-mail já cadastrado. |
-| `400` | Dados de validação inválidos. |
+| `422` | Dados de validação inválidos: `{ "errors": ["<campo>: <mensagem>"] }`. Senha fraca lista só os critérios que faltam (ex.: `A senha precisa de: uma maiúscula, um símbolo`) ou `Senha deve ter no mínimo 8 caracteres`. |
 
 ---
 
@@ -121,13 +124,14 @@ Sempre retorna `204` (não revela se o e-mail existe). Envia link com token de 1
 **`POST /auth/reset-password`** · Público
 
 ```json
-{ "token": "string", "newPassword": "string (mín 8 chars)" }
+{ "token": "string", "newPassword": "string (obrigatório, senha segura)" }
 ```
 
 | Código | Descrição |
 |---|---|
 | `204` | Senha redefinida. Todos os Refresh Tokens do usuário invalidados. |
 | `400` | Token inválido, expirado ou já utilizado. |
+| `422` | Campos ausentes ou senha fraca (mesma regra do cadastro), no formato `{ "errors": [...] }`. Validado antes do token. |
 
 ---
 
