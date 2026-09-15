@@ -20,6 +20,14 @@ public class MemberMetricsQueryPortImpl implements MemberMetricsQueryPort {
 
     private static final String MEMBER_ENTITY =
             "br.edu.lms.module.organization.infrastructure.persistence.OrganizationMemberJpaEntity";
+    private static final String USER_ENTITY =
+            "br.edu.lms.module.identity.infrastructure.persistence.UserJpaEntity";
+
+    private static final Map<String, String> ROLE_LABELS = Map.of(
+            "ADMIN_ORG", "Administrador",
+            "GESTOR", "Gestor",
+            "PROFESSOR", "Professor",
+            "ALUNO", "Aluno");
 
     private final EntityManager em;
 
@@ -43,7 +51,8 @@ public class MemberMetricsQueryPortImpl implements MemberMetricsQueryPort {
     @Override
     public List<ActivityItem> listActivity(String organizationId, DashboardPeriod period) {
         List<Tuple> rows = em.createQuery(
-                        "SELECT m.id, m.role, m.joinedAt FROM " + MEMBER_ENTITY + " m " +
+                        "SELECT m.id, m.role, m.joinedAt, u.fullName FROM " + MEMBER_ENTITY + " m " +
+                                "LEFT JOIN " + USER_ENTITY + " u ON u.id = m.userId " +
                                 "WHERE m.organizationId = :orgId AND m.deletedAt IS NULL " +
                                 "AND m.joinedAt >= :start AND m.joinedAt < :end",
                         Tuple.class)
@@ -56,8 +65,13 @@ public class MemberMetricsQueryPortImpl implements MemberMetricsQueryPort {
                 .map(row -> new ActivityItem(
                         ActivityType.MEMBER_JOINED,
                         row.get(0, String.class),
-                        "Novo membro (" + row.get(1, String.class) + ") ingressou na organização",
+                        memberJoinedDescription(row.get(3, String.class), row.get(1, String.class)),
                         row.get(2, LocalDateTime.class)))
                 .toList();
+    }
+
+    static String memberJoinedDescription(String fullName, String role) {
+        String who = fullName == null || fullName.isBlank() ? "Novo membro" : fullName;
+        return who + " (" + ROLE_LABELS.getOrDefault(role, role) + ") ingressou na organização";
     }
 }

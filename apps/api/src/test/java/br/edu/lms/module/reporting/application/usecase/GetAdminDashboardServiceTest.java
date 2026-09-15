@@ -63,7 +63,7 @@ class GetAdminDashboardServiceTest {
         when(taskMetricsQueryPort.averageDeliveryRate(ORG_ID, period)).thenReturn(BigDecimal.ZERO);
 
         var oldest = new ActivityItem(ActivityType.CLASSROOM_CREATED, "c-1", "Turma criada", LocalDateTime.of(2026, 1, 5, 10, 0));
-        var newest = new ActivityItem(ActivityType.MEMBER_JOINED, "m-1", "Membro ingressou", LocalDateTime.of(2026, 1, 20, 10, 0));
+        var newest = new ActivityItem(ActivityType.MEMBER_JOINED, "m-1", "Maria Silva (Aluno) ingressou na organização", LocalDateTime.of(2026, 1, 20, 10, 0));
         var middle = new ActivityItem(ActivityType.TASK_CREATED, "t-1", "Tarefa criada", LocalDateTime.of(2026, 1, 10, 10, 0));
 
         when(classroomMetricsQueryPort.listActivity(ORG_ID, period)).thenReturn(List.of(oldest));

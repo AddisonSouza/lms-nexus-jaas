@@ -8,7 +8,7 @@ Autorização de rotas no frontend: ProtectedRoute valida autenticação e papel
 O sistema SHALL bloquear acesso a rotas restritas quando o papel do usuário autenticado não estiver na lista de papéis permitidos para aquela rota.
 
 #### Scenario: Usuário sem papel autorizado tenta acessar rota restrita
-- **WHEN** usuário com `role === 'ALUNO'` tenta acessar `/assessment/tasks` (restrita a `['PROFESSOR']`)
+- **WHEN** usuário com `role === 'ALUNO'` tenta acessar `/assessment/tasks` (restrita a `['PROFESSOR', 'ADMIN_ORG', 'GESTOR']`)
 - **THEN** sistema redireciona para `/` sem exibir a página
 
 #### Scenario: Usuário com papel autorizado acessa rota restrita
@@ -26,7 +26,7 @@ O sistema SHALL aplicar as seguintes restrições de papel por rota:
 
 | Rota | Papéis permitidos |
 |---|---|
-| `/assessment/tasks` | `PROFESSOR` |
+| `/assessment/tasks` | `PROFESSOR`, `GESTOR`, `ADMIN_ORG` (quem pode lecionar — RN-09) |
 | `/assessment/student-tasks` | `ALUNO` |
 | `/curriculum` | `ADMIN_ORG`, `GESTOR`, `PROFESSOR`, `ALUNO` |
 | `/organizations/new` | qualquer autenticado |
@@ -35,6 +35,10 @@ O sistema SHALL aplicar as seguintes restrições de papel por rota:
 #### Scenario: ALUNO acessa rota de student-tasks
 - **WHEN** usuário com `role === 'ALUNO'` acessa `/assessment/student-tasks`
 - **THEN** sistema exibe a página
+
+#### Scenario: GESTOR que leciona acessa tarefas pelo menu
+- **WHEN** usuário com `role === 'GESTOR'` abre o menu lateral
+- **THEN** sistema exibe o link "Tarefas" e permite acessar `/assessment/tasks`
 
 #### Scenario: PROFESSOR acessa rota de student-tasks
 - **WHEN** usuário com `role === 'PROFESSOR'` tenta acessar `/assessment/student-tasks`

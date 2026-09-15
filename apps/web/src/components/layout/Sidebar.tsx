@@ -4,6 +4,7 @@ import { useAuthStore } from '@store/authStore'
 import { CardKicker } from '@components/ui/card'
 import OrganizationSwitcher from '@features/organization/components/OrganizationSwitcher'
 import { cn } from '@features/lib/utils'
+import { canTeach } from '@lib/roles'
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   cn(
@@ -36,14 +37,14 @@ function Sidebar() {
           Turmas
         </NavLink>
 
-        {(role === 'PROFESSOR' || role === 'ADMIN_ORG' || role === 'GESTOR') && (
+        {canTeach(role) && (
           <NavLink to="/curriculum" className={linkClass}>
             <BookOpenCheck className="h-[19px] w-[19px] shrink-0" />
             Disciplinas
           </NavLink>
         )}
 
-        {role === 'PROFESSOR' && (
+        {canTeach(role) && (
           <NavLink to="/assessment/tasks" className={linkClass}>
             <ClipboardList className="h-[19px] w-[19px] shrink-0" />
             Tarefas

@@ -142,6 +142,30 @@ class AnnouncementResourceIT {
     }
 
     @Test
+    @TestSecurity(user = PROFESSOR_ID, roles = {"GESTOR"})
+    @JwtSecurity(claims = {@Claim(key = "sub", value = PROFESSOR_ID), @Claim(key = "org", value = ORG_ID)})
+    void create_gestorTeachingInClassroom_returns201() {
+        given()
+                .contentType(ContentType.MULTIPART)
+                .multiPart("content", "Aviso do coordenador")
+                .when().post("/classrooms/{id}/announcements", CLASSROOM_ID)
+                .then()
+                .statusCode(201)
+                .body("authorId", equalTo(PROFESSOR_ID));
+    }
+
+    @Test
+    @TestSecurity(user = OUTSIDER_ID, roles = {"GESTOR"})
+    @JwtSecurity(claims = {@Claim(key = "sub", value = OUTSIDER_ID), @Claim(key = "org", value = ORG_ID)})
+    void create_gestorNotTeachingInClassroom_returns403() {
+        given()
+                .contentType(ContentType.MULTIPART)
+                .multiPart("content", "Aviso")
+                .when().post("/classrooms/{id}/announcements", CLASSROOM_ID)
+                .then().statusCode(403);
+    }
+
+    @Test
     @TestSecurity(user = PROFESSOR_ID, roles = {"PROFESSOR"})
     @JwtSecurity(claims = {@Claim(key = "sub", value = PROFESSOR_ID), @Claim(key = "org", value = ORG_ID)})
     void create_withoutContent_returns422() {
