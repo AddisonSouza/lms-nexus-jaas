@@ -28,7 +28,7 @@ mostrar o nome da pessoa logada (ou o e-mail, se não houver nome).
 - Layout do menu de usuário, edição de perfil, avatar/foto.
 
 ## Subtasks
-- [ ] API: emitir claims `name` e `email` no access token nos três fluxos + testes
+- [x] API: emitir claims `name` e `email` no access token nos três fluxos + testes
 - [ ] Web: `authStore` expõe `userName` e `userEmail` a partir do token + teste
 - [ ] Web: `Header` e `MinimalHeader` exibem nome (fallback e-mail), truncado + teste
 - [ ] Docs: documentar as claims do access token no `API_CONTRACT.md`

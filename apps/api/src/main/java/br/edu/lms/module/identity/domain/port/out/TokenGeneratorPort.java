@@ -1,6 +1,8 @@
 package br.edu.lms.module.identity.domain.port.out;
 
+import br.edu.lms.module.identity.domain.model.User;
+
 public interface TokenGeneratorPort {
-    String generateAccessToken(String userId);
-    String generateAccessToken(String userId, String orgId, String role);
+    String generateAccessToken(User user);
+    String generateAccessToken(User user, String orgId, String role);
 }
