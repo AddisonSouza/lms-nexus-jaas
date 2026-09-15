@@ -20,9 +20,13 @@ interface Props {
   onClose: () => void
   onSubmit: (data: SubmissionFormData) => void
   isPending: boolean
+  /** 'edit' substitui a resposta já enviada; o formulário abre vazio. */
+  mode?: 'create' | 'edit'
 }
 
-function SubmissionFormDialog({ open, taskTitle, deadline, onClose, onSubmit, isPending }: Props) {
+function SubmissionFormDialog({ open, taskTitle, deadline, onClose, onSubmit, isPending, mode = 'create' }: Props) {
+  const isEdit = mode === 'edit'
+  const actionLabel = isEdit ? 'Salvar Resposta' : 'Enviar Resposta'
   const fileInputRef = useRef<HTMLInputElement>(null)
   const isPastDeadline = new Date() > new Date(deadline)
 
@@ -42,7 +46,7 @@ function SubmissionFormDialog({ open, taskTitle, deadline, onClose, onSubmit, is
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Enviar Resposta</DialogTitle>
+          <DialogTitle>{isEdit ? 'Editar Resposta' : 'Enviar Resposta'}</DialogTitle>
         </DialogHeader>
 
         <p className="text-sm font-semibold">{taskTitle}</p>
@@ -59,6 +63,12 @@ function SubmissionFormDialog({ open, taskTitle, deadline, onClose, onSubmit, is
           </p>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {isEdit && (
+              <p className="rounded-[var(--radius-md)] bg-accent-100 p-3 text-sm text-accent-800">
+                O que você enviar aqui substitui a resposta anterior, inclusive os
+                arquivos já anexados.
+              </p>
+            )}
             <div className="space-y-1">
               <label className="text-xs text-muted-foreground">Resposta em texto</label>
               <Textarea {...register('textResponse')} rows={5} placeholder="Digite sua resposta aqui..." />
@@ -87,7 +97,7 @@ function SubmissionFormDialog({ open, taskTitle, deadline, onClose, onSubmit, is
               </Button>
               <Button type="submit" disabled={isPending}>
                 {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-                Enviar Resposta
+                {actionLabel}
               </Button>
             </DialogFooter>
           </form>

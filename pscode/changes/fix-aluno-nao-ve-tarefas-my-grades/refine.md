@@ -35,5 +35,5 @@ carga quando algo falhar e adiciona o botão de editar a resposta antes do prazo
 ## Subtasks
 - [x] Ajustar `taskWithGradeSchema` e `TaskWithGrade` para não exigir `updatedAt`, com teste de parse usando payload real de my-grades
 - [x] `StudentTaskListPage` renderiza `ListErrorState` com retry quando `isError`, com teste
-- [ ] Botão "Editar resposta" (SUBMITTED + prazo aberto) abrindo `SubmissionFormDialog` em modo edição via `useEditSubmission`, com teste
+- [x] Botão "Editar resposta" (SUBMITTED + prazo aberto) abrindo `SubmissionFormDialog` em modo edição via `useEditSubmission`, com teste
 - [ ] Validar no navegador como ALUNO: lista aparece, envio, edição e "Ver Nota"

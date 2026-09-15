@@ -30,6 +30,15 @@ const tarefa: TaskWithGrade = {
   submission: null,
 }
 
+const submissionEnviada = {
+  id: 'sub-id-1',
+  status: 'SUBMITTED' as const,
+  grade: null,
+  feedback: null,
+  submittedAt: '2026-09-10T12:00:00',
+  lateSubmission: false,
+}
+
 beforeEach(() => vi.clearAllMocks())
 
 describe('StudentTaskListPage', () => {
@@ -61,5 +70,58 @@ describe('StudentTaskListPage', () => {
     await userEvent.click(await screen.findByRole('button', { name: /Tentar de novo/ }))
 
     await waitFor(() => expect(screen.getByText('Trabalho de Álgebra')).toBeTruthy())
+  })
+
+  it('offers "Editar resposta" for a SUBMITTED task before the deadline', async () => {
+    vi.mocked(submissionsApi.listStudentGrades).mockResolvedValue([
+      { ...tarefa, submission: { ...submissionEnviada } },
+    ])
+
+    render(<StudentTaskListPage />, { wrapper })
+
+    expect(await screen.findByRole('button', { name: /Editar resposta/ })).toBeTruthy()
+  })
+
+  it('hides "Editar resposta" once the deadline has passed', async () => {
+    vi.mocked(submissionsApi.listStudentGrades).mockResolvedValue([
+      { ...tarefa, deadline: '2020-01-01T23:59:00', submission: { ...submissionEnviada } },
+    ])
+
+    render(<StudentTaskListPage />, { wrapper })
+
+    await screen.findByText('Trabalho de Álgebra')
+    expect(screen.queryByRole('button', { name: /Editar resposta/ })).toBeNull()
+  })
+
+  it('hides "Editar resposta" once the submission is evaluated', async () => {
+    vi.mocked(submissionsApi.listStudentGrades).mockResolvedValue([
+      { ...tarefa, submission: { ...submissionEnviada, status: 'EVALUATED', grade: 9 } },
+    ])
+
+    render(<StudentTaskListPage />, { wrapper })
+
+    await screen.findByText('Trabalho de Álgebra')
+    expect(screen.queryByRole('button', { name: /Editar resposta/ })).toBeNull()
+  })
+
+  it('sends the edited answer through updateSubmission', async () => {
+    vi.mocked(submissionsApi.listStudentGrades).mockResolvedValue([
+      { ...tarefa, submission: { ...submissionEnviada } },
+    ])
+    vi.mocked(submissionsApi.updateSubmission).mockResolvedValue({} as never)
+
+    render(<StudentTaskListPage />, { wrapper })
+
+    await userEvent.click(await screen.findByRole('button', { name: /Editar resposta/ }))
+    await userEvent.type(screen.getByRole('textbox'), 'resposta corrigida')
+    await userEvent.click(screen.getByRole('button', { name: /Salvar Resposta/ }))
+
+    // o TanStack Query passa um segundo argumento à mutationFn; só o payload importa
+    await waitFor(() => expect(submissionsApi.updateSubmission).toHaveBeenCalled())
+    expect(vi.mocked(submissionsApi.updateSubmission).mock.calls[0][0]).toMatchObject({
+      taskId: 'task-1',
+      submissionId: 'sub-id-1',
+      textResponse: 'resposta corrigida',
+    })
   })
 })

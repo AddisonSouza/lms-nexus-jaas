@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Send, Eye, CheckCircle, Clock, AlertCircle } from 'lucide-react'
+import { Send, Eye, CheckCircle, Clock, AlertCircle, Pencil } from 'lucide-react'
 import { useStudentGrades } from '../hooks/useStudentGrades'
-import { useSubmitTask } from '../hooks/useSubmitTask'
+import { useSubmitTask, useEditSubmission } from '../hooks/useSubmitTask'
 import SubmissionFormDialog from './SubmissionFormDialog'
 import GradeFeedbackDrawer from './GradeFeedbackDrawer'
 import type { TaskWithGrade } from '../types'
@@ -41,14 +41,29 @@ function StatusBadge({ task }: { task: TaskWithGrade }) {
 function StudentTaskListPage() {
   const { data: tasks = [], isLoading, isError, isFetching, refetch } = useStudentGrades()
   const [submitting, setSubmitting] = useState<TaskWithGrade | null>(null)
+  const [editing, setEditing] = useState<TaskWithGrade | null>(null)
   const [viewingGrade, setViewingGrade] = useState<TaskWithGrade | null>(null)
   const submitTask = useSubmitTask(submitting?.id ?? '')
+  const editSubmission = useEditSubmission(editing?.id ?? '')
 
   function handleSubmit(data: SubmissionFormData) {
     if (!submitting) return
     submitTask.mutate(
       { taskId: submitting.id, textResponse: data.textResponse, files: data.files },
       { onSuccess: () => setSubmitting(null) }
+    )
+  }
+
+  function handleEdit(data: SubmissionFormData) {
+    if (!editing?.submission) return
+    editSubmission.mutate(
+      {
+        taskId: editing.id,
+        submissionId: editing.submission.id,
+        textResponse: data.textResponse,
+        files: data.files,
+      },
+      { onSuccess: () => setEditing(null) }
     )
   }
 
@@ -73,6 +88,7 @@ function StudentTaskListPage() {
             const isPastDeadline = new Date() > new Date(task.deadline)
             const hasSubmission = task.submission !== null
             const isEvaluated = task.submission?.status === 'EVALUATED'
+            const canEdit = task.submission?.status === 'SUBMITTED' && !isPastDeadline
 
             return (
               <Card key={task.id} elevation="sm">
@@ -104,6 +120,13 @@ function StudentTaskListPage() {
                         </Button>
                       )}
 
+                      {canEdit && (
+                        <Button size="sm" variant="secondary" onClick={() => setEditing(task)}>
+                          <Pencil className="h-3.5 w-3.5" />
+                          Editar resposta
+                        </Button>
+                      )}
+
                       {!hasSubmission && !isPastDeadline && (
                         <Button size="sm" onClick={() => setSubmitting(task)}>
                           <Send className="h-3.5 w-3.5" />
@@ -127,6 +150,18 @@ function StudentTaskListPage() {
           onClose={() => setSubmitting(null)}
           onSubmit={handleSubmit}
           isPending={submitTask.isPending}
+        />
+      )}
+
+      {editing && (
+        <SubmissionFormDialog
+          open={true}
+          mode="edit"
+          taskTitle={editing.title}
+          deadline={editing.deadline}
+          onClose={() => setEditing(null)}
+          onSubmit={handleEdit}
+          isPending={editSubmission.isPending}
         />
       )}
 
