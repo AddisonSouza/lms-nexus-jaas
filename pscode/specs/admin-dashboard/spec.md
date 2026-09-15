@@ -13,6 +13,10 @@ O sistema SHALL retornar, para um período informado (`from`/`to`), as métricas
 - **WHEN** `ADMIN_ORG` chama `GET /organizations/{id}/dashboard` com `from` posterior a `to`
 - **THEN** sistema retorna 400
 
+#### Scenario: Membros por papel com rótulos legíveis
+- **WHEN** o dashboard exibe a contagem de membros por papel (card "Membros" e gráfico "Membros por papel")
+- **THEN** cada papel aparece por extenso — Administrador, Gestor, Professor, Aluno — no texto do card, no eixo e no tooltip do gráfico, nunca o enum cru; a API continua retornando as chaves do enum
+
 ### Requirement: Isolamento por organização (multi-tenant)
 O sistema SHALL filtrar todas as métricas do dashboard exclusivamente pelo `organization_id` extraído do JWT do usuário autenticado, nunca por valor recebido na URL ou no corpo da requisição.
 
@@ -48,6 +52,10 @@ O sistema SHALL gerar um arquivo PDF com as mesmas métricas e o mesmo período 
 #### Scenario: Exportação bem-sucedida
 - **WHEN** `ADMIN_ORG` autenticado chama `GET /organizations/{id}/reports/pdf?from=<data>&to=<data>` para a própria organização
 - **THEN** sistema retorna 200 com `Content-Type: application/pdf` contendo as métricas do período
+
+#### Scenario: PDF com papéis e status de turma legíveis
+- **WHEN** o PDF exportado lista membros por papel e turmas por status
+- **THEN** os papéis aparecem como Administrador, Gestor, Professor e Aluno e os status como Ativa e Arquivada; uma chave sem rótulo conhecido é impressa como veio
 
 #### Scenario: Exportação sem permissão
 - **WHEN** um usuário sem papel `ADMIN_ORG`, ou `ADMIN_ORG` de outra organização, chama o endpoint de exportação

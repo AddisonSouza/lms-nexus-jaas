@@ -2,6 +2,7 @@ package br.edu.lms.module.reporting.infrastructure.pdf;
 
 import br.edu.lms.module.reporting.application.dto.AdminDashboardResponse;
 import br.edu.lms.module.reporting.application.dto.GestorDashboardResponse;
+import br.edu.lms.module.reporting.infrastructure.ReportingLabels;
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import io.quarkus.qute.Location;
 import io.quarkus.qute.Template;
@@ -22,7 +23,15 @@ public class DashboardPdfRenderer {
     Template gestorDashboardTemplate;
 
     public byte[] render(AdminDashboardResponse dashboard) {
-        return toPdf(dashboardTemplate.data("dashboard", dashboard).render());
+        return toPdf(renderHtml(dashboard));
+    }
+
+    String renderHtml(AdminDashboardResponse dashboard) {
+        return dashboardTemplate
+                .data("dashboard", dashboard)
+                .data("roleLabels", ReportingLabels.ROLES)
+                .data("statusLabels", ReportingLabels.CLASSROOM_STATUSES)
+                .render();
     }
 
     public byte[] renderGestorDashboard(GestorDashboardResponse dashboard) {

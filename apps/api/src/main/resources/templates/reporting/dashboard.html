@@ -19,7 +19,7 @@
   <table>
     <tr><th>Status</th><th>Total</th></tr>
     {#for entry in dashboard.classroomsByStatus}
-    <tr><td>{entry.key}</td><td>{entry.value}</td></tr>
+    <tr><td>{statusLabels.get(entry.key) ?: entry.key}</td><td>{entry.value}</td></tr>
     {/for}
   </table>
 
@@ -27,7 +27,7 @@
   <table>
     <tr><th>Papel</th><th>Total</th></tr>
     {#for entry in dashboard.membersByRole}
-    <tr><td>{entry.key}</td><td>{entry.value}</td></tr>
+    <tr><td>{roleLabels.get(entry.key) ?: entry.key}</td><td>{entry.value}</td></tr>
     {/for}
   </table>
 
