@@ -56,7 +56,9 @@ const submissionSummarySchema = z.object({
   lateSubmission: z.boolean(),
 })
 
-const taskWithGradeSchema = taskSchema.extend({
+// `TaskWithGradeResponse` não expõe `updatedAt` — sem o omit, o campo herdado de
+// `taskSchema` é obrigatório (nullable não é optional) e o parse derruba a lista.
+const taskWithGradeSchema = taskSchema.omit({ updatedAt: true }).extend({
   submission: submissionSummarySchema.nullable(),
 })
 
