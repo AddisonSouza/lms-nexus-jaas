@@ -1,6 +1,6 @@
 ### Requirement: Assign Teacher to Subject
 
-ADMIN_ORG and GESTOR SHALL be able to assign a teacher (organization member with PROFESSOR role) to a subject. The assignment is at the subject level within the organization (RN-06), recorded in `subject_teachers`.
+ADMIN_ORG and GESTOR SHALL be able to assign a teacher (organization member with PROFESSOR, GESTOR or ADMIN_ORG role — RN-09) to a subject. The assignment is at the subject level within the organization (RN-06), recorded in `subject_teachers`.
 
 #### Scenario: Successful teacher assignment
 
@@ -13,10 +13,16 @@ AND return 201 Created
 WHEN an ADMIN_ORG sends POST /subjects/{id}/teachers with a `memberId` already assigned
 THEN the system SHALL return 200 OK without creating a duplicate record
 
-#### Scenario: Assign non-PROFESSOR member
+#### Scenario: Assign a GESTOR or ADMIN_ORG who also teaches (RN-09)
 
-WHEN an ADMIN_ORG sends POST /subjects/{id}/teachers with a `memberId` whose role is not PROFESSOR
-THEN the system SHALL return 422 Unprocessable Entity with a validation error
+WHEN an ADMIN_ORG sends POST /subjects/{id}/teachers with a `memberId` whose role is GESTOR or ADMIN_ORG
+THEN the system SHALL create a record in `subject_teachers`
+AND return 201 Created
+
+#### Scenario: Assign ALUNO member
+
+WHEN an ADMIN_ORG sends POST /subjects/{id}/teachers with a `memberId` whose role is ALUNO
+THEN the system SHALL return 422 Unprocessable Entity with error `MEMBER_NOT_A_PROFESSOR`
 
 #### Scenario: Assign member from different organization
 

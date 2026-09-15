@@ -49,6 +49,7 @@ Usuário cadastra-se no sistema
          |     ADMIN_ORG  → pode gerenciar tudo na organização
          |     GESTOR     → gerencia turmas específicas
          |     PROFESSOR  → cria tarefas, avalia, posta avisos
+         |                  (ADMIN_ORG e GESTOR também podem lecionar — RN-09)
          |     ALUNO      → consome conteúdo, envia tarefas
          |
          +-- cria Turmas (vinculadas à organização)
@@ -70,6 +71,7 @@ Usuário cadastra-se no sistema
 | **RN-06** | Um Professor pode estar vinculado a múltiplas disciplinas dentro da mesma organização. |
 | **RN-07** | Um Aluno só visualiza turmas, disciplinas e tarefas das organizações/turmas às quais pertence. |
 | **RN-08** | Toda ação de exclusão é soft delete — registros não são removidos fisicamente do banco. |
+| **RN-09** | Hierarquia de ensino `ADMIN_ORG > GESTOR > PROFESSOR`: ADMIN_ORG e GESTOR também podem lecionar (ex.: coordenador de curso). Podem ser vinculados a disciplinas e usar as ações de professor, sempre limitadas pelo vínculo com a disciplina, turma ou tarefa. O papel continua único por membro da organização. |
 
 ### 1.3 Banco de Dados Único — Schema Multi-Tenant Leve
 

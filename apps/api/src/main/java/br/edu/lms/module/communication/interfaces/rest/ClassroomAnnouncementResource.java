@@ -32,7 +32,7 @@ public class ClassroomAnnouncementResource {
 
     @POST
     @Path("/{classroomId}/announcements")
-    @RolesAllowed("PROFESSOR")
+    @RolesAllowed({"PROFESSOR", "GESTOR", "ADMIN_ORG"})
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Operation(summary = "Publicar aviso na turma")
     public Response create(

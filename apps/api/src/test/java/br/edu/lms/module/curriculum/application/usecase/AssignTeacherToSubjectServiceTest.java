@@ -35,7 +35,7 @@ class AssignTeacherToSubjectServiceTest {
         var subjectId = SubjectId.of("sub-1");
         when(subjectRepository.findById(subjectId, "org-1")).thenReturn(Optional.of(stubSubject("sub-1")));
         when(memberQueryPort.existsByIdAndOrganizationId("mem-1", "org-1")).thenReturn(true);
-        when(memberQueryPort.hasProfessorRole("mem-1", "org-1")).thenReturn(true);
+        when(memberQueryPort.canTeach("mem-1", "org-1")).thenReturn(true);
         when(subjectRepository.existsSubjectTeacherLink("sub-1", "mem-1")).thenReturn(false);
 
         boolean created = sut.execute(subjectId, AssignTeacherCommand.builder().memberId("mem-1").organizationId("org-1").build());
@@ -49,7 +49,7 @@ class AssignTeacherToSubjectServiceTest {
         var subjectId = SubjectId.of("sub-1");
         when(subjectRepository.findById(subjectId, "org-1")).thenReturn(Optional.of(stubSubject("sub-1")));
         when(memberQueryPort.existsByIdAndOrganizationId("mem-1", "org-1")).thenReturn(true);
-        when(memberQueryPort.hasProfessorRole("mem-1", "org-1")).thenReturn(true);
+        when(memberQueryPort.canTeach("mem-1", "org-1")).thenReturn(true);
         when(subjectRepository.existsSubjectTeacherLink("sub-1", "mem-1")).thenReturn(true);
 
         boolean created = sut.execute(subjectId, AssignTeacherCommand.builder().memberId("mem-1").organizationId("org-1").build());
@@ -85,7 +85,7 @@ class AssignTeacherToSubjectServiceTest {
         var subjectId = SubjectId.of("sub-1");
         when(subjectRepository.findById(subjectId, "org-1")).thenReturn(Optional.of(stubSubject("sub-1")));
         when(memberQueryPort.existsByIdAndOrganizationId("mem-1", "org-1")).thenReturn(true);
-        when(memberQueryPort.hasProfessorRole("mem-1", "org-1")).thenReturn(false);
+        when(memberQueryPort.canTeach("mem-1", "org-1")).thenReturn(false);
 
         assertThatThrownBy(() -> sut.execute(subjectId,
                 AssignTeacherCommand.builder().memberId("mem-1").organizationId("org-1").build()))
@@ -100,7 +100,7 @@ class AssignTeacherToSubjectServiceTest {
         when(subjectRepository.findById(sub1, "org-1")).thenReturn(Optional.of(stubSubject("sub-1")));
         when(subjectRepository.findById(sub2, "org-1")).thenReturn(Optional.of(stubSubject("sub-2")));
         when(memberQueryPort.existsByIdAndOrganizationId("mem-1", "org-1")).thenReturn(true);
-        when(memberQueryPort.hasProfessorRole("mem-1", "org-1")).thenReturn(true);
+        when(memberQueryPort.canTeach("mem-1", "org-1")).thenReturn(true);
         when(subjectRepository.existsSubjectTeacherLink(anyString(), eq("mem-1"))).thenReturn(false);
 
         sut.execute(sub1, AssignTeacherCommand.builder().memberId("mem-1").organizationId("org-1").build());

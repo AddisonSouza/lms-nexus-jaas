@@ -29,7 +29,7 @@ public class SubmissionResource {
 
     @PATCH
     @Path("/{id}/evaluation")
-    @RolesAllowed("PROFESSOR")
+    @RolesAllowed({"PROFESSOR", "GESTOR", "ADMIN_ORG"})
     @Operation(summary = "Avaliar uma submissão (professor)")
     public SubmissionResponse evaluate(
             @PathParam("id") String submissionId,
