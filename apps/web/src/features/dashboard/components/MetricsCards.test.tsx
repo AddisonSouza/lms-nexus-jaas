@@ -34,7 +34,7 @@ describe('MetricsCards', () => {
     expect(screen.getByText('3 / 1')).toBeTruthy()
     expect(screen.getByText('5 / 3')).toBeTruthy()
     expect(screen.getByText('75%')).toBeTruthy()
-    expect(screen.getByText(/ALUNO: 10/)).toBeTruthy()
+    expect(screen.getByText('Aluno: 10 · Professor: 2')).toBeTruthy()
   })
 
   it('renders zeroed metrics for an empty period without error', () => {

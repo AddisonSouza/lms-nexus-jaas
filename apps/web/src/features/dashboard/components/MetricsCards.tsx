@@ -1,5 +1,6 @@
 import type { AdminDashboardData } from '../types'
 import { Card, CardKicker } from '@components/ui/card'
+import { roleLabel } from '@lib/roles'
 
 interface Props {
   dashboard: AdminDashboardData
@@ -28,7 +29,7 @@ function MetricsCards({ dashboard }: Props) {
         <CardKicker>Membros ({totalMembers})</CardKicker>
         <p className="text-sm">
           {Object.entries(dashboard.membersByRole)
-            .map(([role, count]) => `${role}: ${count}`)
+            .map(([role, count]) => `${roleLabel(role)}: ${count}`)
             .join(' · ') || 'Sem membros no período'}
         </p>
       </Card>

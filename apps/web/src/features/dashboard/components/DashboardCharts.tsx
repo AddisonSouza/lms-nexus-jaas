@@ -1,13 +1,17 @@
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import type { AdminDashboardData } from '../types'
 import { Card, CardKicker } from '@components/ui/card'
+import { roleLabel } from '@lib/roles'
 
 interface Props {
   dashboard: AdminDashboardData
 }
 
 function DashboardCharts({ dashboard }: Props) {
-  const membersData = Object.entries(dashboard.membersByRole).map(([role, count]) => ({ role, count }))
+  const membersData = Object.entries(dashboard.membersByRole).map(([role, count]) => ({
+    label: roleLabel(role),
+    count,
+  }))
   const tasksData = [
     { label: 'Criadas', value: dashboard.tasksCreated },
     { label: 'Avaliadas', value: dashboard.tasksEvaluated },
@@ -20,7 +24,7 @@ function DashboardCharts({ dashboard }: Props) {
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={membersData}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--color-divider)" />
-            <XAxis dataKey="role" fontSize={12} stroke="var(--color-text)" />
+            <XAxis dataKey="label" fontSize={12} stroke="var(--color-text)" />
             <YAxis allowDecimals={false} fontSize={12} stroke="var(--color-text)" />
             <Tooltip />
             <Bar dataKey="count" fill="var(--color-accent)" radius={[4, 4, 0, 0]} />
