@@ -53,7 +53,19 @@ O sistema SHALL exibir links de navegação na `Sidebar` de acordo com o papel (
 ---
 
 ### Requirement: Header exibe nome do usuário e ação de logout
-O sistema SHALL exibir no `Header` o nome ou email do usuário autenticado e um botão de logout.
+O sistema SHALL exibir no `Header` — e no `MinimalHeader`, quando há sessão — o nome do usuário autenticado (`userName` do `authStore`), ou o e-mail (`userEmail`) quando o token não traz nome, e um botão de logout. O identificador interno (UUID) MUST NOT ser exibido. Nomes longos são truncados, com o valor inteiro no `title`.
+
+#### Scenario: Usuário com nome
+- **WHEN** usuário autenticado cujo token traz `name: 'Ana Souza'` visualiza o Header
+- **THEN** sistema exibe "Ana Souza" no canto superior direito, sem nenhum trecho do UUID
+
+#### Scenario: Token sem nome
+- **WHEN** o token traz `email` mas não `name`
+- **THEN** sistema exibe o e-mail no lugar do nome
+
+#### Scenario: Nome longo
+- **WHEN** o nome não cabe na largura reservada
+- **THEN** o texto é truncado com reticências e o nome inteiro aparece no tooltip (`title`)
 
 #### Scenario: Clique em logout
 - **WHEN** usuário clica em "Sair" no Header
