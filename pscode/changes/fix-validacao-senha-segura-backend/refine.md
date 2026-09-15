@@ -29,7 +29,7 @@ senha forte e recusar as fracas.
 - Senhas já cadastradas; `POST /auth/login` (sem validação de força).
 
 ## Subtasks
-- [ ] Criar `@StrongPassword` + `StrongPasswordValidator` com teste unitário
-- [ ] Aplicar `@StrongPassword` em `RegisterRequest` e `ResetPasswordRequest` e ajustar fixtures fracas
+- [x] Criar `@StrongPassword` + `StrongPasswordValidator` com teste unitário
+- [x] Aplicar `@StrongPassword` em `RegisterRequest` e `ResetPasswordRequest` e ajustar fixtures fracas
 - [ ] ITs: senha fraca retorna 422 em `/auth/register` e `/auth/reset-password`
 - [ ] Atualizar `API_CONTRACT.md` com a regra de senha
