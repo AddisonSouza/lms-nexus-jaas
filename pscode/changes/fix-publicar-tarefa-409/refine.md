@@ -38,5 +38,5 @@ publish, o que faz o front descartar a resposta como inválida.
 ## Subtasks
 - [x] Corrigir `TaskRepositoryImpl.save()` para devolver os campos de auditoria
 - [x] Teste de integração: publish devolve `createdAt` preenchido
-- [ ] Mostrar erro inline na lista quando a publicação falhar
+- [x] Mostrar erro inline na lista quando a publicação falhar
 - [ ] Validar no app: publicar tarefa e ver a lista virar `PUBLISHED` sem 409
