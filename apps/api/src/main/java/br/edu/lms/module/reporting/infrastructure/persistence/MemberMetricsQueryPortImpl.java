@@ -4,6 +4,7 @@ import br.edu.lms.module.reporting.domain.model.ActivityItem;
 import br.edu.lms.module.reporting.domain.model.ActivityType;
 import br.edu.lms.module.reporting.domain.model.DashboardPeriod;
 import br.edu.lms.module.reporting.domain.port.out.MemberMetricsQueryPort;
+import br.edu.lms.module.reporting.infrastructure.ReportingLabels;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
@@ -22,12 +23,6 @@ public class MemberMetricsQueryPortImpl implements MemberMetricsQueryPort {
             "br.edu.lms.module.organization.infrastructure.persistence.OrganizationMemberJpaEntity";
     private static final String USER_ENTITY =
             "br.edu.lms.module.identity.infrastructure.persistence.UserJpaEntity";
-
-    private static final Map<String, String> ROLE_LABELS = Map.of(
-            "ADMIN_ORG", "Administrador",
-            "GESTOR", "Gestor",
-            "PROFESSOR", "Professor",
-            "ALUNO", "Aluno");
 
     private final EntityManager em;
 
@@ -72,6 +67,6 @@ public class MemberMetricsQueryPortImpl implements MemberMetricsQueryPort {
 
     static String memberJoinedDescription(String fullName, String role) {
         String who = fullName == null || fullName.isBlank() ? "Novo membro" : fullName;
-        return who + " (" + ROLE_LABELS.getOrDefault(role, role) + ") ingressou na organização";
+        return who + " (" + ReportingLabels.ROLES.getOrDefault(role, role) + ") ingressou na organização";
     }
 }

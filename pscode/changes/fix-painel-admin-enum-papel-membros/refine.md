@@ -34,4 +34,4 @@ exportado mostram códigos internos (`ADMIN_ORG`, `ACTIVE`). Passam a mostrar
 
 ## Subtasks
 - [x] Web: `@lib/roles.ts` + card "Membros" e gráfico com rótulos legíveis, com testes
-- [ ] PDF: tabelas de papel e status de turma com rótulos legíveis, com teste do HTML renderizado
+- [x] PDF: tabelas de papel e status de turma com rótulos legíveis, com teste do HTML renderizado
