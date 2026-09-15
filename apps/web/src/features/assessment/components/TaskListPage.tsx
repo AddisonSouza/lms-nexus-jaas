@@ -14,6 +14,13 @@ import { Card } from '@components/ui/card'
 import { Badge } from '@components/ui/badge'
 import { Button } from '@components/ui/button'
 
+function publishErrorMessage(error: unknown): string {
+  const status = (error as { response?: { status?: number } })?.response?.status
+  if (status === 409) return 'Esta tarefa já está publicada. Recarregue a lista para ver o status atual.'
+  if (status === 403) return 'Você não tem permissão para publicar esta tarefa.'
+  return 'Não foi possível publicar a tarefa. Tente de novo em instantes.'
+}
+
 function TaskListPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedSubjectId, setSelectedSubjectId] = useState('')
@@ -66,6 +73,10 @@ function TaskListPage() {
           </Button>
         </div>
       </div>
+
+      {publishTask.isError && (
+        <p className="mb-3 text-sm text-destructive">{publishErrorMessage(publishTask.error)}</p>
+      )}
 
       {tasks.length === 0 ? (
         <p className="text-muted-foreground">Nenhuma tarefa criada ainda.</p>
