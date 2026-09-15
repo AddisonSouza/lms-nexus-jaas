@@ -6,6 +6,7 @@ import SubmissionFormDialog from './SubmissionFormDialog'
 import GradeFeedbackDrawer from './GradeFeedbackDrawer'
 import type { TaskWithGrade } from '../types'
 import type { SubmissionFormData } from '../schemas/submission.schema'
+import ListErrorState from '@components/shared/ListErrorState'
 import { Card } from '@components/ui/card'
 import { Badge } from '@components/ui/badge'
 import { Button } from '@components/ui/button'
@@ -38,7 +39,7 @@ function StatusBadge({ task }: { task: TaskWithGrade }) {
 }
 
 function StudentTaskListPage() {
-  const { data: tasks = [], isLoading } = useStudentGrades()
+  const { data: tasks = [], isLoading, isError, isFetching, refetch } = useStudentGrades()
   const [submitting, setSubmitting] = useState<TaskWithGrade | null>(null)
   const [viewingGrade, setViewingGrade] = useState<TaskWithGrade | null>(null)
   const submitTask = useSubmitTask(submitting?.id ?? '')
@@ -62,7 +63,9 @@ function StudentTaskListPage() {
         <p className="text-sm text-muted-foreground">Tarefas publicadas para entrega</p>
       </div>
 
-      {tasks.length === 0 ? (
+      {isError ? (
+        <ListErrorState subject="as tarefas" onRetry={() => void refetch()} isRetrying={isFetching} />
+      ) : tasks.length === 0 ? (
         <p className="text-muted-foreground">Nenhuma tarefa disponível no momento.</p>
       ) : (
         <div className="flex flex-col gap-2">
