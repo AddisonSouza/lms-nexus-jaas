@@ -62,6 +62,15 @@ describe('AnnouncementFeed', () => {
     })
   })
 
+  it('shows the "Novo Aviso" action for a GESTOR who can teach', async () => {
+    mockRole = 'GESTOR'
+    vi.mocked(announcementsApi.listAnnouncements).mockResolvedValue([])
+    render(<AnnouncementFeed classroomId="class-1" />, { wrapper })
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /novo aviso/i })).toBeTruthy()
+    })
+  })
+
   it('hides the "Novo Aviso" action for an ALUNO', async () => {
     mockRole = 'ALUNO'
     mockUserId = 'student-1'

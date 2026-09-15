@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom'
 import { useAuthStore } from '@store/authStore'
+import { canTeach } from '@lib/roles'
 import ProfessorDashboard from '@features/dashboard/components/ProfessorDashboard'
 import SubjectDetailPage from '@features/curriculum/components/SubjectDetailPage'
 
@@ -9,7 +10,7 @@ function SubjectDetailRoute() {
 
   return (
     <SubjectDetailPage
-      dashboardSlot={role === 'PROFESSOR' && subjectId ? <ProfessorDashboard subjectId={subjectId} /> : null}
+      dashboardSlot={canTeach(role) && subjectId ? <ProfessorDashboard subjectId={subjectId} /> : null}
     />
   )
 }
