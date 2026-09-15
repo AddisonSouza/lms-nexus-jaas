@@ -32,4 +32,4 @@ senha forte e recusar as fracas.
 - [x] Criar `@StrongPassword` + `StrongPasswordValidator` com teste unitário
 - [x] Aplicar `@StrongPassword` em `RegisterRequest` e `ResetPasswordRequest` e ajustar fixtures fracas
 - [x] ITs: senha fraca retorna 422 em `/auth/register` e `/auth/reset-password`
-- [ ] Atualizar `API_CONTRACT.md` com a regra de senha
+- [x] Atualizar `API_CONTRACT.md` com a regra de senha
