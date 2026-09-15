@@ -5,7 +5,7 @@ import { useLogout } from '@features/auth/hooks/useLogout'
 import NotificationBell from '@features/communication/components/NotificationBell'
 
 function Header() {
-  const userId = useAuthStore((s) => s.userId)
+  const userLabel = useAuthStore((s) => s.userName ?? s.userEmail)
   const theme = useThemeStore((s) => s.theme)
   const toggleTheme = useThemeStore((s) => s.toggleTheme)
   const handleLogout = useLogout()
@@ -27,7 +27,11 @@ function Header() {
         >
           {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </button>
-        {userId && <span className="text-xs text-muted-foreground">{userId.slice(0, 8)}…</span>}
+        {userLabel && (
+          <span title={userLabel} className="max-w-48 truncate text-xs text-muted-foreground">
+            {userLabel}
+          </span>
+        )}
         <button
           onClick={handleLogout}
           title="Sair"

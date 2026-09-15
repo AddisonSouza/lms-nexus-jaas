@@ -28,7 +28,7 @@ public class AssignTeacherToSubjectService implements AssignTeacherToSubjectUseC
             throw new InvalidTeacherAssignmentException("MEMBER_NOT_IN_ORGANIZATION");
         }
 
-        if (!memberQueryPort.hasProfessorRole(command.getMemberId(), command.getOrganizationId())) {
+        if (!memberQueryPort.canTeach(command.getMemberId(), command.getOrganizationId())) {
             throw new InvalidTeacherAssignmentException("MEMBER_NOT_A_PROFESSOR");
         }
 

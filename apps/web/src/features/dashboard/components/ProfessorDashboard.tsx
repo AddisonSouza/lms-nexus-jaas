@@ -1,3 +1,4 @@
+import { isAxiosError } from 'axios'
 import PendingEvaluationsBadge from './PendingEvaluationsBadge'
 import LastTaskGradeChart from './LastTaskGradeChart'
 import StudentsWithoutSubmissionList from './StudentsWithoutSubmissionList'
@@ -10,10 +11,14 @@ interface Props {
 }
 
 function ProfessorDashboard({ subjectId }: Props) {
-  const { data, isLoading, isError } = useProfessorDashboard(subjectId)
+  const { data, isLoading, isError, error } = useProfessorDashboard(subjectId)
 
   if (isLoading) {
     return <p className="text-sm text-muted-foreground">Carregando dashboard...</p>
+  }
+  // 403: gestor/admin que não leciona nesta disciplina — sem painel, sem erro
+  if (isAxiosError(error) && error.response?.status === 403) {
+    return null
   }
   if (isError || !data) {
     return <p className="text-sm text-destructive">Não foi possível carregar o dashboard.</p>

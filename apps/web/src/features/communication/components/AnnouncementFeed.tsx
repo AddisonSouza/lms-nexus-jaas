@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { useAuthStore } from '@store/authStore'
+import { canTeach } from '@lib/roles'
 import { useAnnouncements } from '../hooks/useAnnouncements'
 import { useCreateAnnouncement, useUpdateAnnouncement, useDeleteAnnouncement } from '../hooks/useAnnouncementMutations'
 import AnnouncementCard from './AnnouncementCard'
@@ -17,7 +18,7 @@ interface Props {
 function AnnouncementFeed({ classroomId }: Props) {
   const userId = useAuthStore((s) => s.userId)
   const role = useAuthStore((s) => s.role)
-  const canPost = role === 'PROFESSOR'
+  const canPost = canTeach(role)
 
   const { data: announcements = [], isLoading, isError } = useAnnouncements(classroomId)
   const createAnnouncement = useCreateAnnouncement(classroomId)

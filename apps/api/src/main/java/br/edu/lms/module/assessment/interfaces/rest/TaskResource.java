@@ -53,7 +53,7 @@ public class TaskResource {
     private final JsonWebToken jwt;
 
     @GET
-    @RolesAllowed("PROFESSOR")
+    @RolesAllowed({"PROFESSOR", "GESTOR", "ADMIN_ORG"})
     @Operation(summary = "Listar tarefas do professor na organização")
     public List<TaskResponse> list() {
         String orgId = (String) jwt.getClaim("org");
@@ -81,7 +81,7 @@ public class TaskResource {
     }
 
     @POST
-    @RolesAllowed("PROFESSOR")
+    @RolesAllowed({"PROFESSOR", "GESTOR", "ADMIN_ORG"})
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Operation(summary = "Criar tarefa em DRAFT")
     public Response create(
@@ -127,7 +127,7 @@ public class TaskResource {
 
     @PATCH
     @Path("/{taskId}/publish")
-    @RolesAllowed("PROFESSOR")
+    @RolesAllowed({"PROFESSOR", "GESTOR", "ADMIN_ORG"})
     @Operation(summary = "Publicar tarefa (DRAFT → PUBLISHED)")
     public Response publish(@PathParam("taskId") String taskId) {
         String orgId = (String) jwt.getClaim("org");
@@ -193,7 +193,7 @@ public class TaskResource {
 
     @GET
     @Path("/{taskId}/submissions")
-    @RolesAllowed("PROFESSOR")
+    @RolesAllowed({"PROFESSOR", "GESTOR", "ADMIN_ORG"})
     @Operation(summary = "Listar submissões de uma tarefa (professor)")
     public List<SubmissionResponse> listSubmissions(@PathParam("taskId") String taskId) {
         String orgId = (String) jwt.getClaim("org");

@@ -1,10 +1,11 @@
 package br.edu.lms.module.identity.application.usecase;
 
 import br.edu.lms.module.identity.application.dto.RefreshCommand;
-import br.edu.lms.module.identity.domain.model.RefreshSession;
+import br.edu.lms.module.identity.domain.model.*;
 import br.edu.lms.module.identity.domain.exception.TokenNotFoundException;
 import br.edu.lms.module.identity.domain.port.out.OrganizationMemberLookupPort;
 import br.edu.lms.module.identity.domain.port.out.RefreshTokenRepository;
+import br.edu.lms.module.identity.domain.port.out.UserRepository;
 import br.edu.lms.module.identity.infrastructure.security.JwtTokenService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +27,7 @@ class LogoutAndRefreshServiceTest {
     @Mock RefreshTokenRepository refreshTokenRepository;
     @Mock JwtTokenService jwtTokenService;
     @Mock OrganizationMemberLookupPort organizationMemberLookupPort;
+    @Mock UserRepository userRepository;
 
     @InjectMocks LogoutService logoutSut;
     @InjectMocks RefreshTokenService refreshSut;
@@ -38,9 +40,17 @@ class LogoutAndRefreshServiceTest {
 
     @Test
     void refresh_validToken_rotatesAndReturnsNewPair() {
+        var user = User.builder()
+                .id(UserId.of("user-id-123"))
+                .fullName(new FullName("Ana Souza"))
+                .email(new Email("ana@test.com"))
+                .passwordHash("hashed")
+                .status(UserStatus.ACTIVE)
+                .build();
         when(refreshTokenRepository.findSession("old-token")).thenReturn(Optional.of(new RefreshSession("user-id-123", null)));
+        when(userRepository.findById(UserId.of("user-id-123"))).thenReturn(Optional.of(user));
         when(organizationMemberLookupPort.findOrganizationsByUser("user-id-123")).thenReturn(List.of());
-        when(jwtTokenService.generateAccessToken("user-id-123")).thenReturn("new.jwt.token");
+        when(jwtTokenService.generateAccessToken(user)).thenReturn("new.jwt.token");
 
         var result = refreshSut.execute(new RefreshCommand("old-token"));
 

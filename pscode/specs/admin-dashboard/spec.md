@@ -38,6 +38,10 @@ O sistema SHALL incluir no dashboard um feed das últimas atividades da organiza
 - **WHEN** o período consultado contém turmas criadas, tarefas avaliadas e novos membros
 - **THEN** sistema retorna o feed com todos os eventos ordenados por data decrescente, identificando o tipo de cada atividade
 
+#### Scenario: Novo membro identificado por nome e papel legível
+- **WHEN** o período consultado contém um membro que ingressou na organização
+- **THEN** a descrição do item traz o nome do usuário e o papel por extenso (Administrador, Gestor, Professor, Aluno) — ex.: "Maria Silva (Aluno) ingressou na organização" — nunca o enum cru; sem nome disponível, usa "Novo membro (<Papel>)"
+
 #### Scenario: Feed vazio
 - **WHEN** o período consultado não contém nenhuma atividade
 - **THEN** sistema retorna o feed como lista vazia, sem erro

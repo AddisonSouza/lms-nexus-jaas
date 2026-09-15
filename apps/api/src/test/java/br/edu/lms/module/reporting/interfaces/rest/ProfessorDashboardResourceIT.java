@@ -82,6 +82,33 @@ class ProfessorDashboardResourceIT {
     }
 
     @Test
+    @TestSecurity(user = TEACHER_ID, roles = {"GESTOR"})
+    @JwtSecurity(claims = {@Claim(key = "sub", value = TEACHER_ID)})
+    void getDashboard_gestorAssignedToSubject_returns200() {
+        given()
+                .when().get("/subjects/{id}/dashboard", subjectId)
+                .then().statusCode(200);
+    }
+
+    @Test
+    @TestSecurity(user = TEACHER_ID, roles = {"ADMIN_ORG"})
+    @JwtSecurity(claims = {@Claim(key = "sub", value = TEACHER_ID)})
+    void getDashboard_adminAssignedToSubject_returns200() {
+        given()
+                .when().get("/subjects/{id}/dashboard", subjectId)
+                .then().statusCode(200);
+    }
+
+    @Test
+    @TestSecurity(user = "51000000-5100-5100-5100-510000000099", roles = {"GESTOR"})
+    @JwtSecurity(claims = {@Claim(key = "sub", value = "51000000-5100-5100-5100-510000000099")})
+    void getDashboard_gestorNotAssignedToSubject_returns403() {
+        given()
+                .when().get("/subjects/{id}/dashboard", subjectId)
+                .then().statusCode(403);
+    }
+
+    @Test
     @TestSecurity(user = "51000000-5100-5100-5100-510000000099", roles = {"PROFESSOR"})
     @JwtSecurity(claims = {@Claim(key = "sub", value = "51000000-5100-5100-5100-510000000099")})
     void getDashboard_professorNotAssignedToSubject_returns403() {

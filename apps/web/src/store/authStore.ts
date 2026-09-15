@@ -4,11 +4,17 @@ interface JwtPayload {
   sub?: string
   org?: string
   groups?: string[]
+  name?: string
+  email?: string
 }
 
 function decodeJwtPayload(token: string): JwtPayload {
   try {
-    return JSON.parse(atob(token.split('.')[1]))
+    // JWT segments are base64url, and `name` may carry accents: a bare atob would
+    // either throw (dropping every claim) or garble the text, so decode as UTF-8.
+    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')
+    const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0))
+    return JSON.parse(new TextDecoder().decode(bytes))
   } catch {
     return {}
   }
@@ -18,6 +24,8 @@ interface AuthState {
   accessToken: string | null
   role: string | null
   userId: string | null
+  userName: string | null
+  userEmail: string | null
   organizationId: string | null
   isAuthenticated: boolean
   // True until the initial silent-refresh on app boot resolves, so guards can
@@ -36,6 +44,8 @@ const signedOutState = {
   accessToken: null,
   role: null,
   userId: null,
+  userName: null,
+  userEmail: null,
   organizationId: null,
   isAuthenticated: false,
   isBootstrapping: false,
@@ -45,6 +55,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   accessToken: null,
   role: null,
   userId: null,
+  userName: null,
+  userEmail: null,
   organizationId: null,
   isAuthenticated: false,
   isBootstrapping: true,
@@ -59,6 +71,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       signedOutByUser: false,
       role: payload.groups?.[0] ?? null,
       userId: payload.sub ?? null,
+      userName: payload.name ?? null,
+      userEmail: payload.email ?? null,
       organizationId: payload.org ?? null,
     })
   },

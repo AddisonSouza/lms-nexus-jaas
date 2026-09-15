@@ -4,10 +4,12 @@ import br.edu.lms.module.identity.application.dto.AuthResult;
 import br.edu.lms.module.identity.application.dto.RefreshCommand;
 import br.edu.lms.module.identity.domain.exception.TokenNotFoundException;
 import br.edu.lms.module.identity.domain.model.OrgMembership;
+import br.edu.lms.module.identity.domain.model.UserId;
 import br.edu.lms.module.identity.domain.port.in.RefreshTokenUseCase;
 import br.edu.lms.module.identity.domain.port.out.OrganizationMemberLookupPort;
 import br.edu.lms.module.identity.domain.port.out.RefreshTokenRepository;
 import br.edu.lms.module.identity.domain.port.out.TokenGeneratorPort;
+import br.edu.lms.module.identity.domain.port.out.UserRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +28,7 @@ public class RefreshTokenService implements RefreshTokenUseCase {
     private final RefreshTokenRepository refreshTokenRepository;
     private final TokenGeneratorPort jwtTokenService;
     private final OrganizationMemberLookupPort organizationMemberLookupPort;
+    private final UserRepository userRepository;
 
     @Override
     public AuthResult execute(RefreshCommand command) {
@@ -34,6 +37,11 @@ public class RefreshTokenService implements RefreshTokenUseCase {
         var userId = session.userId();
 
         refreshTokenRepository.delete(command.refreshToken());
+
+        // The token carries the user's name and e-mail, so they are read fresh on
+        // every rotation. A user that no longer exists ends the session.
+        var user = userRepository.findById(UserId.of(userId))
+                .orElseThrow(TokenNotFoundException::new);
 
         // Rotation must not move the user out of the organization the session is
         // in — a page reload or an expired access token would otherwise undo an
@@ -45,8 +53,8 @@ public class RefreshTokenService implements RefreshTokenUseCase {
 
         var organizationId = membership.map(OrgMembership::organizationId).orElse(null);
         var newAccessToken = membership
-                .map(m -> jwtTokenService.generateAccessToken(userId, m.organizationId(), m.role()))
-                .orElseGet(() -> jwtTokenService.generateAccessToken(userId));
+                .map(m -> jwtTokenService.generateAccessToken(user, m.organizationId(), m.role()))
+                .orElseGet(() -> jwtTokenService.generateAccessToken(user));
 
         var newRefreshToken = UUID.randomUUID().toString();
         refreshTokenRepository.save(newRefreshToken, userId, organizationId, REFRESH_TOKEN_TTL);
