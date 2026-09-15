@@ -21,7 +21,7 @@ public class ProfessorDashboardResource {
 
     @GET
     @Path("/{id}/dashboard")
-    @RolesAllowed("PROFESSOR")
+    @RolesAllowed({"PROFESSOR", "GESTOR", "ADMIN_ORG"})
     @Operation(summary = "Dashboard do professor com indicadores da disciplina")
     @APIResponse(responseCode = "200", description = "Indicadores da disciplina")
     @APIResponse(responseCode = "403", description = "Professor não vinculado a esta disciplina")
