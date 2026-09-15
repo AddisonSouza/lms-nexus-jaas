@@ -37,7 +37,7 @@ precisar de outra conta — como um coordenador de curso que também leciona.
 - Qualquer mudança nos acessos de ALUNO ou entre organizações.
 
 ## Subtasks
-- [ ] API: permitir vincular GESTOR/ADMIN_ORG como professor de disciplina (query port + teste de `AssignTeacherToSubjectService`)
+- [x] API: permitir vincular GESTOR/ADMIN_ORG como professor de disciplina (query port + teste de `AssignTeacherToSubjectService`)
 - [ ] API: liberar para GESTOR/ADMIN_ORG os endpoints de tarefas, entregas, avisos e painel de professor (+ testes de integração)
 - [ ] Web: criar o helper `canTeach` e aplicá-lo no Sidebar, no AnnouncementFeed e no SubjectDetailRoute
 - [ ] Docs: registrar a hierarquia em DECISIONS.md e atualizar as specs `route-authorization` e `subject-teacher-assignment`

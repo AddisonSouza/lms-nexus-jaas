@@ -157,7 +157,7 @@ public class SubjectResource {
     @APIResponse(responseCode = "201", description = "Professor atribuído")
     @APIResponse(responseCode = "200", description = "Professor já atribuído (idempotente)")
     @APIResponse(responseCode = "404", description = "Disciplina não encontrada")
-    @APIResponse(responseCode = "422", description = "Membro não encontrado na organização ou não é PROFESSOR")
+    @APIResponse(responseCode = "422", description = "Membro não encontrado na organização ou não pode lecionar (papel ALUNO)")
     public Response assignTeacher(@PathParam("id") String id, @Valid AssignTeacherRequest request) {
         var orgId = (String) jwt.getClaim("org");
         boolean created = assignTeacherToSubjectUseCase.execute(
