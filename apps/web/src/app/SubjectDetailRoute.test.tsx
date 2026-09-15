@@ -61,7 +61,14 @@ describe('SubjectDetailRoute', () => {
     expect(screen.getByText('ProfessorDashboard for subject-1')).toBeTruthy()
   })
 
-  it('does not render the ProfessorDashboard for non-PROFESSOR roles', () => {
+  it.each(['GESTOR', 'ADMIN_ORG'])('renders the ProfessorDashboard for %s users who can teach', (role) => {
+    mockRole = role
+    renderRoute('subject-1')
+
+    expect(screen.getByTestId('professor-dashboard')).toBeTruthy()
+  })
+
+  it('does not render the ProfessorDashboard for ALUNO users', () => {
     mockRole = 'ALUNO'
     renderRoute('subject-1')
 

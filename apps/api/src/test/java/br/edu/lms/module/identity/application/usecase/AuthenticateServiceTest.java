@@ -50,14 +50,14 @@ class AuthenticateServiceTest {
         when(userRepository.findByEmail(any())).thenReturn(Optional.of(user));
         when(passwordService.verify("secret", "hashed")).thenReturn(true);
         when(organizationMemberLookupPort.findOrganizationsByUser(anyString())).thenReturn(List.of());
-        when(jwtTokenService.generateAccessToken(any())).thenReturn("jwt.token.here");
+        when(jwtTokenService.generateAccessToken(user)).thenReturn("jwt.token.here");
 
         AuthResult result = sut.execute(new AuthenticateCommand("user@test.com", "secret"));
 
         assertThat(result.accessToken()).isEqualTo("jwt.token.here");
         assertThat(result.refreshToken()).isNotBlank();
         verify(refreshTokenRepository).save(anyString(), anyString(), any(), any());
-        verify(jwtTokenService, never()).generateAccessToken(anyString(), anyString(), anyString());
+        verify(jwtTokenService, never()).generateAccessToken(any(User.class), anyString(), anyString());
     }
 
     @Test
@@ -68,12 +68,12 @@ class AuthenticateServiceTest {
         when(passwordService.verify("secret", "hashed")).thenReturn(true);
         when(organizationMemberLookupPort.findOrganizationsByUser(userId))
                 .thenReturn(List.of(new OrgMembership("org-1", "ADMIN_ORG")));
-        when(jwtTokenService.generateAccessToken(userId, "org-1", "ADMIN_ORG")).thenReturn("org-scoped-token");
+        when(jwtTokenService.generateAccessToken(user, "org-1", "ADMIN_ORG")).thenReturn("org-scoped-token");
 
         AuthResult result = sut.execute(new AuthenticateCommand("user@test.com", "secret"));
 
         assertThat(result.accessToken()).isEqualTo("org-scoped-token");
-        verify(jwtTokenService, never()).generateAccessToken(anyString());
+        verify(jwtTokenService, never()).generateAccessToken(any(User.class));
     }
 
     @Test
@@ -86,14 +86,14 @@ class AuthenticateServiceTest {
         when(organizationMemberLookupPort.findOrganizationsByUser(userId)).thenReturn(List.of(
                 new OrgMembership("org-1", "ADMIN_ORG"),
                 new OrgMembership("org-2", "PROFESSOR")));
-        when(jwtTokenService.generateAccessToken(userId, "org-1", "ADMIN_ORG")).thenReturn("first-org-token");
+        when(jwtTokenService.generateAccessToken(user, "org-1", "ADMIN_ORG")).thenReturn("first-org-token");
 
         AuthResult result = sut.execute(new AuthenticateCommand("user@test.com", "secret"));
 
         // Without an organization the user lands on /welcome, which has no
         // sidebar — and therefore no organization switcher to get out of it.
         assertThat(result.accessToken()).isEqualTo("first-org-token");
-        verify(jwtTokenService, never()).generateAccessToken(anyString());
+        verify(jwtTokenService, never()).generateAccessToken(any(User.class));
     }
 
     @Test

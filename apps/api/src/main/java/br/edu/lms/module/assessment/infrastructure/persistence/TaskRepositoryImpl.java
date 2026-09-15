@@ -26,6 +26,9 @@ public class TaskRepositoryImpl implements TaskRepository {
         var entity = toEntityWithAttachments(task);
         var managed = em.merge(entity);
         em.flush();
+        // The mapper leaves the audit columns to JPA, so the merged copy carries no
+        // createdAt/updatedAt. Re-read them so callers get the persisted state back.
+        em.refresh(managed);
         return taskMapper.toDomain(managed);
     }
 

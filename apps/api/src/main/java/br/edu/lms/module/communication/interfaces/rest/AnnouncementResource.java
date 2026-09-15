@@ -30,7 +30,7 @@ public class AnnouncementResource {
 
     @PUT
     @Path("/{id}")
-    @RolesAllowed("PROFESSOR")
+    @RolesAllowed({"PROFESSOR", "GESTOR", "ADMIN_ORG"})
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Operation(summary = "Editar aviso (somente autor)")
     public Response update(
@@ -59,7 +59,7 @@ public class AnnouncementResource {
 
     @DELETE
     @Path("/{id}")
-    @RolesAllowed("PROFESSOR")
+    @RolesAllowed({"PROFESSOR", "GESTOR", "ADMIN_ORG"})
     @Operation(summary = "Excluir aviso (soft delete, somente autor)")
     public Response delete(@PathParam("id") String id) {
         String orgId = (String) jwt.getClaim("org");

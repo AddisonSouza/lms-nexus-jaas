@@ -109,6 +109,9 @@ class AuthResourceIT {
 
         var claims = decodeClaims(accessToken);
         assertThat(claims.has("org") && !claims.get("org").isNull()).isFalse();
+        // The header shows the name (or e-mail) — never the UUID in `sub`.
+        assertThat(claims.get("name").asText()).isEqualTo("Org Scoped IT User");
+        assertThat(claims.get("email").asText()).isEqualTo(EMAIL);
     }
 
     @Test
@@ -153,6 +156,8 @@ class AuthResourceIT {
         var claims = decodeClaims(accessToken);
         assertThat(claims.get("org").asText()).isEqualTo(ORG_ID);
         assertThat(claims.get("groups").get(0).asText()).isEqualTo("PROFESSOR");
+        assertThat(claims.get("name").asText()).isEqualTo("Org Scoped IT User");
+        assertThat(claims.get("email").asText()).isEqualTo(EMAIL);
     }
 
     @Test
@@ -180,6 +185,8 @@ class AuthResourceIT {
         var claims = decodeClaims(accessToken);
         assertThat(claims.get("org").asText()).isEqualTo(ORG_ID);
         assertThat(claims.get("groups").get(0).asText()).isEqualTo("ADMIN_ORG");
+        assertThat(claims.get("name").asText()).isEqualTo("Org Scoped IT User");
+        assertThat(claims.get("email").asText()).isEqualTo(EMAIL);
     }
 
     @Test

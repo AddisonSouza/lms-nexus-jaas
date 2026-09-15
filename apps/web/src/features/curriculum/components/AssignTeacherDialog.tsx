@@ -42,7 +42,7 @@ function AssignTeacherDialog({ open, onClose, onSubmit, isPending }: Props) {
         <form onSubmit={handleSubmit((d) => onSubmit(d.memberId))} className="space-y-4">
           <div className="space-y-1">
             <label className="text-xs text-muted-foreground">ID do Membro *</label>
-            <Input {...register('memberId')} placeholder="UUID do membro (PROFESSOR)" />
+            <Input {...register('memberId')} placeholder="UUID do membro (professor, gestor ou admin)" />
             {errors.memberId && <p className="text-xs text-destructive">{errors.memberId.message}</p>}
           </div>
 

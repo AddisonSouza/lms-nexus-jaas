@@ -54,8 +54,8 @@ public class AuthenticateService implements AuthenticateUseCase {
         var memberships = organizationMemberLookupPort.findOrganizationsByUser(userId);
         var organizationId = memberships.isEmpty() ? null : memberships.get(0).organizationId();
         var accessToken = memberships.isEmpty()
-                ? jwtTokenService.generateAccessToken(userId)
-                : jwtTokenService.generateAccessToken(userId, organizationId, memberships.get(0).role());
+                ? jwtTokenService.generateAccessToken(user)
+                : jwtTokenService.generateAccessToken(user, organizationId, memberships.get(0).role());
         var refreshToken = UUID.randomUUID().toString();
 
         refreshTokenRepository.save(refreshToken, userId, organizationId, REFRESH_TOKEN_TTL);

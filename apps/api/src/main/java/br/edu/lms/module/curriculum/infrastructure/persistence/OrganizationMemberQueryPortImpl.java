@@ -24,10 +24,10 @@ public class OrganizationMemberQueryPortImpl implements OrganizationMemberQueryP
     }
 
     @Override
-    public boolean hasProfessorRole(String memberId, String organizationId) {
+    public boolean canTeach(String memberId, String organizationId) {
         var count = em.createQuery(
                         "SELECT COUNT(m) FROM br.edu.lms.module.organization.infrastructure.persistence.OrganizationMemberJpaEntity m " +
-                        "WHERE m.id = :id AND m.organizationId = :orgId AND m.role = 'PROFESSOR' AND m.deletedAt IS NULL",
+                        "WHERE m.id = :id AND m.organizationId = :orgId AND m.role IN ('PROFESSOR', 'GESTOR', 'ADMIN_ORG') AND m.deletedAt IS NULL",
                         Long.class)
                 .setParameter("id", memberId)
                 .setParameter("orgId", organizationId)
