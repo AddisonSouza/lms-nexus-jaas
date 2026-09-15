@@ -29,6 +29,6 @@ mostrar o nome da pessoa logada (ou o e-mail, se não houver nome).
 
 ## Subtasks
 - [x] API: emitir claims `name` e `email` no access token nos três fluxos + testes
-- [ ] Web: `authStore` expõe `userName` e `userEmail` a partir do token + teste
+- [x] Web: `authStore` expõe `userName` e `userEmail` a partir do token + teste
 - [ ] Web: `Header` e `MinimalHeader` exibem nome (fallback e-mail), truncado + teste
 - [ ] Docs: documentar as claims do access token no `API_CONTRACT.md`
