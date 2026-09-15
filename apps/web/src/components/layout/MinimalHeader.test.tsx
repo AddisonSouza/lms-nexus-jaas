@@ -4,7 +4,19 @@ import { MemoryRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import MinimalHeader from './MinimalHeader'
 
-let mockAuth = { isAuthenticated: false, userId: null as string | null, clearToken: vi.fn() }
+const USER_ID = 'ea1bfa5b-1111-2222-3333-444455556666'
+
+function signedOut() {
+  return {
+    isAuthenticated: false,
+    userId: null as string | null,
+    userName: null as string | null,
+    userEmail: null as string | null,
+    clearToken: vi.fn(),
+  }
+}
+
+let mockAuth = signedOut()
 
 vi.mock('@store/authStore', () => ({
   useAuthStore: vi.fn((selector) => selector(mockAuth)),
@@ -15,7 +27,7 @@ vi.mock('@features/auth/api/auth-api', () => ({
 }))
 
 beforeEach(() => {
-  mockAuth = { isAuthenticated: false, userId: null, clearToken: vi.fn() }
+  mockAuth = signedOut()
 })
 
 function renderHeader() {
@@ -31,14 +43,30 @@ function renderHeader() {
 
 describe('MinimalHeader', () => {
   it('offers the logout action to an authenticated user', () => {
-    mockAuth = { isAuthenticated: true, userId: 'ea1bfa5b-1111-2222-3333-444455556666', clearToken: vi.fn() }
+    mockAuth = { ...signedOut(), isAuthenticated: true, userId: USER_ID, userName: 'Ana Souza' }
     renderHeader()
 
     expect(screen.getByTitle('Sair')).toBeTruthy()
   })
 
+  it('shows the user name instead of the id', () => {
+    mockAuth = { ...signedOut(), isAuthenticated: true, userId: USER_ID, userName: 'Ana Souza', userEmail: 'ana@test.com' }
+    renderHeader()
+
+    // O nome inteiro fica no title para quando o texto for truncado.
+    expect(screen.getByText('Ana Souza').getAttribute('title')).toBe('Ana Souza')
+    expect(screen.queryByText(/ea1bfa5b/)).toBeNull()
+  })
+
+  it('falls back to the e-mail when the token has no name', () => {
+    mockAuth = { ...signedOut(), isAuthenticated: true, userId: USER_ID, userEmail: 'ana@test.com' }
+    renderHeader()
+
+    expect(screen.getByText('ana@test.com')).toBeTruthy()
+    expect(screen.queryByText(/ea1bfa5b/)).toBeNull()
+  })
+
   it('hides the logout action when there is no session', () => {
-    mockAuth = { isAuthenticated: false, userId: null, clearToken: vi.fn() }
     renderHeader()
 
     // /invitations/:token/accept é rota pública: abrir deslogado não pode

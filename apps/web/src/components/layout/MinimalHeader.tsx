@@ -8,7 +8,7 @@ import { useLogout } from '@features/auth/hooks/useLogout'
  */
 function MinimalHeader() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
-  const userId = useAuthStore((s) => s.userId)
+  const userLabel = useAuthStore((s) => s.userName ?? s.userEmail)
   const handleLogout = useLogout()
 
   return (
@@ -22,7 +22,11 @@ function MinimalHeader() {
 
       {isAuthenticated && (
         <div className="flex items-center gap-2">
-          {userId && <span className="text-xs text-muted-foreground">{userId.slice(0, 8)}…</span>}
+          {userLabel && (
+            <span title={userLabel} className="max-w-48 truncate text-xs text-muted-foreground">
+              {userLabel}
+            </span>
+          )}
           <button
             onClick={handleLogout}
             title="Sair"

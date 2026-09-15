@@ -42,13 +42,25 @@ O endpoint `POST /auth/refresh` aceita o campo opcional `organizationId` no body
 - **THEN** access token sem claim `org` e `roles=[]` — comportamento idêntico ao anterior a esta change
 
 ### REQ-AUTH-05 — Claims do JWT
-O Access Token deve conter os claims: `sub` (userId UUID), `org` (organizationId UUID, null se sem org), `roles` (array de strings).
+O Access Token deve conter os claims: `sub` (userId UUID), `name` (nome completo), `email`, `org` (organizationId UUID, null se sem org), `roles` (array de strings). `name` e `email` são relidos do usuário a cada emissão — login, refresh e troca de organização —; no refresh e na troca, um usuário que não existe mais encerra a sessão com HTTP 401.
+
+#### Scenario: Token carrega nome e e-mail
+- **WHEN** um access token é emitido por `POST /auth/login`, `POST /auth/refresh` ou `POST /auth/switch-organization`
+- **THEN** o payload contém `name` com o nome completo e `email` do usuário
+
+#### Scenario: Usuário removido tenta renovar a sessão
+- **WHEN** `POST /auth/refresh` recebe um Refresh Token válido de um usuário que não existe mais
+- **THEN** resposta HTTP 401 e o Refresh Token usado é descartado
 
 ### REQ-AUTH-06 — Frontend: tela de login
 O sistema deve exibir formulário de login acessível em `/login`. Usuário autenticado redirecionado para `/` automaticamente.
 
 ### REQ-AUTH-07 — Frontend: persistência de sessão
-O Access Token MUST ser mantido apenas em memória no `authStore` (Zustand) — NUNCA em `localStorage` ou `sessionStorage`. Ao recarregar a página, o sistema MUST tentar renovar a sessão via `POST /auth/refresh` (usando o `httpOnly cookie`) antes de redirecionar para login. O `authStore` MUST expor os campos `role`, `userId` e `organizationId` decodificados do payload do JWT no momento do `setToken`.
+O Access Token MUST ser mantido apenas em memória no `authStore` (Zustand) — NUNCA em `localStorage` ou `sessionStorage`. Ao recarregar a página, o sistema MUST tentar renovar a sessão via `POST /auth/refresh` (usando o `httpOnly cookie`) antes de redirecionar para login. O `authStore` MUST expor os campos `role`, `userId`, `userName`, `userEmail` e `organizationId` decodificados do payload do JWT no momento do `setToken`. O payload MUST ser decodificado como base64url + UTF-8, para que nomes acentuados não corrompam nem descartem as claims.
+
+#### Scenario: authStore expõe nome acentuado
+- **WHEN** `setToken(accessToken)` é chamado com token que contém `name: 'João Conceição'`
+- **THEN** `useAuthStore.getState().userName` retorna `'João Conceição'` e `role` segue preenchido
 
 #### Scenario: Reload da página com refresh token válido
 - **WHEN** usuário recarrega a página com `httpOnly cookie` de Refresh Token válido
