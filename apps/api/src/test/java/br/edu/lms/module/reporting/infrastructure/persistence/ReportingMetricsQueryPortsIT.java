@@ -126,6 +126,17 @@ class ReportingMetricsQueryPortsIT {
     }
 
     @Test
+    void memberMetrics_listActivity_describesMemberNameAndReadableRole() {
+        var period = new DashboardPeriod(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1));
+
+        var activity = memberMetricsQueryPort.listActivity(ORG_ID, period);
+
+        assertThat(activity).extracting("description").containsExactlyInAnyOrder(
+                "Admin IT (Administrador) ingressou na organização",
+                "Student IT (Aluno) ingressou na organização");
+    }
+
+    @Test
     void taskMetrics_countCreatedAndEvaluated_andAverageDeliveryRate() {
         var period = new DashboardPeriod(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1));
 
