@@ -66,6 +66,23 @@ describe('SubjectListPage', () => {
     expect(screen.queryByRole('table')).toBeNull()
   })
 
+  it('keeps the delete dialog open showing why the API refused', async () => {
+    const user = userEvent.setup()
+    vi.mocked(subjectApi.listSubjects).mockResolvedValue([disciplina])
+    vi.mocked(subjectApi.deleteSubject).mockRejectedValue({
+      response: { status: 403, data: { error: 'Forbidden' } },
+    })
+
+    render(<SubjectListPage />, { wrapper })
+
+    await user.click(await screen.findByRole('button', { name: 'Excluir' }))
+    await user.click(screen.getByRole('button', { name: 'Excluir' }))
+
+    const alert = await screen.findByRole('alert')
+    expect(alert.textContent).toBe('Você não tem permissão para esta ação.')
+    expect(screen.getByText('Excluir disciplina')).toBeTruthy()
+  })
+
   it('refetches when the user retries', async () => {
     const user = userEvent.setup()
     vi.mocked(subjectApi.listSubjects)

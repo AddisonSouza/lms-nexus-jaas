@@ -39,7 +39,7 @@ tradutor de erros reaproveitado por todas as telas.
 
 ## Subtasks
 - [x] `lib/api-error.ts` com `apiErrorMessage` e testes (error, errors, status, desconhecido)
-- [ ] `ConfirmDialog` com prop `error` + excluir disciplina exibindo 403, com teste
+- [x] `ConfirmDialog` com prop `error` + excluir disciplina exibindo 403, com teste
 - [ ] `AnnouncementForm` e `ContentFormDialog` exibindo erro da mutation (403/422), com testes
 - [ ] `ResetPasswordPage` e `AcceptInvitePage` migrados para o helper (422 lista critérios; 403 e-mail divergente), com testes
 - [ ] `evaluationSchema` com limite `maxScore` e mensagem "Nota não pode exceder X", com teste

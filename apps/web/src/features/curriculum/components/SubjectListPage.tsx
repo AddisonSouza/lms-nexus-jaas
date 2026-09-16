@@ -9,6 +9,7 @@ import { useAuthStore } from '@store/authStore'
 import SubjectFormDialog from './SubjectFormDialog'
 import ConfirmDialog from '@components/shared/ConfirmDialog'
 import ListErrorState from '@components/shared/ListErrorState'
+import { apiErrorMessage } from '@lib/api-error'
 import type { SubjectFormData } from '../schemas/subjectSchema'
 import type { Subject } from '../types'
 import { Card } from '@components/ui/card'
@@ -56,6 +57,12 @@ function SubjectListPage() {
   const handleConfirmDelete = () => {
     if (!deleteTarget) return
     deleteSubject.mutate(deleteTarget.id, { onSuccess: () => setDeleteTarget(null) })
+  }
+
+  // Fechar o diálogo limpa a recusa anterior: a próxima exclusão começa limpa.
+  const handleCancelDelete = () => {
+    setDeleteTarget(null)
+    deleteSubject.reset()
   }
 
   return (
@@ -150,8 +157,9 @@ function SubjectListPage() {
         title="Excluir disciplina"
         description={`Confirmar exclusão de "${deleteTarget?.name}"? Esta ação não pode ser desfeita.`}
         confirmLabel="Excluir"
+        error={deleteSubject.isError ? apiErrorMessage(deleteSubject.error) : null}
         onConfirm={handleConfirmDelete}
-        onCancel={() => setDeleteTarget(null)}
+        onCancel={handleCancelDelete}
       />
     </div>
   )
