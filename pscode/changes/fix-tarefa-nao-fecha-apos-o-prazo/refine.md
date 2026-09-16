@@ -50,4 +50,4 @@ papéis, sem deixar de mostrar a nota já recebida.
 - [x] Inverter a ordem das checagens em `SubmitTaskService` para preservar o 422 `DeadlineExpired`
 - [x] Teste de integração (Testcontainers) cobrindo tarefa vencida retornando `CLOSED` nos três endpoints
 - [x] Front professor: mapa `TASK_STATUS_LABEL` no badge de `TaskListPage`
-- [ ] Front aluno: badge "Encerrada" em `StudentTaskListPage` quando `status === 'CLOSED'`
+- [x] Front aluno: badge "Encerrada" em `StudentTaskListPage` quando `status === 'CLOSED'`
