@@ -26,6 +26,7 @@ const draft = {
 }
 
 const published = { ...draft, status: 'PUBLISHED' as const }
+const closed = { ...draft, status: 'CLOSED' as const }
 
 function renderPage() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })
@@ -57,9 +58,35 @@ describe('TaskListPage', () => {
     await user.click(await screen.findByRole('button', { name: /publicar/i }))
 
     await waitFor(() => {
-      expect(screen.getByText('PUBLISHED')).toBeTruthy()
+      expect(screen.getByText('Publicada')).toBeTruthy()
     })
     expect(screen.queryByRole('button', { name: /publicar/i })).toBeNull()
+  })
+
+  it('mostra "Encerrada" quando o prazo já venceu', async () => {
+    vi.mocked(tasksApi.listTasks).mockResolvedValue([closed])
+
+    renderPage()
+
+    expect(await screen.findByText('Encerrada')).toBeTruthy()
+    expect(screen.queryByText('CLOSED')).toBeNull()
+  })
+
+  it('mantém "Ver Submissões" na tarefa encerrada, para o professor avaliar', async () => {
+    vi.mocked(tasksApi.listTasks).mockResolvedValue([closed])
+
+    renderPage()
+
+    expect(await screen.findByRole('button', { name: /ver submissões/i })).toBeTruthy()
+    expect(screen.queryByRole('button', { name: /publicar/i })).toBeNull()
+  })
+
+  it('traduz o rascunho em vez de mostrar o enum', async () => {
+    vi.mocked(tasksApi.listTasks).mockResolvedValue([draft])
+
+    renderPage()
+
+    expect(await screen.findByText('Rascunho')).toBeTruthy()
   })
 
   it('mostra mensagem de erro quando a publicação falha', async () => {

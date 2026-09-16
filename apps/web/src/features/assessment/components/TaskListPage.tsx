@@ -8,11 +8,20 @@ import { taskKeys } from '../api/query-keys'
 import { listTasks } from '../api/tasks'
 import TaskFormDialog from './TaskFormDialog'
 import SubmissionListDrawer from './SubmissionListDrawer'
-import type { Task } from '../types'
+import type { Task, TaskStatus } from '../types'
 import type { TaskFormData } from '../schemas/task.schema'
 import { Card } from '@components/ui/card'
 import { Badge } from '@components/ui/badge'
 import { Button } from '@components/ui/button'
+
+// A lista mostrava o enum cru ("PUBLISHED"). Encerrada é derivada do prazo no
+// back-end, então chega aqui como qualquer outro status.
+const TASK_STATUS_LABEL: Record<TaskStatus, string> = {
+  DRAFT: 'Rascunho',
+  PUBLISHED: 'Publicada',
+  CLOSED: 'Encerrada',
+  GRADED: 'Avaliada',
+}
 
 function publishErrorMessage(error: unknown): string {
   const status = (error as { response?: { status?: number } })?.response?.status
@@ -92,12 +101,14 @@ function TaskListPage() {
                     timeStyle: 'short',
                   })}
                   <Badge variant={task.status === 'PUBLISHED' ? 'accent-2' : 'neutral'}>
-                    {task.status}
+                    {TASK_STATUS_LABEL[task.status]}
                   </Badge>
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                {task.status === 'PUBLISHED' && (
+                {/* Encerrada também: é justamente depois do prazo que o professor
+                    precisa alcançar as respostas para avaliar. */}
+                {(task.status === 'PUBLISHED' || task.status === 'CLOSED') && (
                   <Button size="sm" variant="secondary" onClick={() => setSubmissionsTask(task)}>
                     <Users className="h-3.5 w-3.5" />
                     Ver Submissões
