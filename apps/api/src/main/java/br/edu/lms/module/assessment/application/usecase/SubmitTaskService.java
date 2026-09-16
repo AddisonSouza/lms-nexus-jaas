@@ -46,12 +46,16 @@ public class SubmitTaskService implements SubmitTaskUseCase {
         var task = taskRepository.findByIdAndOrganization(TaskId.of(command.getTaskId()), command.getOrganizationId())
                 .orElseThrow(() -> new TaskNotFoundException(command.getTaskId()));
 
-        if (task.getStatus() != TaskStatus.PUBLISHED) {
-            throw new InvalidTaskStateException(task.getStatus(), TaskStatus.PUBLISHED);
-        }
-
+        // O prazo vem antes do estado: a tarefa vencida é lida como CLOSED, e a
+        // checagem de estado a acusaria como InvalidTaskState. Quem perdeu o
+        // prazo merece o 422 DeadlineExpired que o API_CONTRACT.md documenta.
         if (!LocalDateTime.now().isBefore(task.getDeadline())) {
             throw new DeadlineExpiredException(command.getTaskId());
+        }
+
+        // Estado armazenado, não o efetivo: aqui o que importa é DRAFT ou GRADED.
+        if (task.getStatus() != TaskStatus.PUBLISHED) {
+            throw new InvalidTaskStateException(task.getStatus(), TaskStatus.PUBLISHED);
         }
 
         boolean hasText = command.getTextResponse() != null && !command.getTextResponse().isBlank();
