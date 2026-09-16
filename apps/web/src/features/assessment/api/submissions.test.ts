@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { listStudentGrades } from './submissions'
+import { listStudentGrades, updateSubmission } from './submissions'
 import api from '@lib/axios'
 
 vi.mock('@lib/axios', () => ({
-  default: { get: vi.fn() },
+  default: { get: vi.fn(), put: vi.fn() },
   API_BASE_URL: '',
 }))
 
@@ -64,9 +64,35 @@ describe('listStudentGrades', () => {
   })
 
   it('rejects a payload missing a field the API does send', async () => {
-    const { createdAt: _omitted, ...withoutCreatedAt } = myGradesPayload[0]
+    const withoutCreatedAt = { ...myGradesPayload[0] }
+    delete (withoutCreatedAt as Partial<typeof withoutCreatedAt>).createdAt
     vi.mocked(api.get).mockResolvedValue({ data: [withoutCreatedAt] })
 
     await expect(listStudentGrades()).rejects.toThrow()
+  })
+})
+
+describe('updateSubmission', () => {
+  it('parses the PUT response, which comes back without createdAt', async () => {
+    vi.mocked(api.put).mockResolvedValue({
+      data: {
+        id: 'sub-id-1',
+        taskId: 'task-1',
+        studentId: 'student-1',
+        organizationId: 'org-1',
+        textResponse: 'resposta corrigida',
+        status: 'SUBMITTED',
+        grade: null,
+        feedback: null,
+        attachments: [],
+        createdAt: null,
+        updatedAt: '2026-09-15T20:49:00.354999',
+      },
+    })
+
+    const result = await updateSubmission({ taskId: 'task-1', submissionId: 'sub-id-1', textResponse: 'resposta corrigida' })
+
+    expect(result.textResponse).toBe('resposta corrigida')
+    expect(result.createdAt).toBeNull()
   })
 })

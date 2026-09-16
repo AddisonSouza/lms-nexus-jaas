@@ -51,7 +51,7 @@ export interface TaskSubmission {
   grade: number | null
   feedback: string | null
   attachments: SubmissionAttachment[]
-  createdAt: string
+  createdAt: string | null
   updatedAt: string | null
 }
 

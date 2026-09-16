@@ -20,7 +20,8 @@ const submissionSchema = z.object({
   grade: z.number().nullable(),
   feedback: z.string().nullable(),
   attachments: z.array(submissionAttachmentSchema),
-  createdAt: z.string(),
+  // o PUT de edição responde sem `createdAt`; nada na UI lê o campo
+  createdAt: z.string().nullable(),
   updatedAt: z.string().nullable(),
 })
 
