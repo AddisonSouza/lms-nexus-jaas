@@ -1,8 +1,8 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from 'lucide-react'
-import { evaluationSchema, type EvaluationFormData } from '../schemas/evaluation.schema'
+import { createEvaluationSchema, type EvaluationFormData } from '../schemas/evaluation.schema'
 import type { Task, TaskSubmission } from '../types'
 import {
   Dialog,
@@ -26,13 +26,15 @@ interface Props {
 }
 
 function EvaluationDialog({ open, submission, task, onClose, onSubmit, isPending }: Props) {
+  const schema = useMemo(() => createEvaluationSchema(task.maxScore), [task.maxScore])
+
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
   } = useForm<EvaluationFormData>({
-    resolver: zodResolver(evaluationSchema),
+    resolver: zodResolver(schema),
     defaultValues: { grade: null, feedback: '' },
   })
 

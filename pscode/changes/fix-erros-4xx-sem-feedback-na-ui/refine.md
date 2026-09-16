@@ -42,5 +42,5 @@ tradutor de erros reaproveitado por todas as telas.
 - [x] `ConfirmDialog` com prop `error` + excluir disciplina exibindo 403, com teste
 - [x] `AnnouncementForm` e `ContentFormDialog` exibindo erro da mutation (403/422), com testes
 - [x] `ResetPasswordPage` e `AcceptInvitePage` migrados para o helper (422 lista critérios; 403 e-mail divergente), com testes
-- [ ] `evaluationSchema` com limite `maxScore` e mensagem "Nota não pode exceder X", com teste
+- [x] `evaluationSchema` com limite `maxScore` e mensagem "Nota não pode exceder X", com teste
 - [ ] Validar no navegador os seis casos da bateria com os perfis correspondentes
