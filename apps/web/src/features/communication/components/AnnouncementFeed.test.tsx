@@ -117,4 +117,20 @@ describe('AnnouncementFeed', () => {
       )
     })
   })
+
+  it('keeps the form open showing why the API refused to publish', async () => {
+    vi.mocked(announcementsApi.listAnnouncements).mockResolvedValue([])
+    vi.mocked(announcementsApi.createAnnouncement).mockRejectedValue({
+      response: { status: 403, data: { error: 'Forbidden' } },
+    })
+
+    render(<AnnouncementFeed classroomId="class-1" />, { wrapper })
+    await userEvent.click(await screen.findByRole('button', { name: /novo aviso/i }))
+    await userEvent.type(screen.getByPlaceholderText(/escreva o aviso/i), 'Prova na próxima semana')
+    await userEvent.click(screen.getByRole('button', { name: /^publicar$/i }))
+
+    const alert = await screen.findByRole('alert')
+    expect(alert.textContent).toBe('Você não tem permissão para esta ação.')
+    expect(screen.getByPlaceholderText(/escreva o aviso/i)).toBeTruthy()
+  })
 })

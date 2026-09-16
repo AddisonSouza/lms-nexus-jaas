@@ -31,9 +31,20 @@ interface Props {
   topics: Topic[]
   defaultTopicId?: string
   title: string
+  /** Recusa da API no envio. Fica acima do rodapé, como os erros do Zod. */
+  error?: string | null
 }
 
-function ContentFormDialog({ open, onClose, onSubmit, isPending, topics, defaultTopicId, title }: Props) {
+function ContentFormDialog({
+  open,
+  onClose,
+  onSubmit,
+  isPending,
+  topics,
+  defaultTopicId,
+  title,
+  error,
+}: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const {
@@ -152,6 +163,12 @@ function ContentFormDialog({ open, onClose, onSubmit, isPending, topics, default
             <label className="text-xs text-muted-foreground">Descrição</label>
             <Textarea {...register('description')} rows={2} placeholder="Descrição opcional" />
           </div>
+
+          {error && (
+            <p role="alert" className="text-sm text-destructive">
+              {error}
+            </p>
+          )}
 
           <DialogFooter>
             <Button type="button" variant="secondary" onClick={onClose}>

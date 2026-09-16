@@ -21,9 +21,11 @@ interface Props {
   onClose: () => void
   onSubmit: (data: AnnouncementFormData) => void
   isPending: boolean
+  /** Recusa da API no envio. Fica acima do rodapé, como os erros do Zod. */
+  error?: string | null
 }
 
-function AnnouncementForm({ open, announcement, onClose, onSubmit, isPending }: Props) {
+function AnnouncementForm({ open, announcement, onClose, onSubmit, isPending, error }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const isEditing = !!announcement
 
@@ -73,6 +75,12 @@ function AnnouncementForm({ open, announcement, onClose, onSubmit, isPending }: 
               className="w-full rounded-[var(--radius-md)] border border-border bg-surface px-3 py-2 text-sm file:mr-2 file:rounded-full file:border-0 file:bg-accent-100 file:px-3 file:py-1 file:text-accent-800"
             />
           </div>
+
+          {error && (
+            <p role="alert" className="text-sm text-destructive">
+              {error}
+            </p>
+          )}
 
           <DialogFooter>
             <Button type="button" variant="secondary" onClick={onClose}>

@@ -7,6 +7,7 @@ import { useCreateAnnouncement, useUpdateAnnouncement, useDeleteAnnouncement } f
 import AnnouncementCard from './AnnouncementCard'
 import AnnouncementForm from './AnnouncementForm'
 import ConfirmDialog from '@components/shared/ConfirmDialog'
+import { apiErrorMessage } from '@lib/api-error'
 import type { Announcement } from '../types'
 import type { AnnouncementFormData } from '../schemas/announcementSchema'
 import { Button } from '@components/ui/button'
@@ -77,17 +78,19 @@ function AnnouncementFeed({ classroomId }: Props) {
 
       <AnnouncementForm
         open={showForm}
-        onClose={() => setShowForm(false)}
+        onClose={() => { setShowForm(false); createAnnouncement.reset() }}
         onSubmit={handleCreate}
         isPending={createAnnouncement.isPending}
+        error={createAnnouncement.isError ? apiErrorMessage(createAnnouncement.error) : null}
       />
 
       <AnnouncementForm
         open={!!editing}
         announcement={editing}
-        onClose={() => setEditing(null)}
+        onClose={() => { setEditing(null); updateAnnouncement.reset() }}
         onSubmit={handleUpdate}
         isPending={updateAnnouncement.isPending}
+        error={updateAnnouncement.isError ? apiErrorMessage(updateAnnouncement.error) : null}
       />
 
       <ConfirmDialog
