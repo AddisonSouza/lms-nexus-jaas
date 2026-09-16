@@ -19,6 +19,7 @@ export function useEditSubmission(taskId: string) {
     mutationFn: updateSubmission,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: submissionKeys.byTask(taskId) })
+      queryClient.invalidateQueries({ queryKey: submissionKeys.myGrades() })
     },
   })
 }
