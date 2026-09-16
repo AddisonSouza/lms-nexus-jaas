@@ -100,7 +100,9 @@ describe('AcceptInvitePage', () => {
 
     it('shows error message when invitation is expired (410)', async () => {
       vi.mocked(invitationApi.getInvitationInfo).mockResolvedValue(mockInfo)
-      vi.mocked(invitationApi.acceptInvitation).mockRejectedValue({ response: { status: 410 } })
+      vi.mocked(invitationApi.acceptInvitation).mockRejectedValue({
+        response: { status: 410, data: { error: 'INVITATION_EXPIRED' } },
+      })
 
       renderPage()
 
@@ -110,6 +112,23 @@ describe('AcceptInvitePage', () => {
       await waitFor(() => {
         expect(screen.getByText(/expirou/i)).toBeTruthy()
       })
+    })
+
+    it('tells the invitee the invitation belongs to another e-mail (403)', async () => {
+      vi.mocked(invitationApi.getInvitationInfo).mockResolvedValue(mockInfo)
+      vi.mocked(invitationApi.acceptInvitation).mockRejectedValue({
+        response: { status: 403, data: { error: 'INVITATION_NOT_FOR_THIS_USER' } },
+      })
+
+      renderPage()
+
+      await waitFor(() => screen.getByRole('button', { name: /aceitar convite/i }))
+      await userEvent.click(screen.getByRole('button', { name: /aceitar convite/i }))
+
+      const alert = await screen.findByRole('alert')
+      expect(alert.textContent).toBe(
+        'Este convite foi enviado para outro e-mail. Entre com a conta convidada.'
+      )
     })
 
     it('tells the invitee the invitation was cancelled instead of expired (410 INVITATION_CANCELLED)', async () => {

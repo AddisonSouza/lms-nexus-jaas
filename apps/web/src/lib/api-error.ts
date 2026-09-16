@@ -70,6 +70,7 @@ const STATUS_MESSAGES: Record<number, string> = {
   403: 'Você não tem permissão para esta ação.',
   404: 'Não encontramos o que você procura.',
   409: 'Esta ação conflita com o estado atual. Recarregue a página.',
+  410: 'Este link não está mais disponível.',
   422: 'Dados inválidos. Revise os campos e tente de novo.',
   429: 'Muitas tentativas. Aguarde um pouco e tente de novo.',
 }

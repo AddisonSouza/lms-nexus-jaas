@@ -5,6 +5,7 @@ import { Loader2, UserPlus, XCircle } from 'lucide-react'
 import { useAuthStore } from '@store/authStore'
 import { getInvitationInfo } from '../api/invitation-api'
 import { useAcceptInvitation } from '../hooks/useAcceptInvitation'
+import { apiErrorMessage } from '@lib/api-error'
 import { Card, CardKicker } from '@components/ui/card'
 import { Badge } from '@components/ui/badge'
 import { Button } from '@components/ui/button'
@@ -83,21 +84,10 @@ function AcceptInvitePage() {
     )
   }
 
-  const acceptErrorResponse = (acceptError as { response?: { status?: number; data?: { error?: string } } })
-    ?.response
-  const acceptErrorStatus = acceptErrorResponse?.status
   // 410 cobre dois fins de convite: o prazo venceu ou o admin cancelou (e, num
-  // reenvio, o link antigo também cai aqui). Só o código diz qual.
-  const acceptErrorMessage =
-    acceptErrorStatus === 409
-      ? 'Você já é membro desta organização.'
-      : acceptErrorStatus === 410 && acceptErrorResponse?.data?.error === 'INVITATION_CANCELLED'
-        ? 'Este convite foi cancelado pelo administrador. Peça um novo convite.'
-        : acceptErrorStatus === 410
-          ? 'Este convite expirou.'
-          : acceptError
-            ? 'Erro ao aceitar convite. Tente novamente.'
-            : null
+  // reenvio, o link antigo também cai aqui). Só o código diz qual — o helper
+  // traduz cada um, incluindo o 403 de convite para outro e-mail.
+  const acceptErrorMessage = acceptError ? apiErrorMessage(acceptError) : null
 
   return (
     <Card elevation="md" className="w-full max-w-sm items-start p-6">
@@ -121,7 +111,11 @@ function AcceptInvitePage() {
         </div>
       </div>
 
-      {acceptErrorMessage && <p className="text-sm text-destructive">{acceptErrorMessage}</p>}
+      {acceptErrorMessage && (
+        <p role="alert" className="text-sm text-destructive">
+          {acceptErrorMessage}
+        </p>
+      )}
 
       <Button onClick={() => accept(token)} disabled={isAccepting} className="w-full">
         {isAccepting && <Loader2 className="h-4 w-4 animate-spin" />}
