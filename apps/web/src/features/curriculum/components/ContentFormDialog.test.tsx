@@ -107,4 +107,20 @@ describe('ContentFormDialog', () => {
     )
     expect(screen.getByRole('button', { name: /salvar/i }).hasAttribute('disabled')).toBe(true)
   })
+
+  it('shows the API refusal above the footer without closing', () => {
+    render(
+      <ContentFormDialog
+        open
+        onClose={vi.fn()}
+        onSubmit={vi.fn()}
+        isPending={false}
+        topics={TOPICS}
+        title="Novo Conteúdo"
+        error="Este tipo de arquivo não é permitido."
+      />,
+    )
+    expect(screen.getByRole('alert').textContent).toBe('Este tipo de arquivo não é permitido.')
+    expect(screen.getByRole('button', { name: /salvar/i })).toBeTruthy()
+  })
 })

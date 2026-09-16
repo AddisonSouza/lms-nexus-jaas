@@ -1,8 +1,8 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from 'lucide-react'
-import { evaluationSchema, type EvaluationFormData } from '../schemas/evaluation.schema'
+import { createEvaluationSchema, type EvaluationFormData } from '../schemas/evaluation.schema'
 import type { Task, TaskSubmission } from '../types'
 import {
   Dialog,
@@ -26,13 +26,15 @@ interface Props {
 }
 
 function EvaluationDialog({ open, submission, task, onClose, onSubmit, isPending }: Props) {
+  const schema = useMemo(() => createEvaluationSchema(task.maxScore), [task.maxScore])
+
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
   } = useForm<EvaluationFormData>({
-    resolver: zodResolver(evaluationSchema),
+    resolver: zodResolver(schema),
     defaultValues: { grade: null, feedback: '' },
   })
 
@@ -80,16 +82,20 @@ function EvaluationDialog({ open, submission, task, onClose, onSubmit, isPending
           {task.maxScore != null && (
             <div className="space-y-1">
               <label className="text-xs text-muted-foreground">Nota (máx. {task.maxScore})</label>
+              {/* Sem `min`/`max` nativos: o balão do navegador vem em inglês e
+                  impede o envio antes do Zod. Os limites são do schema. */}
               <Input
                 type="number"
                 step="0.01"
-                min="0"
-                max={task.maxScore}
                 {...register('grade', { valueAsNumber: true })}
                 className="w-32"
                 placeholder="Ex: 8.5"
               />
-              {errors.grade && <p className="text-xs text-destructive">{errors.grade.message}</p>}
+              {errors.grade && (
+                <p role="alert" className="text-xs text-destructive">
+                  {errors.grade.message}
+                </p>
+              )}
             </div>
           )}
 

@@ -23,6 +23,7 @@ import {
   DialogTitle,
 } from '@components/ui/dialog'
 import ConfirmDialog from '@components/shared/ConfirmDialog'
+import { apiErrorMessage } from '@lib/api-error'
 import { Button } from '@components/ui/button'
 
 interface SubjectDetailPageProps {
@@ -164,9 +165,10 @@ function SubjectDetailPage({ dashboardSlot }: SubjectDetailPageProps) {
 
       <ContentFormDialog
         open={showCreateContent}
-        onClose={() => { setShowCreateContent(false); setDefaultTopicId(undefined) }}
+        onClose={() => { setShowCreateContent(false); setDefaultTopicId(undefined); createContent.reset() }}
         onSubmit={handleCreateContent}
         isPending={createContent.isPending}
+        error={createContent.isError ? apiErrorMessage(createContent.error) : null}
         topics={topics}
         defaultTopicId={defaultTopicId}
         title="Novo Conteúdo"
