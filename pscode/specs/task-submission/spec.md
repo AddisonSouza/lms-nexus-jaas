@@ -101,3 +101,20 @@ O sistema SHALL reconhecer e exibir corretamente submissões com status `LATE` r
 #### Scenario: SubmissionStatus aceita LATE sem erro de tipo
 - **WHEN** código TypeScript compara `submission.status === 'LATE'`
 - **THEN** compilador TypeScript não reporta erro — `'LATE'` é membro do union type
+
+---
+
+### Requirement: Aluno edita a resposta pela tela "Minhas Tarefas"
+O front SHALL oferecer a ação de editar a resposta enquanto a edição for permitida pela API, e aceitar a resposta do `PUT` mesmo sem `createdAt`.
+
+#### Scenario: Ação de edição disponível
+- **WHEN** a tarefa tem `submission.status == SUBMITTED` e o prazo não expirou
+- **THEN** a lista exibe "Editar resposta", que abre o formulário vazio avisando que a nova resposta substitui a anterior, inclusive os anexos
+
+#### Scenario: Ação de edição indisponível
+- **WHEN** o prazo expirou ou `submission.status == EVALUATED`
+- **THEN** a lista não exibe "Editar resposta"
+
+#### Scenario: Resposta do PUT sem createdAt
+- **WHEN** `PUT /tasks/{id}/submissions/{submissionId}` retorna 200 com `createdAt: null`
+- **THEN** o front aceita a resposta, fecha o diálogo e atualiza a lista do aluno

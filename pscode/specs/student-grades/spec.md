@@ -42,3 +42,20 @@ O sistema SHALL calcular e expor no DTO se a submissão foi entregue após o pra
 #### Scenario: Submissão fora do prazo
 - **WHEN** `submission.createdAt > task.deadline`
 - **THEN** `lateSubmission: true`
+
+---
+
+### Requirement: Tela "Minhas Tarefas" do aluno
+O front SHALL exibir ao ALUNO as tarefas retornadas por `GET /tasks/my-grades`, distinguindo falha de carga de lista vazia.
+
+#### Scenario: Lista renderiza a resposta da API
+- **WHEN** `GET /tasks/my-grades` retorna 200
+- **THEN** a tela lista as tarefas; o payload é aceito mesmo sem `updatedAt`, que `TaskWithGradeResponse` não envia
+
+#### Scenario: Falha de carga
+- **WHEN** a consulta de `my-grades` falha
+- **THEN** a tela mostra o estado de erro com "Tentar de novo", e não a mensagem de lista vazia
+
+#### Scenario: Aluno sem tarefas
+- **WHEN** `GET /tasks/my-grades` retorna lista vazia
+- **THEN** a tela mostra "Nenhuma tarefa disponível no momento."
