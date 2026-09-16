@@ -82,16 +82,20 @@ function EvaluationDialog({ open, submission, task, onClose, onSubmit, isPending
           {task.maxScore != null && (
             <div className="space-y-1">
               <label className="text-xs text-muted-foreground">Nota (máx. {task.maxScore})</label>
+              {/* Sem `min`/`max` nativos: o balão do navegador vem em inglês e
+                  impede o envio antes do Zod. Os limites são do schema. */}
               <Input
                 type="number"
                 step="0.01"
-                min="0"
-                max={task.maxScore}
                 {...register('grade', { valueAsNumber: true })}
                 className="w-32"
                 placeholder="Ex: 8.5"
               />
-              {errors.grade && <p className="text-xs text-destructive">{errors.grade.message}</p>}
+              {errors.grade && (
+                <p role="alert" className="text-xs text-destructive">
+                  {errors.grade.message}
+                </p>
+              )}
             </div>
           )}
 
