@@ -73,7 +73,7 @@ public class ListStudentGradesService implements ListStudentGradesUseCase {
                 .description(task.getDescription())
                 .deadline(task.getDeadline())
                 .maxScore(task.getMaxScore())
-                .status(task.getStatus())
+                .status(task.effectiveStatus())
                 .attachments(attachments)
                 .createdAt(task.getCreatedAt())
                 .submission(submissionSummary)

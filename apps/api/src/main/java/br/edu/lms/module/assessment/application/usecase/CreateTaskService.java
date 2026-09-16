@@ -116,7 +116,7 @@ public class CreateTaskService implements CreateTaskUseCase {
                 .description(task.getDescription())
                 .deadline(task.getDeadline())
                 .maxScore(task.getMaxScore())
-                .status(task.getStatus())
+                .status(task.effectiveStatus())
                 .attachments(attachmentResponses)
                 .createdAt(task.getCreatedAt())
                 .updatedAt(task.getUpdatedAt())
