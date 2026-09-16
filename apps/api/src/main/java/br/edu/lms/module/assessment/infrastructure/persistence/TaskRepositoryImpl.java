@@ -61,8 +61,10 @@ public class TaskRepositoryImpl implements TaskRepository {
     @Override
     @Transactional
     public List<Task> findPublishedByOrganization(String organizationId) {
+        // CLOSED entra junto: uma tarefa com prazo vencido segue visível ao aluno,
+        // que precisa alcançar a própria nota (RF-14). Só o envio é bloqueado.
         TypedQuery<TaskJpaEntity> q = em.createQuery(
-                "SELECT t FROM TaskJpaEntity t WHERE t.organizationId = :orgId AND t.status = 'PUBLISHED' AND t.deletedAt IS NULL ORDER BY t.deadline ASC",
+                "SELECT t FROM TaskJpaEntity t WHERE t.organizationId = :orgId AND t.status IN ('PUBLISHED', 'CLOSED') AND t.deletedAt IS NULL ORDER BY t.deadline ASC",
                 TaskJpaEntity.class);
         q.setParameter("orgId", organizationId);
         return q.getResultList().stream().map(taskMapper::toDomain).toList();

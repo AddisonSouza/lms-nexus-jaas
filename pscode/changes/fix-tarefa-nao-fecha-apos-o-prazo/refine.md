@@ -46,7 +46,7 @@ papéis, sem deixar de mostrar a nota já recebida.
 ## Subtasks
 - [x] Adicionar `Task.effectiveStatus()` no domínio + teste unitário cobrindo prazo vencido, prazo futuro e DRAFT/GRADED
 - [x] Expor `effectiveStatus()` nos três use cases de leitura (`ListTasksService`, `ListPublishedTasksService`, `ListStudentGradesService`)
-- [ ] Ampliar `findPublishedByOrganization` para `status IN ('PUBLISHED','CLOSED')` mantendo a tarefa vencida visível ao aluno
+- [x] Ampliar `findPublishedByOrganization` para `status IN ('PUBLISHED','CLOSED')` mantendo a tarefa vencida visível ao aluno
 - [ ] Inverter a ordem das checagens em `SubmitTaskService` para preservar o 422 `DeadlineExpired`
 - [ ] Teste de integração (Testcontainers) cobrindo tarefa vencida retornando `CLOSED` nos três endpoints
 - [ ] Front professor: mapa `TASK_STATUS_LABEL` no badge de `TaskListPage`
