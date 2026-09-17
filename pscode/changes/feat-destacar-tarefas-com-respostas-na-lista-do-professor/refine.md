@@ -47,7 +47,7 @@ badge de destaque nas que têm avaliação pendente.
 
 ## Subtasks
 - [ ] BE: `countByTasks(taskIds, orgId)` na porta `SubmissionRepository` e a query agregada no `SubmissionRepositoryImpl`, com teste de integração (tarefa sem submissão, só pendentes, mistas, submissão removida)
-- [ ] BE: `TaskSummaryResponse` + mapper MapStruct, com `ListTasksService` casando os contadores por `taskId`
+- [x] BE: `TaskSummaryResponse` + mapper MapStruct, com `ListTasksService` casando os contadores por `taskId`
 - [ ] BE: `TaskResource.list()` devolvendo o novo DTO, com teste de integração do `GET /tasks`
 - [ ] Docs: registrar `submissionCount` e `pendingEvaluationCount` no `API_CONTRACT.md` e na spec `task-creation`
 - [ ] FE: `taskSummarySchema` e o tipo `TaskSummary` em `api/tasks.ts` / `types.ts`

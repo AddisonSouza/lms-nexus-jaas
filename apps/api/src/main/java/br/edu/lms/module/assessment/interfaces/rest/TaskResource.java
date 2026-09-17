@@ -6,6 +6,7 @@ import br.edu.lms.module.assessment.application.dto.EditSubmissionCommand;
 import br.edu.lms.module.assessment.application.dto.SubmissionResponse;
 import br.edu.lms.module.assessment.application.dto.SubmitTaskCommand;
 import br.edu.lms.module.assessment.application.dto.TaskResponse;
+import br.edu.lms.module.assessment.application.dto.TaskSummaryResponse;
 import br.edu.lms.module.assessment.application.dto.TaskWithGradeResponse;
 import br.edu.lms.module.assessment.domain.port.in.CreateTaskUseCase;
 import br.edu.lms.module.assessment.domain.port.in.EditSubmissionUseCase;
@@ -55,7 +56,7 @@ public class TaskResource {
     @GET
     @RolesAllowed({"PROFESSOR", "GESTOR", "ADMIN_ORG"})
     @Operation(summary = "Listar tarefas do professor na organização")
-    public List<TaskResponse> list() {
+    public List<TaskSummaryResponse> list() {
         String orgId = (String) jwt.getClaim("org");
         String userId = jwt.getSubject();
         return listTasksUseCase.execute(orgId, userId);
