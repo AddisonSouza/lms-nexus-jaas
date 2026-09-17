@@ -36,6 +36,21 @@ public class Task {
         return this.toBuilder().status(TaskStatus.PUBLISHED).build();
     }
 
+    /**
+     * Status como o usuário deve ver: uma tarefa publicada cujo prazo já passou
+     * está encerrada, mesmo que o banco ainda guarde PUBLISHED. Derivar na
+     * leitura evita job agendado e escrita em GET — e mantém o prazo como única
+     * fonte da verdade.
+     */
+    public TaskStatus effectiveStatus() {
+        if (this.status == TaskStatus.PUBLISHED
+                && this.deadline != null
+                && this.deadline.isBefore(LocalDateTime.now())) {
+            return TaskStatus.CLOSED;
+        }
+        return this.status;
+    }
+
     public Task close() {
         if (this.status != TaskStatus.PUBLISHED) {
             throw new br.edu.lms.module.assessment.domain.exception.InvalidTaskStateException(this.status, TaskStatus.CLOSED);

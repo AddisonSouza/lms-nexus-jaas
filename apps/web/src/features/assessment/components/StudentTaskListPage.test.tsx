@@ -104,6 +104,42 @@ describe('StudentTaskListPage', () => {
     expect(screen.queryByRole('button', { name: /Editar resposta/ })).toBeNull()
   })
 
+  it('marks the task as Encerrada once the API reports CLOSED', async () => {
+    vi.mocked(submissionsApi.listStudentGrades).mockResolvedValue([
+      { ...tarefa, deadline: '2020-01-01T23:59:00', status: 'CLOSED' },
+    ])
+
+    render(<StudentTaskListPage />, { wrapper })
+
+    expect(await screen.findByText('Encerrada')).toBeTruthy()
+  })
+
+  it('keeps the grade of a closed task reachable', async () => {
+    vi.mocked(submissionsApi.listStudentGrades).mockResolvedValue([
+      {
+        ...tarefa,
+        deadline: '2020-01-01T23:59:00',
+        status: 'CLOSED',
+        submission: { ...submissionEnviada, status: 'EVALUATED', grade: 9 },
+      },
+    ])
+
+    render(<StudentTaskListPage />, { wrapper })
+
+    expect(await screen.findByText('Encerrada')).toBeTruthy()
+    expect(screen.getByText('Nota: 9 / 10')).toBeTruthy()
+    expect(screen.getByRole('button', { name: /Ver Nota/ })).toBeTruthy()
+  })
+
+  it('does not show Encerrada while the task is still open', async () => {
+    vi.mocked(submissionsApi.listStudentGrades).mockResolvedValue([tarefa])
+
+    render(<StudentTaskListPage />, { wrapper })
+
+    await screen.findByText('Trabalho de Álgebra')
+    expect(screen.queryByText('Encerrada')).toBeNull()
+  })
+
   it('sends the edited answer through updateSubmission', async () => {
     vi.mocked(submissionsApi.listStudentGrades).mockResolvedValue([
       { ...tarefa, submission: { ...submissionEnviada } },

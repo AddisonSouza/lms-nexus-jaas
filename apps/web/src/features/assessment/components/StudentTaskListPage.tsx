@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Send, Eye, CheckCircle, Clock, AlertCircle, Pencil } from 'lucide-react'
+import { Send, Eye, CheckCircle, Clock, AlertCircle, Pencil, Lock } from 'lucide-react'
 import { useStudentGrades } from '../hooks/useStudentGrades'
 import { useSubmitTask, useEditSubmission } from '../hooks/useSubmitTask'
 import SubmissionFormDialog from './SubmissionFormDialog'
@@ -110,7 +110,17 @@ function StudentTaskListPage() {
                   </div>
 
                   <div className="flex flex-col items-end gap-2">
-                    <StatusBadge task={task} />
+                    <div className="flex items-center gap-2">
+                      {/* O prazo encerra a tarefa; o badge ao lado segue contando
+                          a entrega, que continua valendo depois de encerrada. */}
+                      {task.status === 'CLOSED' && (
+                        <Badge variant="neutral">
+                          <Lock className="mr-1 h-3 w-3" />
+                          Encerrada
+                        </Badge>
+                      )}
+                      <StatusBadge task={task} />
+                    </div>
 
                     <div className="flex gap-2">
                       {isEvaluated && (
