@@ -29,6 +29,11 @@ public class SubmissionRepositoryImpl implements SubmissionRepository {
         var entity = toEntityWithAttachments(submission);
         var managed = em.merge(entity);
         em.flush();
+        // `createdAt` é `updatable = false`: o banco mantém o valor, mas o merge
+        // copia o null da entidade destacada para a gerenciada. Sem reler o
+        // estado persistido, a resposta sai com `createdAt: null` e o Zod do
+        // front recusa a resposta inteira — a avaliação salva e a tela não sabe.
+        em.refresh(managed);
         return submissionMapper.toDomain(managed);
     }
 

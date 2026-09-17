@@ -32,7 +32,7 @@ atualiza na hora.
 - Diálogos que já fecham (turma, disciplina, tópico); afrouxar schemas Zod.
 
 ## Subtasks
-- [ ] API: avaliação de submissão retorna `createdAt`/`updatedAt` preenchidos + teste de integração
-- [ ] API: adicionar membro à turma retorna `joinedAt` preenchido + teste de integração
-- [ ] Web: testes de `SubmissionListDrawer`/`EvaluationDialog` (fecha, invalida, submit pendente desabilitado)
-- [ ] Web: testes de `ClassroomMembersPanel` (fecha, invalida membros, submit pendente desabilitado)
+- [x] API: avaliação de submissão retorna `createdAt`/`updatedAt` preenchidos + teste de integração
+- [x] API: adicionar membro à turma retorna `joinedAt` preenchido + teste de integração
+- [x] Web: testes de `SubmissionListDrawer`/`EvaluationDialog` (fecha, invalida, submit pendente desabilitado)
+- [x] Web: testes de `ClassroomMembersPanel` (fecha, invalida membros, submit pendente desabilitado)

@@ -97,8 +97,16 @@ public class ClassroomRepositoryImpl implements ClassroomRepository {
     @Transactional
     public ClassroomMember saveMember(ClassroomMember member) {
         var entity = classroomMapper.toMemberEntity(member);
-        em.merge(entity);
-        return member;
+        var managed = em.merge(entity);
+        // O `joinedAt` nasce no @PrePersist, que só roda no flush. Devolver o
+        // domínio de entrada devolvia esse campo nulo, e o Zod do front recusava
+        // a resposta inteira — o membro entrava e a tela não fechava o diálogo.
+        em.flush();
+        // A coluna não guarda fração de segundo: sem reler, a resposta traria os
+        // nanossegundos do `LocalDateTime.now()` e não bateria com o que a
+        // listagem devolve depois, para o mesmo membro.
+        em.refresh(managed);
+        return classroomMapper.toMemberDomain(managed);
     }
 
     @Override
