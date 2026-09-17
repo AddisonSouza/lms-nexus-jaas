@@ -29,6 +29,8 @@ const draft = {
 
 const published = { ...draft, status: 'PUBLISHED' as const }
 const closed = { ...draft, status: 'CLOSED' as const }
+const comPendentes = { ...published, submissionCount: 5, pendingEvaluationCount: 3 }
+const todasAvaliadas = { ...published, submissionCount: 4, pendingEvaluationCount: 0 }
 
 function renderPage() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })
@@ -89,6 +91,45 @@ describe('TaskListPage', () => {
     renderPage()
 
     expect(await screen.findByText('Rascunho')).toBeTruthy()
+  })
+
+  it('destaca quantas respostas faltam avaliar', async () => {
+    vi.mocked(tasksApi.listTasks).mockResolvedValue([comPendentes])
+
+    renderPage()
+
+    expect(await screen.findByText('3 a avaliar')).toBeTruthy()
+    expect(screen.getByText('5 respostas')).toBeTruthy()
+  })
+
+  it('mostra o total sem badge quando não há pendência', async () => {
+    vi.mocked(tasksApi.listTasks).mockResolvedValue([todasAvaliadas])
+
+    renderPage()
+
+    expect(await screen.findByText('4 respostas')).toBeTruthy()
+    expect(screen.queryByText(/a avaliar/)).toBeNull()
+  })
+
+  it('não mostra contador algum na tarefa sem respostas', async () => {
+    vi.mocked(tasksApi.listTasks).mockResolvedValue([published])
+
+    renderPage()
+
+    await screen.findByText('Lista 01')
+    expect(screen.queryByText(/respostas?$/)).toBeNull()
+    expect(screen.queryByText(/a avaliar/)).toBeNull()
+  })
+
+  it('usa o singular com uma resposta só', async () => {
+    vi.mocked(tasksApi.listTasks).mockResolvedValue([
+      { ...published, submissionCount: 1, pendingEvaluationCount: 1 },
+    ])
+
+    renderPage()
+
+    expect(await screen.findByText('1 resposta')).toBeTruthy()
+    expect(screen.getByText('1 a avaliar')).toBeTruthy()
   })
 
   it('mostra mensagem de erro quando a publicação falha', async () => {
