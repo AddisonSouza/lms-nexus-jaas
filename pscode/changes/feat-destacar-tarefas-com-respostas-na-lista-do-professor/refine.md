@@ -52,4 +52,4 @@ badge de destaque nas que têm avaliação pendente.
 - [x] Docs: registrar `submissionCount` e `pendingEvaluationCount` no `API_CONTRACT.md` e na spec `task-creation`
 - [x] FE: `taskSummarySchema` e o tipo `TaskSummary` em `api/tasks.ts` / `types.ts`
 - [x] FE: badge "N a avaliar" e total de respostas em `TaskListPage`, com teste dos três casos (sem respostas, com pendentes, todas avaliadas)
-- [ ] Rodar lint, type-check e as duas suítes; validar a lista no navegador como professor
+- [x] Rodar lint, type-check e as duas suítes; validar a lista no navegador como professor
