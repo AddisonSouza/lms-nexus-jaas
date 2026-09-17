@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, BookOpenCheck, Plus } from 'lucide-react'
 import { useAuthStore } from '@store/authStore'
 import { API_BASE_URL } from '@lib/axios'
+import { useSubject } from '../hooks/useSubject'
 import { useSubjectContents } from '../hooks/useSubjectContents'
 import { useTopics } from '../hooks/useTopics'
 import { useCreateTopic } from '../hooks/useCreateTopic'
@@ -37,6 +38,7 @@ function SubjectDetailPage({ dashboardSlot }: SubjectDetailPageProps) {
   const role = useAuthStore((s) => s.role)
   const canManage = role === 'PROFESSOR' || role === 'ADMIN_ORG' || role === 'GESTOR'
 
+  const { data: subject } = useSubject(id)
   const { data: grouped, isLoading } = useSubjectContents(id)
   const { data: topics = [] } = useTopics(id)
 
@@ -111,7 +113,9 @@ function SubjectDetailPage({ dashboardSlot }: SubjectDetailPageProps) {
         </Link>
         <div className="flex items-center gap-2">
           <BookOpenCheck className="h-5 w-5 text-accent" />
-          <h2 className="mb-0">Conteúdo da Disciplina</h2>
+          {/* Sem o nome, quem chega de uma lista de disciplinas não sabe em qual entrou. */}
+          <h2 className="mb-0">{subject?.name ?? 'Conteúdo da Disciplina'}</h2>
+          {subject?.code && <span className="text-sm text-muted-foreground">{subject.code}</span>}
         </div>
       </div>
 

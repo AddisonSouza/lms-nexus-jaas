@@ -58,4 +58,4 @@ membro — e corrige a mensagem de erro de permissão.
 - [x] Aplicar a checagem de matrícula do ALUNO no `ListTopicsService`
 - [x] Exibir "Disciplinas" na sidebar para o papel ALUNO
 - [x] Tratar 403 no `ListErrorState` com mensagem de permissão e sem botão de retry
-- [ ] Exibir o nome da disciplina no cabeçalho da `SubjectDetailPage` via `useSubject`
+- [x] Exibir o nome da disciplina no cabeçalho da `SubjectDetailPage` via `useSubject`
