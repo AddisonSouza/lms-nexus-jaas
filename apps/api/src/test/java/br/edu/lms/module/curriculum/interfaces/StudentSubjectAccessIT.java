@@ -189,4 +189,25 @@ class StudentSubjectAccessIT {
                 .statusCode(200)
                 .body("id", equalTo(subjectSemTurma));
     }
+
+    @Test
+    @TestSecurity(user = STUDENT_ID, roles = {"ALUNO"})
+    @JwtSecurity(claims = { @Claim(key = "sub", value = STUDENT_ID), @Claim(key = "org", value = ORG_ID) })
+    void studentIsRefusedOnTheTopicsOfASubjectTheyDoNotAttend() {
+        given()
+                .when().get("/subjects/{id}/topics", subjectDeOutraTurma)
+                .then()
+                .statusCode(403)
+                .body("error", equalTo("CONTENT_ACCESS_DENIED"));
+    }
+
+    @Test
+    @TestSecurity(user = STUDENT_ID, roles = {"ALUNO"})
+    @JwtSecurity(claims = { @Claim(key = "sub", value = STUDENT_ID), @Claim(key = "org", value = ORG_ID) })
+    void studentReadsTheTopicsOfTheirOwnSubject() {
+        given()
+                .when().get("/subjects/{id}/topics", subjectDoAluno)
+                .then()
+                .statusCode(200);
+    }
 }
