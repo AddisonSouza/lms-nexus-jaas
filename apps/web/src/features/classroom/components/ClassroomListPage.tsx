@@ -16,7 +16,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 function ClassroomListPage() {
   const [showCreate, setShowCreate] = useState(false)
   const [showJoin, setShowJoin] = useState(false)
-  const { data: classrooms, isLoading, isError, isFetching, refetch } = useClassrooms()
+  const { data: classrooms, isLoading, isError, error, isFetching, refetch } = useClassrooms()
   const createClassroom = useCreateClassroom()
 
   const role = useAuthStore((s) => s.role)
@@ -55,7 +55,7 @@ function ClassroomListPage() {
       {isLoading ? (
         <p className="text-muted-foreground">Carregando turmas...</p>
       ) : isError ? (
-        <ListErrorState subject="as turmas" onRetry={() => void refetch()} isRetrying={isFetching} />
+        <ListErrorState subject="as turmas" error={error} onRetry={() => void refetch()} isRetrying={isFetching} />
       ) : classrooms?.length === 0 ? (
         <p className="text-muted-foreground">Nenhuma turma encontrada.</p>
       ) : (
