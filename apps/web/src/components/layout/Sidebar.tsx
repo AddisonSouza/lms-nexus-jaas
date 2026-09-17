@@ -37,12 +37,12 @@ function Sidebar() {
           Turmas
         </NavLink>
 
-        {canTeach(role) && (
-          <NavLink to="/curriculum" className={linkClass}>
-            <BookOpenCheck className="h-[19px] w-[19px] shrink-0" />
-            Disciplinas
-          </NavLink>
-        )}
+        {/* Sem papel: o aluno precisa chegar aos materiais das disciplinas dele.
+            A listagem já vem filtrada pelas turmas de que ele é membro. */}
+        <NavLink to="/curriculum" className={linkClass}>
+          <BookOpenCheck className="h-[19px] w-[19px] shrink-0" />
+          Disciplinas
+        </NavLink>
 
         {canTeach(role) && (
           <NavLink to="/assessment/tasks" className={linkClass}>

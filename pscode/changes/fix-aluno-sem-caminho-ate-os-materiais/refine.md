@@ -56,6 +56,6 @@ membro — e corrige a mensagem de erro de permissão.
 - [x] Abrir `GET /subjects` ao ALUNO filtrando pelas turmas do aluno no `ListSubjectsService`
 - [x] Abrir `GET /subjects/{id}` ao ALUNO com checagem de matrícula no `GetSubjectService` (403 `CONTENT_ACCESS_DENIED`)
 - [x] Aplicar a checagem de matrícula do ALUNO no `ListTopicsService`
-- [ ] Exibir "Disciplinas" na sidebar para o papel ALUNO
+- [x] Exibir "Disciplinas" na sidebar para o papel ALUNO
 - [ ] Tratar 403 no `ListErrorState` com mensagem de permissão e sem botão de retry
 - [ ] Exibir o nome da disciplina no cabeçalho da `SubjectDetailPage` via `useSubject`
