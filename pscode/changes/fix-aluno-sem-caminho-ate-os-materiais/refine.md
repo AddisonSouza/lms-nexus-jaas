@@ -52,7 +52,7 @@ membro — e corrige a mensagem de erro de permissão.
 
 ## Subtasks
 
-- [ ] Adicionar `findClassroomIdsByUser` ao `ClassroomQueryPort` do curriculum e implementar em `ClassroomQueryPortImpl`
+- [x] Adicionar `findClassroomIdsByUser` ao `ClassroomQueryPort` do curriculum e implementar em `ClassroomQueryPortImpl`
 - [ ] Abrir `GET /subjects` ao ALUNO filtrando pelas turmas do aluno no `ListSubjectsService`
 - [ ] Abrir `GET /subjects/{id}` ao ALUNO com checagem de matrícula no `GetSubjectService` (403 `CONTENT_ACCESS_DENIED`)
 - [ ] Aplicar a checagem de matrícula do ALUNO no `ListTopicsService`

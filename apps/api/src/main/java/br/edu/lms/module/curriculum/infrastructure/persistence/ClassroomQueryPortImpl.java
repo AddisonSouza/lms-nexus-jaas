@@ -49,4 +49,15 @@ public class ClassroomQueryPortImpl implements ClassroomQueryPort {
                 .getSingleResult();
         return count > 0;
     }
+
+    @Override
+    public List<String> findClassroomIdsByUser(String userId, String organizationId) {
+        return em.createQuery(
+                        "SELECT m.classroomId FROM br.edu.lms.module.classroom.infrastructure.persistence.ClassroomMemberJpaEntity m " +
+                        "WHERE m.userId = :uid AND m.organizationId = :orgId AND m.deletedAt IS NULL",
+                        String.class)
+                .setParameter("uid", userId)
+                .setParameter("orgId", organizationId)
+                .getResultList();
+    }
 }
