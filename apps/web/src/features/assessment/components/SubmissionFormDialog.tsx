@@ -20,11 +20,13 @@ interface Props {
   onClose: () => void
   onSubmit: (data: SubmissionFormData) => void
   isPending: boolean
+  /** Recusa da API — 422 de tipo de arquivo, por exemplo. O diálogo segue aberto. */
+  error?: string | null
   /** 'edit' substitui a resposta já enviada; o formulário abre vazio. */
   mode?: 'create' | 'edit'
 }
 
-function SubmissionFormDialog({ open, taskTitle, deadline, onClose, onSubmit, isPending, mode = 'create' }: Props) {
+function SubmissionFormDialog({ open, taskTitle, deadline, onClose, onSubmit, isPending, error, mode = 'create' }: Props) {
   const isEdit = mode === 'edit'
   const actionLabel = isEdit ? 'Salvar Resposta' : 'Enviar Resposta'
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -90,6 +92,12 @@ function SubmissionFormDialog({ open, taskTitle, deadline, onClose, onSubmit, is
               <p className="text-xs text-muted-foreground">PDF, DOC, DOCX, ZIP, JPG, PNG — máx. 50MB cada</p>
               {errors.files && <p className="text-xs text-destructive">{errors.files.message}</p>}
             </div>
+
+            {error && (
+              <p role="alert" className="text-sm text-destructive">
+                {error}
+              </p>
+            )}
 
             <DialogFooter>
               <Button type="button" variant="secondary" onClick={onClose}>

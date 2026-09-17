@@ -29,7 +29,7 @@ o resto com uma mensagem clara na tela.
 - Validação por magic bytes; antivírus; limite de tamanho.
 
 ## Subtasks
-- [ ] Criar `AttachmentTypePolicy` (extensão + MIME) no domínio `assessment` com testes unitários
-- [ ] Aplicar a política em `SubmitTaskService` e `EditSubmissionService` antes do `store`, com testes (`.exe` → 422, nada armazenado)
-- [ ] Front: `submission.schema.ts` valida extensão além do MIME
-- [ ] Front: `SubmissionFormDialog` exibe o erro 422 da submissão
+- [x] Criar `AttachmentTypePolicy` (extensão + MIME) no domínio `assessment` com testes unitários
+- [x] Aplicar a política em `SubmitTaskService` e `EditSubmissionService` antes do `store`, com testes (`.exe` → 422, nada armazenado)
+- [x] Front: `submission.schema.ts` valida extensão além do MIME
+- [x] Front: `SubmissionFormDialog` exibe o erro 422 da submissão
