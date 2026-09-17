@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 
@@ -154,5 +155,38 @@ class StudentSubjectAccessIT {
     @Test
     void listingWithoutATokenIsStillUnauthorized() {
         given().when().get("/subjects").then().statusCode(401);
+    }
+
+    @Test
+    @TestSecurity(user = STUDENT_ID, roles = {"ALUNO"})
+    @JwtSecurity(claims = { @Claim(key = "sub", value = STUDENT_ID), @Claim(key = "org", value = ORG_ID) })
+    void studentReachesTheSubjectOfTheirClassroom() {
+        given()
+                .when().get("/subjects/{id}", subjectDoAluno)
+                .then()
+                .statusCode(200)
+                .body("id", equalTo(subjectDoAluno));
+    }
+
+    @Test
+    @TestSecurity(user = STUDENT_ID, roles = {"ALUNO"})
+    @JwtSecurity(claims = { @Claim(key = "sub", value = STUDENT_ID), @Claim(key = "org", value = ORG_ID) })
+    void studentIsRefusedOnASubjectOfAnotherClassroom() {
+        given()
+                .when().get("/subjects/{id}", subjectDeOutraTurma)
+                .then()
+                .statusCode(403)
+                .body("error", equalTo("CONTENT_ACCESS_DENIED"));
+    }
+
+    @Test
+    @TestSecurity(user = TEACHER_ID, roles = {"PROFESSOR"})
+    @JwtSecurity(claims = { @Claim(key = "sub", value = TEACHER_ID), @Claim(key = "org", value = ORG_ID) })
+    void teacherReachesASubjectWithNoClassroomLinked() {
+        given()
+                .when().get("/subjects/{id}", subjectSemTurma)
+                .then()
+                .statusCode(200)
+                .body("id", equalTo(subjectSemTurma));
     }
 }

@@ -54,7 +54,7 @@ membro — e corrige a mensagem de erro de permissão.
 
 - [x] Adicionar `findClassroomIdsByUser` ao `ClassroomQueryPort` do curriculum e implementar em `ClassroomQueryPortImpl`
 - [x] Abrir `GET /subjects` ao ALUNO filtrando pelas turmas do aluno no `ListSubjectsService`
-- [ ] Abrir `GET /subjects/{id}` ao ALUNO com checagem de matrícula no `GetSubjectService` (403 `CONTENT_ACCESS_DENIED`)
+- [x] Abrir `GET /subjects/{id}` ao ALUNO com checagem de matrícula no `GetSubjectService` (403 `CONTENT_ACCESS_DENIED`)
 - [ ] Aplicar a checagem de matrícula do ALUNO no `ListTopicsService`
 - [ ] Exibir "Disciplinas" na sidebar para o papel ALUNO
 - [ ] Tratar 403 no `ListErrorState` com mensagem de permissão e sem botão de retry
