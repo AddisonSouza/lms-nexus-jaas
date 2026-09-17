@@ -5,5 +5,5 @@ import br.edu.lms.module.curriculum.application.dto.TopicResponse;
 import java.util.List;
 
 public interface ListTopicsUseCase {
-    List<TopicResponse> execute(String subjectId, String organizationId);
+    List<TopicResponse> execute(String subjectId, String organizationId, String requestingUserId, String requestingUserRole);
 }

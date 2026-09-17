@@ -21,7 +21,7 @@ function SubjectListPage() {
   const [editTarget, setEditTarget] = useState<Subject | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Subject | null>(null)
 
-  const { data: subjects, isLoading, isError, isFetching, refetch } = useSubjects()
+  const { data: subjects, isLoading, isError, error, isFetching, refetch } = useSubjects()
   const createSubject = useCreateSubject()
   const updateSubject = useUpdateSubject(editTarget?.id ?? '')
   const deleteSubject = useDeleteSubject()
@@ -82,7 +82,7 @@ function SubjectListPage() {
       {isLoading ? (
         <p className="text-muted-foreground">Carregando disciplinas...</p>
       ) : isError ? (
-        <ListErrorState subject="as disciplinas" onRetry={() => void refetch()} isRetrying={isFetching} />
+        <ListErrorState subject="as disciplinas" error={error} onRetry={() => void refetch()} isRetrying={isFetching} />
       ) : subjects?.length === 0 ? (
         <p className="text-muted-foreground">Nenhuma disciplina encontrada.</p>
       ) : (

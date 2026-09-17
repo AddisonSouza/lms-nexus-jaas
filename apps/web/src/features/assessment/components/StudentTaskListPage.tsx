@@ -39,7 +39,7 @@ function StatusBadge({ task }: { task: TaskWithGrade }) {
 }
 
 function StudentTaskListPage() {
-  const { data: tasks = [], isLoading, isError, isFetching, refetch } = useStudentGrades()
+  const { data: tasks = [], isLoading, isError, error, isFetching, refetch } = useStudentGrades()
   const [submitting, setSubmitting] = useState<TaskWithGrade | null>(null)
   const [editing, setEditing] = useState<TaskWithGrade | null>(null)
   const [viewingGrade, setViewingGrade] = useState<TaskWithGrade | null>(null)
@@ -79,7 +79,7 @@ function StudentTaskListPage() {
       </div>
 
       {isError ? (
-        <ListErrorState subject="as tarefas" onRetry={() => void refetch()} isRetrying={isFetching} />
+        <ListErrorState subject="as tarefas" error={error} onRetry={() => void refetch()} isRetrying={isFetching} />
       ) : tasks.length === 0 ? (
         <p className="text-muted-foreground">Nenhuma tarefa disponível no momento.</p>
       ) : (

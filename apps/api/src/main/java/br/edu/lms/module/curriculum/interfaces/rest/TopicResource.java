@@ -44,7 +44,9 @@ public class TopicResource {
     @Operation(summary = "Listar tópicos da disciplina")
     public Response list(@PathParam("subjectId") String subjectId) {
         String orgId = (String) jwt.getClaim("org");
-        return Response.ok(listTopicsUseCase.execute(subjectId, orgId)).build();
+        String userId = jwt.getSubject();
+        String role = jwt.getGroups().stream().findFirst().orElse("ALUNO");
+        return Response.ok(listTopicsUseCase.execute(subjectId, orgId, userId, role)).build();
     }
 
     @POST

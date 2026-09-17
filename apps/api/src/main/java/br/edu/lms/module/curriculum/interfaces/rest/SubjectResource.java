@@ -50,23 +50,28 @@ public class SubjectResource {
     private final JsonWebToken jwt;
 
     @GET
-    @RolesAllowed({"ADMIN_ORG", "GESTOR", "PROFESSOR"})
+    @RolesAllowed({"ADMIN_ORG", "GESTOR", "PROFESSOR", "ALUNO"})
     @Operation(summary = "Listar disciplinas")
     @APIResponse(responseCode = "200", description = "Lista de disciplinas")
     public Response list() {
         var orgId = (String) jwt.getClaim("org");
-        return Response.ok(listSubjectsUseCase.execute(orgId)).build();
+        var userId = jwt.getSubject();
+        var role = jwt.getGroups().stream().findFirst().orElse("ALUNO");
+        return Response.ok(listSubjectsUseCase.execute(orgId, userId, role)).build();
     }
 
     @GET
     @Path("/{id}")
-    @RolesAllowed({"ADMIN_ORG", "GESTOR", "PROFESSOR"})
+    @RolesAllowed({"ADMIN_ORG", "GESTOR", "PROFESSOR", "ALUNO"})
     @Operation(summary = "Detalhar disciplina")
     @APIResponse(responseCode = "200", description = "Disciplina encontrada")
+    @APIResponse(responseCode = "403", description = "Aluno não matriculado em turma da disciplina")
     @APIResponse(responseCode = "404", description = "Disciplina não encontrada")
     public Response getById(@PathParam("id") String id) {
         var orgId = (String) jwt.getClaim("org");
-        return Response.ok(getSubjectUseCase.execute(SubjectId.of(id), orgId)).build();
+        var userId = jwt.getSubject();
+        var role = jwt.getGroups().stream().findFirst().orElse("ALUNO");
+        return Response.ok(getSubjectUseCase.execute(SubjectId.of(id), orgId, userId, role)).build();
     }
 
     @POST

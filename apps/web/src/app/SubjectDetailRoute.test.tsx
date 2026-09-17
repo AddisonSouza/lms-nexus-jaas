@@ -15,6 +15,14 @@ vi.mock('@features/dashboard/components/ProfessorDashboard', () => ({
   ),
 }))
 
+let mockSubject: { name: string; code: string | null } | undefined = {
+  name: 'Matemática',
+  code: 'MAT1',
+}
+
+vi.mock('@features/curriculum/hooks/useSubject', () => ({
+  useSubject: () => ({ data: mockSubject }),
+}))
 vi.mock('@features/curriculum/hooks/useSubjectContents', () => ({
   useSubjectContents: () => ({ data: { topics: [] }, isLoading: false }),
 }))
@@ -40,6 +48,7 @@ vi.mock('@features/curriculum/hooks/useDeleteContent', () => ({
 beforeEach(() => {
   vi.clearAllMocks()
   mockRole = 'PROFESSOR'
+  mockSubject = { name: 'Matemática', code: 'MAT1' }
 })
 
 function renderRoute(subjectId = 'subject-1') {
@@ -73,5 +82,20 @@ describe('SubjectDetailRoute', () => {
     renderRoute('subject-1')
 
     expect(screen.queryByTestId('professor-dashboard')).toBeNull()
+  })
+
+  it('names the subject in the header, so the student knows where they are', () => {
+    renderRoute()
+
+    expect(screen.getByRole('heading', { name: 'Matemática' })).toBeTruthy()
+    expect(screen.getByText('MAT1')).toBeTruthy()
+  })
+
+  it('falls back to a generic title while the subject has not arrived', () => {
+    mockSubject = undefined
+
+    renderRoute()
+
+    expect(screen.getByRole('heading', { name: 'Conteúdo da Disciplina' })).toBeTruthy()
   })
 })
