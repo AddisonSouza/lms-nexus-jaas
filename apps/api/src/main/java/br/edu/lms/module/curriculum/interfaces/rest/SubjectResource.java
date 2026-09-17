@@ -50,12 +50,14 @@ public class SubjectResource {
     private final JsonWebToken jwt;
 
     @GET
-    @RolesAllowed({"ADMIN_ORG", "GESTOR", "PROFESSOR"})
+    @RolesAllowed({"ADMIN_ORG", "GESTOR", "PROFESSOR", "ALUNO"})
     @Operation(summary = "Listar disciplinas")
     @APIResponse(responseCode = "200", description = "Lista de disciplinas")
     public Response list() {
         var orgId = (String) jwt.getClaim("org");
-        return Response.ok(listSubjectsUseCase.execute(orgId)).build();
+        var userId = jwt.getSubject();
+        var role = jwt.getGroups().stream().findFirst().orElse("ALUNO");
+        return Response.ok(listSubjectsUseCase.execute(orgId, userId, role)).build();
     }
 
     @GET
