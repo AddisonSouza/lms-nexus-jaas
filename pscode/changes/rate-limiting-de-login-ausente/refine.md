@@ -23,7 +23,7 @@ a brecha de força bruta achada no E2E (RF-02, SEC-08).
 - Proxy reverso e configuração de `X-Forwarded-For` em produção.
 - Mudar o limite de reenvio de confirmação, que já existe por e-mail.
 ## Subtasks
-- [ ] Porta `AuthRateLimiter` + adapter Redis (limites por config, fail-open) com teste de integração
-- [ ] Filtros em `/auth/**`: bloqueio 429 + `Retry-After`, contagem login 401 / reset 400, reset no login 200, CORS exposto; ITs e isolamento do `AuthResourceIT`
-- [ ] Front: mensagem com minutos restantes e botão desabilitado no login; mensagem 429 em forgot/reset/register; testes
-- [ ] `API_CONTRACT.md`: documentar 429 `AUTH_RATE_LIMIT_EXCEEDED` nos endpoints de `/auth`
+- [x] Porta `AuthRateLimiter` + adapter Redis (limites por config, fail-open) com teste de integração
+- [x] Filtros em `/auth/**`: bloqueio 429 + `Retry-After`, contagem login 401 / reset 400, reset no login 200, CORS exposto; ITs e isolamento do `AuthResourceIT`
+- [x] Front: mensagem com minutos restantes e botão desabilitado no login; mensagem 429 em forgot/reset/register; testes
+- [x] `API_CONTRACT.md`: documentar 429 `AUTH_RATE_LIMIT_EXCEEDED` nos endpoints de `/auth`

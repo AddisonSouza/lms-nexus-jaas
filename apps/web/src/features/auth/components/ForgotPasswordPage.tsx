@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from 'lucide-react'
 import { forgotPasswordSchema, type ForgotPasswordFormData } from '../schemas/forgotPasswordSchema'
 import { useForgotPassword } from '../hooks/useForgotPassword'
+import { rateLimitMessageFor } from '../schemas/rateLimitSchema'
 import AuthLayout from '@components/layout/AuthLayout'
 import BackToLogin from '@components/shared/BackToLogin'
 import { Input } from '@components/ui/input'
@@ -17,7 +18,12 @@ function ForgotPasswordPage() {
     resolver: zodResolver(forgotPasswordSchema),
   })
 
-  const { mutate: requestReset, isPending, isSuccess } = useForgotPassword()
+  const { mutate: requestReset, isPending, isSuccess, error } = useForgotPassword()
+
+  // A rota responde 200 mesmo para e-mail inexistente, para não revelar quem
+  // tem conta: na prática o único erro que chega aqui é o bloqueio por
+  // tentativas, e sem mensagem o botão parecia não fazer nada.
+  const errorMessage = rateLimitMessageFor(error)
 
   const onSubmit = (data: ForgotPasswordFormData) => requestReset(data.email)
 
@@ -49,6 +55,8 @@ function ForgotPasswordPage() {
             Informe seu e-mail e enviaremos um link para redefinir sua senha.
           </p>
         </div>
+
+        {errorMessage && <p role="alert" className="text-sm text-destructive">{errorMessage}</p>}
 
         <div className="space-y-1">
           <label htmlFor="email" className="text-xs text-muted-foreground">E-mail</label>

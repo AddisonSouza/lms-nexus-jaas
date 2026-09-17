@@ -70,4 +70,22 @@ describe('ResetPasswordPage', () => {
     const alert = await screen.findByRole('alert')
     expect(alert.textContent).toBe('O link de redefinição é inválido ou já expirou. Solicite um novo.')
   })
+
+  it('shows the block instead of the token message when the IP is rate limited', async () => {
+    vi.mocked(authApi.resetPassword).mockRejectedValue({
+      response: {
+        status: 429,
+        headers: { 'retry-after': '900' },
+        data: { error: 'AUTH_RATE_LIMIT_EXCEEDED' },
+      },
+    })
+
+    renderPage('/reset-password?token=abc')
+    await userEvent.type(screen.getByLabelText('Nova senha'), 'Senha@123')
+    await userEvent.type(screen.getByLabelText('Confirmar nova senha'), 'Senha@123')
+    await userEvent.click(screen.getByRole('button', { name: /redefinir senha/i }))
+
+    const alert = await screen.findByRole('alert')
+    expect(alert.textContent).toBe('Muitas tentativas. Tente novamente em 15 minutos.')
+  })
 })

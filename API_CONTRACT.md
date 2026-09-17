@@ -49,6 +49,31 @@ Todas as rotas protegidas exigem `Authorization: Bearer <access_token>`.
 
 ## Módulo: `identity` — Autenticação
 
+### Limite de tentativas em `/auth` (SEC-08)
+
+Todas as rotas de `/auth` — exceto `POST /auth/refresh` e `POST /auth/logout`,
+que são a sessão de quem já entrou — recusam o IP que acumula **5 falhas em 1
+minuto**, por **15 minutos**:
+
+```json
+{ "error": "AUTH_RATE_LIMIT_EXCEEDED" }
+```
+
+| Código | Descrição |
+|---|---|
+| `429` | IP bloqueado. Header `Retry-After` com os segundos restantes (exposto via CORS). |
+
+Contam como falha o `401` de `POST /auth/login` e o `400` de
+`POST /auth/reset-password`; um login com `200` zera a contagem. Durante o
+bloqueio **nem a credencial correta passa** — a recusa vem antes da validação.
+Limites configuráveis por `AUTH_RATE_LIMIT_MAX_FAILURES`,
+`AUTH_RATE_LIMIT_WINDOW_SECONDS` e `AUTH_RATE_LIMIT_BLOCK_SECONDS`. Se o Redis
+estiver fora, o limitador libera a requisição em vez de derrubar o login.
+
+Atrás de proxy reverso, ligue `quarkus.http.proxy.proxy-address-forwarding` para
+o IP ser o do cliente e não o do proxy — sem isso o bloqueio atingiria todo mundo
+de uma vez.
+
 ### RF-01 — Cadastro de Usuário ✅
 
 **`POST /auth/register`** · Público
@@ -69,6 +94,7 @@ minúscula, um número e um símbolo. Validada pela API, não só pelo front.
 | `201` | Usuário criado com status `PENDING_CONFIRMATION`. E-mail de confirmação enviado. |
 | `409` | E-mail já cadastrado. |
 | `422` | Dados de validação inválidos: `{ "errors": ["<campo>: <mensagem>"] }`. Senha fraca lista só os critérios que faltam (ex.: `A senha precisa de: uma maiúscula, um símbolo`) ou `Senha deve ter no mínimo 8 caracteres`. |
+| `429` | Muitas falhas deste IP (`AUTH_RATE_LIMIT_EXCEEDED`). Ver o limite de tentativas acima. |
 
 ---
 
@@ -85,6 +111,7 @@ minúscula, um número e um símbolo. Validada pela API, não só pelo front.
 | `200` | `{ accessToken, tokenType: "Bearer", expiresIn: 900 }` · Refresh Token no cookie `refresh_token`. |
 | `401` | Credenciais inválidas. |
 | `403` | Conta não confirmada. |
+| `429` | Muitas falhas deste IP (`AUTH_RATE_LIMIT_EXCEEDED`). Ver o limite de tentativas acima. |
 
 ---
 
@@ -118,6 +145,7 @@ Cookie `refresh_token` no request. Rotaciona o par Access + Refresh Token.
 ```
 
 Sempre retorna `204` (não revela se o e-mail existe). Envia link com token de 1h.
+Pode responder `429` se o IP estiver bloqueado.
 
 ---
 
@@ -132,6 +160,7 @@ Sempre retorna `204` (não revela se o e-mail existe). Envia link com token de 1
 | `204` | Senha redefinida. Todos os Refresh Tokens do usuário invalidados. |
 | `400` | Token inválido, expirado ou já utilizado. |
 | `422` | Campos ausentes ou senha fraca (mesma regra do cadastro), no formato `{ "errors": [...] }`. Validado antes do token. |
+| `429` | Muitas falhas deste IP (`AUTH_RATE_LIMIT_EXCEEDED`). Ver o limite de tentativas acima. |
 
 ---
 
@@ -152,7 +181,9 @@ Sempre retorna `204` (não revela se o e-mail existe). Envia link com token de 1
 { "email": "string" }
 ```
 
-Reenvia e-mail de confirmação. Sempre retorna `200`.
+Reenvia e-mail de confirmação. Sempre retorna `200`. Pode responder `429` se o
+IP estiver bloqueado, além do `429` por e-mail que já existia
+(`RESEND_RATE_LIMIT_EXCEEDED`, 3 por hora).
 
 ---
 
