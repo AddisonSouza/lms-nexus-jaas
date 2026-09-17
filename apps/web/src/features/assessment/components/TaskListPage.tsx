@@ -8,7 +8,7 @@ import { taskKeys } from '../api/query-keys'
 import { listTasks } from '../api/tasks'
 import TaskFormDialog from './TaskFormDialog'
 import SubmissionListDrawer from './SubmissionListDrawer'
-import type { Task, TaskStatus } from '../types'
+import type { Task, TaskStatus, TaskSummary } from '../types'
 import type { TaskFormData } from '../schemas/task.schema'
 import { Card } from '@components/ui/card'
 import { Badge } from '@components/ui/badge'
@@ -37,7 +37,7 @@ function TaskListPage() {
 
   const { data: subjects = [] } = useSubjectList()
 
-  const { data: tasks = [] } = useQuery<Task[]>({
+  const { data: tasks = [] } = useQuery<TaskSummary[]>({
     queryKey: taskKeys.lists(),
     queryFn: listTasks,
   })
@@ -103,6 +103,14 @@ function TaskListPage() {
                   <Badge variant={task.status === 'PUBLISHED' ? 'accent-2' : 'neutral'}>
                     {TASK_STATUS_LABEL[task.status]}
                   </Badge>
+                  {task.pendingEvaluationCount > 0 && (
+                    <Badge variant="accent">{task.pendingEvaluationCount} a avaliar</Badge>
+                  )}
+                  {task.submissionCount > 0 && (
+                    <span>
+                      {task.submissionCount} {task.submissionCount === 1 ? 'resposta' : 'respostas'}
+                    </span>
+                  )}
                 </p>
               </div>
               <div className="flex items-center gap-2">

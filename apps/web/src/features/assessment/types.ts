@@ -24,6 +24,12 @@ export interface Task {
   updatedAt: string | null
 }
 
+/** A tarefa como o professor a vê na listagem: com os contadores de entrega. */
+export interface TaskSummary extends Task {
+  submissionCount: number
+  pendingEvaluationCount: number
+}
+
 export interface CreateTaskPayload {
   subjectId: string
   title: string

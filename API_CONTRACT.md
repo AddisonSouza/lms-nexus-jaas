@@ -599,6 +599,44 @@ Ao publicar (`PUBLISHED`), publica `TaskCreatedEvent` → notificações para al
 
 ---
 
+**`GET /tasks`** · `PROFESSOR | GESTOR | ADMIN_ORG`
+
+Lista as tarefas criadas pelo usuário na organização do JWT, com os contadores
+de entrega. Os contadores saem de uma consulta agregada única.
+
+```json
+[
+  {
+    "id": "string",
+    "subjectId": "string",
+    "organizationId": "string",
+    "createdBy": "string",
+    "title": "string",
+    "description": "string",
+    "deadline": "ISO-8601 datetime",
+    "maxScore": "number | null",
+    "status": "DRAFT | PUBLISHED | CLOSED | GRADED",
+    "attachments": [],
+    "submissionCount": "number",
+    "pendingEvaluationCount": "number",
+    "createdAt": "ISO-8601 datetime",
+    "updatedAt": "ISO-8601 datetime | null"
+  }
+]
+```
+
+| Campo | Descrição |
+|---|---|
+| `submissionCount` | Respostas recebidas, sem contar as removidas. |
+| `pendingEvaluationCount` | Respostas ainda em `SUBMITTED`, esperando avaliação. |
+
+Tarefa sem nenhuma resposta vem com os dois contadores em `0`.
+
+> Os contadores são exclusivos desta rota. `GET /tasks/published`, que o aluno
+> consome, não os expõe — a turma não deve saber quantas respostas já entraram.
+
+---
+
 ### RF-12 — Envio de Resposta pelo Aluno 📋
 
 **`POST /tasks/{id}/submissions`** · `ALUNO`

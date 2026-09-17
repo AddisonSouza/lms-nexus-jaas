@@ -1,6 +1,7 @@
 package br.edu.lms.module.assessment.infrastructure.persistence;
 
 import br.edu.lms.module.assessment.domain.model.SubmissionAttachment;
+import br.edu.lms.module.assessment.domain.model.SubmissionCounts;
 import br.edu.lms.module.assessment.domain.model.SubmissionId;
 import br.edu.lms.module.assessment.domain.model.TaskSubmission;
 import br.edu.lms.module.assessment.domain.port.out.SubmissionRepository;
@@ -11,7 +12,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -68,6 +71,30 @@ public class SubmissionRepositoryImpl implements SubmissionRepository {
         q.setParameter("studentId", studentId);
         q.setParameter("orgId", organizationId);
         return q.getResultList().stream().map(submissionMapper::toDomain).toList();
+    }
+
+    @Override
+    @Transactional
+    public Map<String, SubmissionCounts> countByTasks(List<String> taskIds, String organizationId) {
+        // IN () vazio é erro de sintaxe em SQL; sem tarefa não há o que contar.
+        if (taskIds == null || taskIds.isEmpty()) return Map.of();
+
+        TypedQuery<Object[]> q = em.createQuery(
+                """
+                        SELECT s.taskId, COUNT(s), SUM(CASE WHEN s.status = 'SUBMITTED' THEN 1 ELSE 0 END)
+                        FROM TaskSubmissionJpaEntity s
+                        WHERE s.taskId IN :taskIds AND s.organizationId = :orgId AND s.deletedAt IS NULL
+                        GROUP BY s.taskId
+                        """,
+                Object[].class);
+        q.setParameter("taskIds", taskIds);
+        q.setParameter("orgId", organizationId);
+
+        return q.getResultList().stream().collect(Collectors.toMap(
+                row -> (String) row[0],
+                row -> new SubmissionCounts(
+                        ((Number) row[1]).longValue(),
+                        row[2] == null ? 0L : ((Number) row[2]).longValue())));
     }
 
     /**
