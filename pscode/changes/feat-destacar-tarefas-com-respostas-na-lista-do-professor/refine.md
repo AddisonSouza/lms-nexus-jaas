@@ -50,6 +50,6 @@ badge de destaque nas que têm avaliação pendente.
 - [x] BE: `TaskSummaryResponse` + mapper MapStruct, com `ListTasksService` casando os contadores por `taskId`
 - [x] BE: `TaskResource.list()` devolvendo o novo DTO, com teste de integração do `GET /tasks`
 - [x] Docs: registrar `submissionCount` e `pendingEvaluationCount` no `API_CONTRACT.md` e na spec `task-creation`
-- [ ] FE: `taskSummarySchema` e o tipo `TaskSummary` em `api/tasks.ts` / `types.ts`
+- [x] FE: `taskSummarySchema` e o tipo `TaskSummary` em `api/tasks.ts` / `types.ts`
 - [ ] FE: badge "N a avaliar" e total de respostas em `TaskListPage`, com teste dos três casos (sem respostas, com pendentes, todas avaliadas)
 - [ ] Rodar lint, type-check e as duas suítes; validar a lista no navegador como professor

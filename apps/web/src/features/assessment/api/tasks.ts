@@ -25,9 +25,16 @@ const taskSchema = z.object({
   updatedAt: z.string().nullable(),
 })
 
+// Só o GET /tasks do professor traz os contadores; o createTask e o publishTask
+// respondem o TaskResponse comum, então seguem com o taskSchema.
+const taskSummarySchema = taskSchema.extend({
+  submissionCount: z.number().int(),
+  pendingEvaluationCount: z.number().int(),
+})
+
 export async function listTasks() {
   const res = await api.get('/tasks')
-  return z.array(taskSchema).parse(res.data)
+  return z.array(taskSummarySchema).parse(res.data)
 }
 
 export async function createTask(data: CreateTaskPayload) {

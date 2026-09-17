@@ -23,6 +23,8 @@ const draft = {
   attachments: [],
   createdAt: '2026-09-01T10:00:00',
   updatedAt: null,
+  submissionCount: 0,
+  pendingEvaluationCount: 0,
 }
 
 const published = { ...draft, status: 'PUBLISHED' as const }
