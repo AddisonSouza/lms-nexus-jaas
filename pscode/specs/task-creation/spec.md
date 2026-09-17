@@ -33,3 +33,30 @@ O sistema SHALL garantir que tarefas com status `DRAFT` sejam invisíveis para u
 #### Scenario: Aluno tenta acessar tarefa em rascunho
 - **WHEN** aluno realiza qualquer operação de leitura em uma tarefa com status `DRAFT`
 - **THEN** sistema retorna `404 Not Found` (sem revelar a existência)
+
+---
+
+### Requirement: Listagem do professor traz os contadores de entrega
+`GET /tasks` SHALL acompanhar, em cada tarefa, quantas respostas foram recebidas
+(`submissionCount`) e quantas ainda esperam avaliação (`pendingEvaluationCount`).
+Os contadores vivem num DTO exclusivo desta rota.
+
+#### Scenario: Tarefa com respostas recebidas e pendentes
+- **WHEN** professor faz `GET /tasks` e uma tarefa tem duas entregas, uma delas já avaliada
+- **THEN** a tarefa volta com `submissionCount: 2` e `pendingEvaluationCount: 1`
+
+#### Scenario: Tarefa sem nenhuma resposta
+- **WHEN** professor faz `GET /tasks` e a tarefa não recebeu entregas
+- **THEN** a tarefa volta com os dois contadores em `0` — e não omitida da lista
+
+#### Scenario: Submissão removida não entra na conta
+- **WHEN** uma submissão da tarefa tem `deleted_at` preenchido
+- **THEN** ela não é contada em nenhum dos dois campos
+
+#### Scenario: Contadores não vazam para o aluno
+- **WHEN** aluno faz `GET /tasks/published`
+- **THEN** a resposta não traz `submissionCount` nem `pendingEvaluationCount`
+
+#### Scenario: Uma consulta para a lista inteira
+- **WHEN** a listagem devolve N tarefas
+- **THEN** as contagens saem de uma única consulta agregada, não de uma por tarefa
