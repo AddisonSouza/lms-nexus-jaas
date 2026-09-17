@@ -36,6 +36,7 @@ const CODE_MESSAGES: Record<string, string> = {
   CLASSROOM_MEMBER_NOT_FOUND: 'Membro não encontrado nesta turma.',
   CLASSROOM_NOT_FOUND: 'Turma não encontrada.',
   INVALID_INVITE_CODE: 'Código de turma inválido.',
+  MEMBER_NOT_A_PROFESSOR: 'Este membro não pode lecionar. Escolha um professor, gestor ou administrador.',
   MEMBER_NOT_IN_ORGANIZATION: 'Este usuário não faz parte da organização.',
 
   // tarefas e submissões

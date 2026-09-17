@@ -28,9 +28,9 @@ sem digitar códigos. Sem isso, professores não criam tarefas e alunos não vee
 - Acesso de GESTOR à página de membros (rota continua ADMIN_ORG).
 
 ## Subtasks
-- [ ] api: permitir GESTOR em `GET /organizations/{id}/members` + teste de integração
-- [ ] web: clients e hooks em `curriculum` para turmas da org e candidatos a professor (Zod)
-- [ ] web: `LinkClassroomDialog` com seleção de turmas ativas não vinculadas + erro 422 + testes
-- [ ] web: `AssignTeacherDialog` com seleção de membros elegíveis não atribuídos + erro 422 + testes
-- [ ] web: seção "Turmas e Professores" no `SubjectDetailPage` (listar, desvincular/remover com confirmação) + testes
-- [ ] docs: atualizar RF-09 em `API_CONTRACT.md`
+- [x] api: permitir GESTOR em `GET /organizations/{id}/members` + teste de integração
+- [x] web: clients e hooks em `curriculum` para turmas da org e candidatos a professor (Zod)
+- [x] web: `LinkClassroomDialog` com seleção de turmas ativas não vinculadas + erro 422 + testes
+- [x] web: `AssignTeacherDialog` com seleção de membros elegíveis não atribuídos + erro 422 + testes
+- [x] web: seção "Turmas e Professores" no `SubjectDetailPage` (listar, desvincular/remover com confirmação) + testes
+- [x] docs: atualizar RF-09 em `API_CONTRACT.md`

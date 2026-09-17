@@ -1,12 +1,22 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import SubjectDetailRoute from './SubjectDetailRoute'
 
 let mockRole: string | null = 'PROFESSOR'
 
 vi.mock('@store/authStore', () => ({
-  useAuthStore: vi.fn((selector) => selector({ role: mockRole })),
+  useAuthStore: vi.fn((selector) => selector({ role: mockRole, organizationId: 'org-1' })),
+}))
+
+// ADMIN_ORG e GESTOR abrem a seção "Turmas e Professores", que consulta as
+// listas da organização: mocka os clients para a rota não sair à rede.
+vi.mock('@features/curriculum/api/org-classroom-api', () => ({
+  listOrgClassrooms: vi.fn().mockResolvedValue([]),
+}))
+vi.mock('@features/curriculum/api/org-member-api', () => ({
+  listOrgMembers: vi.fn().mockResolvedValue([]),
 }))
 
 vi.mock('@features/dashboard/components/ProfessorDashboard', () => ({
@@ -52,12 +62,15 @@ beforeEach(() => {
 })
 
 function renderRoute(subjectId = 'subject-1') {
+  const qc = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })
   return render(
-    <MemoryRouter initialEntries={[`/curriculum/${subjectId}`]}>
-      <Routes>
-        <Route path="/curriculum/:subjectId" element={<SubjectDetailRoute />} />
-      </Routes>
-    </MemoryRouter>,
+    <QueryClientProvider client={qc}>
+      <MemoryRouter initialEntries={[`/curriculum/${subjectId}`]}>
+        <Routes>
+          <Route path="/curriculum/:subjectId" element={<SubjectDetailRoute />} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
   )
 }
 

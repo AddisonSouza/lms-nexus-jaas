@@ -20,6 +20,7 @@ class ListOrganizationMembersResourceIT {
     static final String OWNER_ID   = "b1111111-1111-1111-1111-111111111111";
     static final String TEACHER_ID = "b2222222-2222-2222-2222-222222222222";
     static final String GONE_ID    = "b3333333-3333-3333-3333-333333333333";
+    static final String MANAGER_ID = "b4444444-4444-4444-4444-444444444444";
     static final String ORG_ID     = "b9999999-9999-9999-9999-999999999999";
     static final String OTHER_ORG  = "b8888888-8888-8888-8888-888888888888";
 
@@ -40,6 +41,7 @@ class ListOrganizationMembersResourceIT {
         insertUser(OWNER_ID, "Zelia Owner", "members-it-owner@test.com");
         insertUser(TEACHER_ID, "Ana Professora", "members-it-teacher@test.com");
         insertUser(GONE_ID, "Removido Silva", "members-it-gone@test.com");
+        insertUser(MANAGER_ID, "Bruno Gestor", "members-it-manager@test.com");
         em.createNativeQuery("INSERT IGNORE INTO organizations (id, name, owner_id, created_at) VALUES (?,?,?,NOW(6))")
                 .setParameter(1, ORG_ID).setParameter(2, "Members IT Org").setParameter(3, OWNER_ID)
                 .executeUpdate();
@@ -49,6 +51,7 @@ class ListOrganizationMembersResourceIT {
         addMember(ORG_ID, OWNER_ID, "ADMIN_ORG", false);
         addMember(ORG_ID, TEACHER_ID, "PROFESSOR", false);
         addMember(ORG_ID, GONE_ID, "ALUNO", true);
+        addMember(ORG_ID, MANAGER_ID, "GESTOR", false);
         tx.commit();
     }
 
@@ -59,8 +62,9 @@ class ListOrganizationMembersResourceIT {
                 .setParameter(1, ORG_ID).setParameter(2, OTHER_ORG).executeUpdate();
         em.createNativeQuery("DELETE FROM organizations WHERE id IN (?,?)")
                 .setParameter(1, ORG_ID).setParameter(2, OTHER_ORG).executeUpdate();
-        em.createNativeQuery("DELETE FROM users WHERE id IN (?,?,?)")
-                .setParameter(1, OWNER_ID).setParameter(2, TEACHER_ID).setParameter(3, GONE_ID).executeUpdate();
+        em.createNativeQuery("DELETE FROM users WHERE id IN (?,?,?,?)")
+                .setParameter(1, OWNER_ID).setParameter(2, TEACHER_ID).setParameter(3, GONE_ID)
+                .setParameter(4, MANAGER_ID).executeUpdate();
         tx.commit();
     }
 
@@ -82,16 +86,44 @@ class ListOrganizationMembersResourceIT {
                 .when().get("/organizations/" + ORG_ID + "/members")
                 .then()
                 .statusCode(200)
-                .body("size()", equalTo(2))
+                .body("size()", equalTo(3))
                 .body("[0].name", equalTo("Ana Professora"))
                 .body("[0].email", equalTo("members-it-teacher@test.com"))
                 .body("[0].userId", equalTo(TEACHER_ID))
                 .body("[0].role", equalTo("PROFESSOR"))
                 .body("[0].owner", equalTo(false))
                 .body("[0].joinedAt", notNullValue())
-                .body("[1].name", equalTo("Zelia Owner"))
-                .body("[1].role", equalTo("ADMIN_ORG"))
-                .body("[1].owner", equalTo(true));
+                .body("[1].name", equalTo("Bruno Gestor"))
+                .body("[1].role", equalTo("GESTOR"))
+                .body("[2].name", equalTo("Zelia Owner"))
+                .body("[2].role", equalTo("ADMIN_ORG"))
+                .body("[2].owner", equalTo(true));
+    }
+
+    @Test
+    @TestSecurity(user = MANAGER_ID, roles = {"GESTOR"})
+    @JwtSecurity(claims = {
+            @Claim(key = "sub", value = MANAGER_ID),
+            @Claim(key = "org", value = ORG_ID) })
+    void listMembers_asManager_returnsActiveMembers() {
+        given()
+                .when().get("/organizations/" + ORG_ID + "/members")
+                .then()
+                .statusCode(200)
+                .body("size()", equalTo(3))
+                .body("name", contains("Ana Professora", "Bruno Gestor", "Zelia Owner"));
+    }
+
+    @Test
+    @TestSecurity(user = MANAGER_ID, roles = {"GESTOR"})
+    @JwtSecurity(claims = {
+            @Claim(key = "sub", value = MANAGER_ID),
+            @Claim(key = "org", value = OTHER_ORG) })
+    void listMembers_managerOfAnotherOrganization_returns403() {
+        given()
+                .when().get("/organizations/" + ORG_ID + "/members")
+                .then()
+                .statusCode(403);
     }
 
     @Test
