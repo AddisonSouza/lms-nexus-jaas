@@ -1,6 +1,8 @@
 import { CheckCircle } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useLogin } from '../hooks/useLogin'
+import { useRateLimitCountdown } from '../hooks/useRateLimitCountdown'
+import { rateLimitMessage } from '../schemas/rateLimitSchema'
 import LoginForm from './LoginForm'
 import AuthLayout from '@components/layout/AuthLayout'
 
@@ -12,8 +14,12 @@ function LoginPage() {
   const inviteToken = searchParams.get('invite')
   const { mutate: login, isPending, error } = useLogin(inviteToken)
 
-  const errorMessage =
-    (error as { response?: { status?: number } })?.response?.status === 401
+  // Enquanto o bloqueio durar, a tela mostra o tempo que falta em vez de
+  // "senha inválida" — a senha pode até estar certa, o servidor nem olha.
+  const blockedSeconds = useRateLimitCountdown(error)
+  const errorMessage = blockedSeconds > 0
+    ? rateLimitMessage(blockedSeconds)
+    : (error as { response?: { status?: number } })?.response?.status === 401
       ? 'E-mail ou senha inválidos.'
       : error
         ? 'Erro ao realizar login. Tente novamente.'
@@ -36,7 +42,7 @@ function LoginPage() {
 
         {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
 
-        <LoginForm onSubmit={login} isPending={isPending} />
+        <LoginForm onSubmit={login} isPending={isPending} disabled={blockedSeconds > 0} />
 
         <hr className="border-border" />
 

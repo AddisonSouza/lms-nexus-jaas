@@ -47,4 +47,20 @@ describe('ForgotPasswordPage', () => {
       expect(screen.getByRole('link', { name: 'Voltar ao login' }).getAttribute('href')).toBe('/login')
     })
   })
+
+  it('explains the block instead of failing silently', async () => {
+    vi.mocked(authApi.forgotPassword).mockRejectedValue({
+      response: { status: 429, headers: { 'retry-after': '900' }, data: { error: 'AUTH_RATE_LIMIT_EXCEEDED' } },
+    })
+    render(<ForgotPasswordPage />, { wrapper })
+
+    await userEvent.type(screen.getByLabelText(/e-mail/i), 'user@test.com')
+    await userEvent.click(screen.getByRole('button', { name: /enviar link/i }))
+
+    await waitFor(() =>
+      expect(screen.getByRole('alert').textContent).toBe(
+        'Muitas tentativas. Tente novamente em 15 minutos.',
+      ),
+    )
+  })
 })
