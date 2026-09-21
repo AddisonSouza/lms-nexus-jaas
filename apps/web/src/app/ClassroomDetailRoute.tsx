@@ -19,11 +19,11 @@ function ClassroomDetailRoute() {
   return (
     <ClassroomDetailPage
       announcementFeedSlot={
-        id ? (
+        id && membership ? (
           <AnnouncementFeed
             classroomId={id}
-            isMember={!!membership}
-            canPost={membership?.role === 'PROFESSOR'}
+            isMember
+            canPost={membership.role === 'PROFESSOR'}
           />
         ) : null
       }

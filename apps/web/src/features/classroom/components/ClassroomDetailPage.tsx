@@ -109,10 +109,14 @@ function ClassroomDetailPage({ announcementFeedSlot }: ClassroomDetailPageProps)
         <ClassroomMembersPanel classroomId={id!} canManage={canManage} />
       </Card>
 
-      <div className="space-y-3">
-        <h4 className="mb-0">Mural de Avisos</h4>
-        {announcementFeedSlot}
-      </div>
+      {/* Sem slot não há mural: quem não é membro da turma levaria 403 na
+          listagem, e o título sozinho anunciava um bloco que nunca vinha. */}
+      {announcementFeedSlot && (
+        <div className="space-y-3">
+          <h4 className="mb-0">Mural de Avisos</h4>
+          {announcementFeedSlot}
+        </div>
+      )}
 
       <ClassroomFormDialog
         open={showEdit}
