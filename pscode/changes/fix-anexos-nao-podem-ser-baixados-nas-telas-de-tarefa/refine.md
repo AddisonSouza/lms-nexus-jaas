@@ -58,4 +58,4 @@ o tipo e o nome originais.
 - [x] `EvaluationDialog` e `SubmissionListDrawer` com os anexos baixáveis, com testes
 - [x] `ContentCard` usando `downloadFile` no arquivo e mantendo o link externo, com teste
 - [x] Atualizar `API_CONTRACT.md` e a spec `file-storage`; rodar lint, type-check e as duas suítes
-- [ ] Validar no navegador: anexo de tarefa (aluno), de submissão (professor) e de conteúdo (disciplina)
+- [x] Validar no navegador: anexo de tarefa (aluno), de submissão (professor) e de conteúdo (disciplina)
