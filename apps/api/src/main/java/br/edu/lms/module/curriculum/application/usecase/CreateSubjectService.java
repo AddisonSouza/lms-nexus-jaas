@@ -36,10 +36,11 @@ public class CreateSubjectService implements CreateSubjectUseCase {
         var saved = subjectRepository.save(subject);
         log.info("Subject created: {} in org: {}", saved.getId().getValue(), command.getOrganizationId());
 
-        return toResponse(saved, List.of(), List.of());
+        return toResponse(saved, List.of(), List.of(), List.of());
     }
 
-    static SubjectResponse toResponse(Subject s, List<String> classroomIds, List<String> teacherMemberIds) {
+    static SubjectResponse toResponse(Subject s, List<String> classroomIds,
+                                      List<String> teacherMemberIds, List<String> teacherUserIds) {
         return SubjectResponse.builder()
                 .id(s.getId().getValue())
                 .name(s.getName())
@@ -49,6 +50,7 @@ public class CreateSubjectService implements CreateSubjectUseCase {
                 .organizationId(s.getOrganizationId())
                 .classroomIds(classroomIds)
                 .teacherMemberIds(teacherMemberIds)
+                .teacherUserIds(teacherUserIds)
                 .createdAt(s.getCreatedAt())
                 .build();
     }

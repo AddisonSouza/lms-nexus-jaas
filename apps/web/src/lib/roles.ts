@@ -21,3 +21,27 @@ const roleLabels: Record<string, string> = {
 export function roleLabel(role: string): string {
   return roleLabels[role] ?? role
 }
+
+/**
+ * Gates por ação, espelhando o que o backend já recusa. Ficam juntos aqui porque
+ * as comparações inline espalhadas pelas telas divergiam da regra do servidor e
+ * ofereciam botões que só davam 403.
+ */
+
+/** `SubjectResource.delete` é `@RolesAllowed(ADMIN_ORG)` — gestor não exclui. */
+export function canDeleteSubject(role: string | null): boolean {
+  return role === 'ADMIN_ORG'
+}
+
+/** Criar e editar disciplina: administrador e gestor. Excluir é mais estrito. */
+export function canManageSubject(role: string | null): boolean {
+  return role === 'ADMIN_ORG' || role === 'GESTOR'
+}
+
+/**
+ * Entrar em turma por código é ação de aluno. O backend ainda aceita qualquer
+ * papel (fora do escopo deste card); o gate aqui é o que a tela oferece.
+ */
+export function canJoinByCode(role: string | null): boolean {
+  return role === 'ALUNO'
+}

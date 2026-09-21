@@ -6,6 +6,7 @@ import { useCreateSubject } from '../hooks/useCreateSubject'
 import { useUpdateSubject } from '../hooks/useUpdateSubject'
 import { useDeleteSubject } from '../hooks/useDeleteSubject'
 import { useAuthStore } from '@store/authStore'
+import { canDeleteSubject, canManageSubject } from '@lib/roles'
 import SubjectFormDialog from './SubjectFormDialog'
 import ConfirmDialog from '@components/shared/ConfirmDialog'
 import ListErrorState from '@components/shared/ListErrorState'
@@ -27,7 +28,10 @@ function SubjectListPage() {
   const deleteSubject = useDeleteSubject()
 
   const role = useAuthStore((s) => s.role)
-  const canManage = role === 'ADMIN_ORG' || role === 'GESTOR'
+  // Criar e editar vale para gestor; excluir é só do administrador
+  // (`SubjectResource.delete` é `@RolesAllowed(ADMIN_ORG)`).
+  const canManage = canManageSubject(role)
+  const canDelete = canDeleteSubject(role)
 
   const handleCreate = (data: SubjectFormData) => {
     createSubject.mutate(
@@ -118,13 +122,15 @@ function SubjectListPage() {
                         >
                           <Pencil className="h-4 w-4" />
                         </button>
-                        <button
-                          onClick={() => setDeleteTarget(s)}
-                          className="text-muted-foreground hover:text-destructive"
-                          title="Excluir"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        {canDelete && (
+                          <button
+                            onClick={() => setDeleteTarget(s)}
+                            className="text-muted-foreground hover:text-destructive"
+                            title="Excluir"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
                       </div>
                     </TableCell>
                   )}

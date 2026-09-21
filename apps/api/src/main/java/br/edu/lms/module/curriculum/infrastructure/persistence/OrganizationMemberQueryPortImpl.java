@@ -5,6 +5,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 @ApplicationScoped
 @RequiredArgsConstructor
 public class OrganizationMemberQueryPortImpl implements OrganizationMemberQueryPort {
@@ -33,5 +35,19 @@ public class OrganizationMemberQueryPortImpl implements OrganizationMemberQueryP
                 .setParameter("orgId", organizationId)
                 .getSingleResult();
         return count > 0;
+    }
+
+    @Override
+    public List<String> findUserIdsByMemberIds(List<String> memberIds, String organizationId) {
+        if (memberIds == null || memberIds.isEmpty()) {
+            return List.of();
+        }
+        return em.createQuery(
+                        "SELECT m.userId FROM br.edu.lms.module.organization.infrastructure.persistence.OrganizationMemberJpaEntity m " +
+                        "WHERE m.id IN :ids AND m.organizationId = :orgId AND m.deletedAt IS NULL",
+                        String.class)
+                .setParameter("ids", memberIds)
+                .setParameter("orgId", organizationId)
+                .getResultList();
     }
 }

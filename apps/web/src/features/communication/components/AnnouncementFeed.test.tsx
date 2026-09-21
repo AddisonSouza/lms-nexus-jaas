@@ -31,6 +31,16 @@ const ANNOUNCEMENT: Announcement = {
   updatedAt: null,
 }
 
+// Associação e permissão de publicar chegam da rota, que é quem pode consultar
+// os membros da turma. O padrão aqui é o professor membro daquela turma.
+function renderFeed(props: { isMember?: boolean; canPost?: boolean } = {}) {
+  const { isMember = true, canPost = true } = props
+  return render(
+    <AnnouncementFeed classroomId="class-1" isMember={isMember} canPost={canPost} />,
+    { wrapper },
+  )
+}
+
 beforeEach(() => {
   vi.clearAllMocks()
   mockRole = 'PROFESSOR'
@@ -40,7 +50,7 @@ beforeEach(() => {
 describe('AnnouncementFeed', () => {
   it('shows empty state when there are no announcements', async () => {
     vi.mocked(announcementsApi.listAnnouncements).mockResolvedValue([])
-    render(<AnnouncementFeed classroomId="class-1" />, { wrapper })
+    renderFeed()
     await waitFor(() => {
       expect(screen.getByText(/nenhum aviso publicado/i)).toBeTruthy()
     })
@@ -48,7 +58,7 @@ describe('AnnouncementFeed', () => {
 
   it('renders the ordered list of announcements returned by the API', async () => {
     vi.mocked(announcementsApi.listAnnouncements).mockResolvedValue([ANNOUNCEMENT])
-    render(<AnnouncementFeed classroomId="class-1" />, { wrapper })
+    renderFeed()
     await waitFor(() => {
       expect(screen.getByText('Prova na próxima semana')).toBeTruthy()
     })
@@ -56,34 +66,52 @@ describe('AnnouncementFeed', () => {
 
   it('shows the "Novo Aviso" action for a PROFESSOR', async () => {
     vi.mocked(announcementsApi.listAnnouncements).mockResolvedValue([])
-    render(<AnnouncementFeed classroomId="class-1" />, { wrapper })
+    renderFeed()
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /novo aviso/i })).toBeTruthy()
     })
   })
 
-  it('shows the "Novo Aviso" action for a GESTOR who can teach', async () => {
+  // Publicar exige papel PROFESSOR **na turma**. Gestor e admin têm papel largo
+  // na organização mas levam 403 aqui, então não recebem `canPost`.
+  it('hides the "Novo Aviso" action from a member who does not teach the class', async () => {
     mockRole = 'GESTOR'
     vi.mocked(announcementsApi.listAnnouncements).mockResolvedValue([])
-    render(<AnnouncementFeed classroomId="class-1" />, { wrapper })
+    renderFeed({ canPost: false })
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /novo aviso/i })).toBeTruthy()
+      expect(screen.getByText(/nenhum aviso publicado/i)).toBeTruthy()
     })
+    expect(screen.queryByRole('button', { name: /novo aviso/i })).toBeNull()
   })
 
   it('hides the "Novo Aviso" action for an ALUNO', async () => {
     mockRole = 'ALUNO'
     mockUserId = 'student-1'
     vi.mocked(announcementsApi.listAnnouncements).mockResolvedValue([])
-    render(<AnnouncementFeed classroomId="class-1" />, { wrapper })
+    renderFeed({ canPost: false })
     await waitFor(() => {
       expect(screen.queryByRole('button', { name: /novo aviso/i })).toBeNull()
     })
   })
 
+  // `ListAnnouncementsService` exige associação à turma seja qual for o papel:
+  // admin e gestor levam 403. Em vez de um mural quebrado, ele some.
+  it('renders nothing for someone who is not a member of the class', async () => {
+    mockRole = 'ADMIN_ORG'
+    mockUserId = 'admin-1'
+    vi.mocked(announcementsApi.listAnnouncements).mockResolvedValue([ANNOUNCEMENT])
+
+    const { container } = renderFeed({ isMember: false, canPost: false })
+
+    await waitFor(() => {
+      expect(container.firstChild).toBeNull()
+    })
+    expect(announcementsApi.listAnnouncements).not.toHaveBeenCalled()
+  })
+
   it('shows edit/delete actions only for the announcement author', async () => {
     vi.mocked(announcementsApi.listAnnouncements).mockResolvedValue([ANNOUNCEMENT])
-    render(<AnnouncementFeed classroomId="class-1" />, { wrapper })
+    renderFeed()
     await waitFor(() => {
       expect(screen.getByTitle(/editar/i)).toBeTruthy()
       expect(screen.getByTitle(/excluir/i)).toBeTruthy()
@@ -93,7 +121,7 @@ describe('AnnouncementFeed', () => {
   it('hides edit/delete actions for a non-author professor', async () => {
     mockUserId = 'other-prof'
     vi.mocked(announcementsApi.listAnnouncements).mockResolvedValue([ANNOUNCEMENT])
-    render(<AnnouncementFeed classroomId="class-1" />, { wrapper })
+    renderFeed()
     await waitFor(() => {
       expect(screen.getByText('Prova na próxima semana')).toBeTruthy()
     })
@@ -105,7 +133,7 @@ describe('AnnouncementFeed', () => {
     vi.mocked(announcementsApi.listAnnouncements).mockResolvedValue([])
     vi.mocked(announcementsApi.createAnnouncement).mockResolvedValue(ANNOUNCEMENT)
 
-    render(<AnnouncementFeed classroomId="class-1" />, { wrapper })
+    renderFeed()
     await userEvent.click(await screen.findByRole('button', { name: /novo aviso/i }))
     await userEvent.type(screen.getByPlaceholderText(/escreva o aviso/i), 'Prova na próxima semana')
     await userEvent.click(screen.getByRole('button', { name: /^publicar$/i }))
@@ -124,7 +152,7 @@ describe('AnnouncementFeed', () => {
       response: { status: 403, data: { error: 'Forbidden' } },
     })
 
-    render(<AnnouncementFeed classroomId="class-1" />, { wrapper })
+    renderFeed()
     await userEvent.click(await screen.findByRole('button', { name: /novo aviso/i }))
     await userEvent.type(screen.getByPlaceholderText(/escreva o aviso/i), 'Prova na próxima semana')
     await userEvent.click(screen.getByRole('button', { name: /^publicar$/i }))

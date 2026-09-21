@@ -56,17 +56,17 @@ As quatro regras já existem no backend; só a UI está desalinhada.
 
 ## Subtasks
 
-- [ ] Centralizar permissões em `lib/roles.ts`: helpers por ação (`canDeleteSubject`,
+- [x] Centralizar permissões em `lib/roles.ts`: helpers por ação (`canDeleteSubject`,
       `canJoinByCode`, `canManageSubject`) com testes unitários
-- [ ] Mostrar "Excluir" disciplina só para `ADMIN_ORG` em `SubjectListPage`,
+- [x] Mostrar "Excluir" disciplina só para `ADMIN_ORG` em `SubjectListPage`,
       separando-o do `canManage` de gestor
-- [ ] Restringir "Entrar via código" a `ALUNO` em `ClassroomListPage`: botão e
+- [x] Restringir "Entrar via código" a `ALUNO` em `ClassroomListPage`: botão e
       formulário inline
-- [ ] Esconder o mural para não-membros da turma em `AnnouncementFeed`, via
+- [x] Esconder o mural para não-membros da turma em `AnnouncementFeed`, via
       `useClassroomMembers`
-- [ ] Mostrar "Novo Aviso" só para membro da turma com papel `PROFESSOR`,
+- [x] Mostrar "Novo Aviso" só para membro da turma com papel `PROFESSOR`,
       substituindo o `canTeach(role)` atual
-- [ ] Expor `teacherUserIds` no `SubjectResponse` (porta, repositório, DTO, mapper
+- [x] Expor `teacherUserIds` no `SubjectResponse` (porta, repositório, DTO, mapper
       e teste de integração)
-- [ ] Esconder o bloco "Dashboard da Disciplina" para quem não leciona, casando
+- [x] Esconder o bloco "Dashboard da Disciplina" para quem não leciona, casando
       `teacherUserIds` com o `userId` do JWT, e eliminar o cabeçalho órfão

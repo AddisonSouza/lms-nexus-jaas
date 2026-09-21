@@ -4,6 +4,7 @@ import { Plus, BookOpen, LogIn, Copy } from 'lucide-react'
 import { useClassrooms } from '../hooks/useClassrooms'
 import { useCreateClassroom } from '../hooks/useCreateClassroom'
 import { useAuthStore } from '@store/authStore'
+import { canJoinByCode } from '@lib/roles'
 import ListErrorState from '@components/shared/ListErrorState'
 import ClassroomFormDialog from './ClassroomFormDialog'
 import JoinClassroomForm from './JoinClassroomForm'
@@ -22,6 +23,8 @@ function ClassroomListPage() {
   const role = useAuthStore((s) => s.role)
   const canManage = role === 'ADMIN_ORG' || role === 'GESTOR'
   const canSeeInviteCode = canManage || role === 'PROFESSOR'
+  // Entrar por código é ação de aluno; para os demais o card inline não tem uso.
+  const canJoin = canJoinByCode(role)
 
   const handleCreate = (data: ClassroomFormData) => {
     createClassroom.mutate(data, { onSuccess: () => setShowCreate(false) })
@@ -35,9 +38,11 @@ function ClassroomListPage() {
           <h2 className="mb-0">Turmas</h2>
         </div>
         <div className="flex gap-2">
-          <Button variant="secondary" onClick={() => setShowJoin((v) => !v)}>
-            <LogIn className="h-4 w-4" /> Entrar via código
-          </Button>
+          {canJoin && (
+            <Button variant="secondary" onClick={() => setShowJoin((v) => !v)}>
+              <LogIn className="h-4 w-4" /> Entrar via código
+            </Button>
+          )}
           {canManage && (
             <Button onClick={() => setShowCreate(true)}>
               <Plus className="h-4 w-4" /> Nova Turma
@@ -46,7 +51,7 @@ function ClassroomListPage() {
         </div>
       </div>
 
-      {showJoin && (
+      {canJoin && showJoin && (
         <Card elevation="sm">
           <JoinClassroomForm />
         </Card>

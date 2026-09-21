@@ -11,10 +11,9 @@ import { useAuthStore } from '@store/authStore'
 vi.mock('../api/org-classroom-api')
 vi.mock('../api/org-member-api')
 
-let mockSubject: { classroomIds: string[]; teacherMemberIds: string[] } | undefined = {
-  classroomIds: [],
-  teacherMemberIds: [],
-}
+let mockSubject:
+  | { classroomIds: string[]; teacherMemberIds: string[]; teacherUserIds: string[] }
+  | undefined = { classroomIds: [], teacherMemberIds: [], teacherUserIds: [] }
 
 vi.mock('../hooks/useSubject', () => ({
   useSubject: () => ({ data: mockSubject }),
@@ -68,14 +67,17 @@ const MEMBERS = [
   { id: 'm-2', userId: 'u-2', name: 'Bruno Gestor', email: 'bruno@test.com', role: 'GESTOR' as const },
 ]
 
-function renderPage(role: string) {
-  useAuthStore.setState({ role, organizationId: 'org-1' })
+function renderPage(role: string, userId = 'u-outro') {
+  useAuthStore.setState({ role, userId, organizationId: 'org-1' })
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={qc}>
       <MemoryRouter initialEntries={['/curriculum/subject-1']}>
         <Routes>
-          <Route path="/curriculum/:subjectId" element={<SubjectDetailPage />} />
+          <Route
+            path="/curriculum/:subjectId"
+            element={<SubjectDetailPage dashboardSlot={<div>painel</div>} />}
+          />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,
@@ -84,7 +86,7 @@ function renderPage(role: string) {
 
 beforeEach(() => {
   vi.clearAllMocks()
-  mockSubject = { classroomIds: [], teacherMemberIds: [] }
+  mockSubject = { classroomIds: [], teacherMemberIds: [], teacherUserIds: [] }
   vi.mocked(orgClassroomApi.listOrgClassrooms).mockResolvedValue(CLASSROOMS)
   vi.mocked(orgMemberApi.listOrgMembers).mockResolvedValue(MEMBERS)
 })
@@ -101,7 +103,7 @@ describe('SubjectDetailPage — Turmas e Professores', () => {
   })
 
   it('names the linked classrooms and teachers instead of showing ids', async () => {
-    mockSubject = { classroomIds: ['c-1'], teacherMemberIds: ['m-1'] }
+    mockSubject = { classroomIds: ['c-1'], teacherMemberIds: ['m-1'], teacherUserIds: ['u-1'] }
     renderPage('ADMIN_ORG')
 
     await waitFor(() => expect(screen.getByText('Turma Vinculada')).toBeTruthy())
@@ -111,7 +113,7 @@ describe('SubjectDetailPage — Turmas e Professores', () => {
   })
 
   it('flags a linked classroom that was archived afterwards', async () => {
-    mockSubject = { classroomIds: ['c-2'], teacherMemberIds: [] }
+    mockSubject = { classroomIds: ['c-2'], teacherMemberIds: [], teacherUserIds: [] }
     renderPage('GESTOR')
 
     await waitFor(() => expect(screen.getByText('Turma Arquivada')).toBeTruthy())
@@ -139,7 +141,7 @@ describe('SubjectDetailPage — Turmas e Professores', () => {
   })
 
   it('asks for confirmation before unlinking a classroom', async () => {
-    mockSubject = { classroomIds: ['c-1'], teacherMemberIds: [] }
+    mockSubject = { classroomIds: ['c-1'], teacherMemberIds: [], teacherUserIds: [] }
     renderPage('ADMIN_ORG')
 
     await waitFor(() => expect(screen.getByText('Turma Vinculada')).toBeTruthy())
@@ -153,7 +155,7 @@ describe('SubjectDetailPage — Turmas e Professores', () => {
   })
 
   it('asks for confirmation before removing a teacher', async () => {
-    mockSubject = { classroomIds: [], teacherMemberIds: ['m-1'] }
+    mockSubject = { classroomIds: [], teacherMemberIds: ['m-1'], teacherUserIds: ['u-1'] }
     renderPage('GESTOR')
 
     await waitFor(() => expect(screen.getByText('Ana Professora')).toBeTruthy())
@@ -179,5 +181,34 @@ describe('SubjectDetailPage — Turmas e Professores', () => {
     await waitFor(() =>
       expect(assignMutate).toHaveBeenCalledWith({ memberId: 'm-2' }, expect.any(Object)),
     )
+  })
+})
+
+// `GetProfessorDashboardService` só devolve dados para quem leciona a disciplina.
+// Antes o bloco saía pelo papel na organização, e gestor/admin ficavam com o
+// cabeçalho "Dashboard da Disciplina" sobre um bloco vazio.
+describe('SubjectDetailPage — Dashboard da Disciplina', () => {
+  it('shows the block to the teacher assigned to this subject', () => {
+    mockSubject = { classroomIds: [], teacherMemberIds: ['m-1'], teacherUserIds: ['u-1'] }
+
+    renderPage('PROFESSOR', 'u-1')
+
+    expect(screen.getByRole('heading', { name: /dashboard da disciplina/i })).toBeTruthy()
+  })
+
+  it('hides it from a professor who does not teach this subject', () => {
+    mockSubject = { classroomIds: [], teacherMemberIds: ['m-1'], teacherUserIds: ['u-1'] }
+
+    renderPage('PROFESSOR', 'u-outro')
+
+    expect(screen.queryByRole('heading', { name: /dashboard da disciplina/i })).toBeNull()
+  })
+
+  it.each(['ADMIN_ORG', 'GESTOR'])('hides it from %s, who does not teach', (role) => {
+    mockSubject = { classroomIds: [], teacherMemberIds: ['m-1'], teacherUserIds: ['u-1'] }
+
+    renderPage(role, 'u-admin')
+
+    expect(screen.queryByRole('heading', { name: /dashboard da disciplina/i })).toBeNull()
   })
 })

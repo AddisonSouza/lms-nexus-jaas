@@ -7,8 +7,9 @@ import SubjectListPage from './SubjectListPage'
 import * as subjectApi from '../api/subject-api'
 
 vi.mock('../api/subject-api')
+const { signedInRole } = vi.hoisted(() => ({ signedInRole: { current: 'ADMIN_ORG' } }))
 vi.mock('@store/authStore', () => ({
-  useAuthStore: vi.fn((selector) => selector({ role: 'ADMIN_ORG' })),
+  useAuthStore: vi.fn((selector) => selector({ role: signedInRole.current })),
 }))
 
 function wrapper({ children }: { children: React.ReactNode }) {
@@ -31,11 +32,13 @@ const disciplina = {
   organizationId: 'o1',
   classroomIds: [],
   teacherMemberIds: [],
+  teacherUserIds: [],
   createdAt: '2026-08-30T00:00:00',
 }
 
 beforeEach(() => {
   vi.clearAllMocks()
+  signedInRole.current = 'ADMIN_ORG'
 })
 
 describe('SubjectListPage', () => {
@@ -94,5 +97,27 @@ describe('SubjectListPage', () => {
     await user.click(await screen.findByRole('button', { name: 'Tentar de novo' }))
 
     await waitFor(() => expect(screen.getByText('Matemática')).toBeTruthy())
+  })
+
+  // `SubjectResource.delete` é `@RolesAllowed(ADMIN_ORG)`: oferecer o botão ao
+  // gestor só rendia 403, com cara de defeito do sistema.
+  describe('delete action', () => {
+    it('offers it to the organization administrator', async () => {
+      vi.mocked(subjectApi.listSubjects).mockResolvedValue([disciplina])
+
+      render(<SubjectListPage />, { wrapper })
+
+      expect(await screen.findByTitle('Excluir')).toBeTruthy()
+    })
+
+    it('hides it from the manager, who keeps editing', async () => {
+      signedInRole.current = 'GESTOR'
+      vi.mocked(subjectApi.listSubjects).mockResolvedValue([disciplina])
+
+      render(<SubjectListPage />, { wrapper })
+
+      expect(await screen.findByTitle('Editar')).toBeTruthy()
+      expect(screen.queryByTitle('Excluir')).toBeNull()
+    })
   })
 })

@@ -7,8 +7,9 @@ import ClassroomListPage from './ClassroomListPage'
 import * as classroomApi from '../api/classroom-api'
 
 vi.mock('../api/classroom-api')
+const { signedInRole } = vi.hoisted(() => ({ signedInRole: { current: 'ADMIN_ORG' } }))
 vi.mock('@store/authStore', () => ({
-  useAuthStore: vi.fn((selector) => selector({ role: 'ADMIN_ORG' })),
+  useAuthStore: vi.fn((selector) => selector({ role: signedInRole.current })),
 }))
 
 function wrapper({ children }: { children: React.ReactNode }) {
@@ -35,6 +36,7 @@ const turma = {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  signedInRole.current = 'ADMIN_ORG'
 })
 
 describe('ClassroomListPage', () => {
@@ -76,5 +78,28 @@ describe('ClassroomListPage', () => {
     await user.click(await screen.findByRole('button', { name: 'Tentar de novo' }))
 
     await waitFor(() => expect(screen.getByText('Turma A')).toBeTruthy())
+  })
+
+  // Entrar por código é ação de aluno: para os demais papéis o botão abria um
+  // formulário inline que nunca servia para nada.
+  describe('join by code', () => {
+    it('offers it to the student', async () => {
+      signedInRole.current = 'ALUNO'
+      vi.mocked(classroomApi.getClassrooms).mockResolvedValue([turma])
+
+      render(<ClassroomListPage />, { wrapper })
+
+      expect(await screen.findByRole('button', { name: /entrar via código/i })).toBeTruthy()
+    })
+
+    it('hides the button and its inline form from the administrator', async () => {
+      vi.mocked(classroomApi.getClassrooms).mockResolvedValue([turma])
+
+      render(<ClassroomListPage />, { wrapper })
+
+      await screen.findByText('Turma A')
+      expect(screen.queryByRole('button', { name: /entrar via código/i })).toBeNull()
+      expect(screen.queryByLabelText(/código/i)).toBeNull()
+    })
   })
 })
