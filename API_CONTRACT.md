@@ -352,7 +352,7 @@ uma credencial. O e-mail é comparado sem diferenciar maiúsculas de minúsculas
 
 ---
 
-**`GET /organizations/{id}/members`** · `ADMIN_ORG`
+**`GET /organizations/{id}/members`** · `ADMIN_ORG | GESTOR`
 
 Lista os membros ativos da organização, ordenados por nome. Nome e e-mail vêm do
 módulo `identity`. `owner` marca o criador da organização, que não pode ser
@@ -376,7 +376,10 @@ removido nem ter o papel alterado. Vínculos removidos (soft delete) não aparec
 |---|---|
 | `200` | Membros da organização. |
 | `401` | Não autenticado. |
-| `403` | Não é `ADMIN_ORG` desta organização (o `{id}` precisa bater com o claim `org`). |
+| `403` | Não é `ADMIN_ORG` nem `GESTOR` desta organização (o `{id}` precisa bater com o claim `org`). |
+
+O `GESTOR` lê a lista porque atribui professores a disciplinas (RF-09); alterar
+papel e remover membro seguem só com `ADMIN_ORG`.
 
 ---
 
@@ -566,21 +569,59 @@ como `ALUNO`, e o `ALUNO` nunca recebe o código de volta.
 
 **`POST /subjects/{id}/classrooms`** · `ADMIN_ORG | GESTOR`
 
-Vincula disciplina a uma turma.
+Vincula a disciplina a uma turma. Idempotente: repetir o vínculo devolve `200`.
 
 ```json
 { "classroomId": "string" }
 ```
 
+| Código | Descrição |
+|---|---|
+| `201` | Turma vinculada. |
+| `200` | Vínculo já existia. |
+| `404` | Disciplina ou turma não encontrada na organização. |
+| `422` | Turma arquivada (`CLASSROOM_ARCHIVED`). |
+
+---
+
+**`DELETE /subjects/{id}/classrooms/{classroomId}`** · `ADMIN_ORG | GESTOR`
+
+Desfaz o vínculo. A turma continua existindo; só deixa de ver a disciplina.
+
+| Código | Descrição |
+|---|---|
+| `204` | Turma desvinculada. |
+| `404` | Vínculo não encontrado. |
+
 ---
 
 **`POST /subjects/{id}/teachers`** · `ADMIN_ORG | GESTOR`
 
-Atribui professor à disciplina dentro de uma turma.
+Atribui um professor à disciplina. `memberId` é o **`id` do vínculo** devolvido
+por `GET /organizations/{id}/members` — não o `userId`. Idempotente: repetir a
+atribuição devolve `200`.
 
 ```json
-{ "userId": "string", "classroomId": "string" }
+{ "memberId": "string" }
 ```
+
+| Código | Descrição |
+|---|---|
+| `201` | Professor atribuído. |
+| `200` | Professor já estava atribuído. |
+| `404` | Disciplina não encontrada na organização. |
+| `422` | Membro fora da organização (`MEMBER_NOT_IN_ORGANIZATION`) ou sem permissão para lecionar — papel `ALUNO` (`MEMBER_NOT_A_PROFESSOR`). |
+
+---
+
+**`DELETE /subjects/{id}/teachers/{memberId}`** · `ADMIN_ORG | GESTOR`
+
+Remove a atribuição. `{memberId}` é o mesmo `id` de vínculo usado no `POST`.
+
+| Código | Descrição |
+|---|---|
+| `204` | Professor removido. |
+| `404` | Atribuição não encontrada. |
 
 ---
 
@@ -913,7 +954,7 @@ Todos os recursos usam `deleted_at TIMESTAMP NULL`. Queries filtram `WHERE delet
 | RF-06 | organization | Gestão de Membros | ✅ | `POST /organizations/{id}/invitations` · `GET /organizations/{id}/invitations` · `DELETE /organizations/{id}/invitations/{invitationId}` · `GET /invitations/{token}` · `GET /invitations/pending` · `POST /invitations/{token}/accept` · `GET /organizations/{id}/members` · `PATCH /organizations/{id}/members/{userId}` · `DELETE /organizations/{id}/members/{userId}` |
 | RF-07 | classroom | Gestão de Turmas | ✅ | `GET /classrooms` · `GET /classrooms/{id}` · `POST /classrooms` · `PUT /classrooms/{id}` · `DELETE /classrooms/{id}` · `GET /classrooms/{id}/members` · `POST /classrooms/{id}/members` · `DELETE /classrooms/{id}/members/{userId}` |
 | RF-08 | classroom | Ingresso via Código | 🔍 | `POST /classrooms/join` |
-| RF-09 | curriculum | Gestão de Disciplinas | 📋 | `POST /subjects` · `POST /subjects/{id}/classrooms` · `POST /subjects/{id}/teachers` |
+| RF-09 | curriculum | Gestão de Disciplinas | 📋 | `POST /subjects` · `POST /subjects/{id}/classrooms` · `DELETE /subjects/{id}/classrooms/{classroomId}` · `POST /subjects/{id}/teachers` · `DELETE /subjects/{id}/teachers/{memberId}` |
 | RF-10 | curriculum | Conteúdo Complementar | 📋 | `POST /subjects/{id}/contents` · `GET /subjects/{id}/contents` |
 | RF-11 | assessment | Criação de Tarefas | 📋 | `POST /tasks` |
 | RF-12 | assessment | Envio de Resposta | 📋 | `POST /tasks/{id}/submissions` · `PUT /tasks/{id}/submissions/{submissionId}` |

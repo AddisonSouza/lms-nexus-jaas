@@ -13,3 +13,11 @@ export const contentKeys = {
   all: ['contents'] as const,
   bySubject: (subjectId: string) => [...contentKeys.all, 'subject', subjectId] as const,
 }
+
+/** Listas da organização consultadas pela disciplina (turmas e membros). */
+export const orgDirectoryKeys = {
+  all: ['curriculum', 'org-directory'] as const,
+  classrooms: () => [...orgDirectoryKeys.all, 'classrooms'] as const,
+  members: (organizationId: string) =>
+    [...orgDirectoryKeys.all, 'members', organizationId] as const,
+}

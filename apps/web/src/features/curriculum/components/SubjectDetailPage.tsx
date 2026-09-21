@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, BookOpenCheck, Plus } from 'lucide-react'
+import { ArrowLeft, BookOpenCheck, Plus, Trash2, Users } from 'lucide-react'
 import { useAuthStore } from '@store/authStore'
 import { API_BASE_URL } from '@lib/axios'
 import { useSubject } from '../hooks/useSubject'
@@ -11,9 +11,17 @@ import { useUpdateTopic } from '../hooks/useUpdateTopic'
 import { useDeleteTopic } from '../hooks/useDeleteTopic'
 import { useCreateContent } from '../hooks/useCreateContent'
 import { useDeleteContent } from '../hooks/useDeleteContent'
+import { useOrgClassrooms } from '../hooks/useOrgClassrooms'
+import { useTeacherCandidates } from '../hooks/useTeacherCandidates'
+import { useLinkClassroom } from '../hooks/useLinkClassroom'
+import { useUnlinkClassroom } from '../hooks/useUnlinkClassroom'
+import { useAssignTeacher } from '../hooks/useAssignTeacher'
+import { useRemoveTeacher } from '../hooks/useRemoveTeacher'
 import TopicList from './TopicList'
 import TopicFormDialog from './TopicFormDialog'
 import ContentFormDialog from './ContentFormDialog'
+import LinkClassroomDialog from './LinkClassroomDialog'
+import AssignTeacherDialog from './AssignTeacherDialog'
 import type { TopicFormData } from '../schemas/topicSchema'
 import type { ContentFormData } from '../schemas/contentSchema'
 import type { SubjectContent } from '../types'
@@ -26,6 +34,8 @@ import {
 import ConfirmDialog from '@components/shared/ConfirmDialog'
 import { apiErrorMessage } from '@lib/api-error'
 import { Button } from '@components/ui/button'
+import { Badge } from '@components/ui/badge'
+import { roleLabel } from '@lib/roles'
 
 interface SubjectDetailPageProps {
   dashboardSlot?: ReactNode
@@ -37,6 +47,9 @@ function SubjectDetailPage({ dashboardSlot }: SubjectDetailPageProps) {
 
   const role = useAuthStore((s) => s.role)
   const canManage = role === 'PROFESSOR' || role === 'ADMIN_ORG' || role === 'GESTOR'
+  // Vincular turma e atribuir professor é decisão de quem administra a
+  // organização — o professor gerencia o conteúdo, não os vínculos.
+  const canManageLinks = role === 'ADMIN_ORG' || role === 'GESTOR'
 
   const { data: subject } = useSubject(id)
   const { data: grouped, isLoading } = useSubjectContents(id)
@@ -49,12 +62,60 @@ function SubjectDetailPage({ dashboardSlot }: SubjectDetailPageProps) {
   const [showCreateContent, setShowCreateContent] = useState(false)
   const [editContent, setEditContent] = useState<SubjectContent | null>(null)
   const [deleteContentTarget, setDeleteContentTarget] = useState<SubjectContent | null>(null)
+  const [showLinkClassroom, setShowLinkClassroom] = useState(false)
+  const [showAssignTeacher, setShowAssignTeacher] = useState(false)
+  const [unlinkTarget, setUnlinkTarget] = useState<{ id: string; name: string } | null>(null)
+  const [removeTeacherTarget, setRemoveTeacherTarget] = useState<{ id: string; name: string } | null>(null)
 
   const createTopic = useCreateTopic(id)
   const updateTopic = useUpdateTopic(id)
   const deleteTopic = useDeleteTopic(id)
   const createContent = useCreateContent(id)
   const deleteContent = useDeleteContent(id)
+  const linkClassroom = useLinkClassroom(id)
+  const unlinkClassroom = useUnlinkClassroom(id)
+  const assignTeacher = useAssignTeacher(id)
+  const removeTeacher = useRemoveTeacher(id)
+
+  // As listas da organização resolvem os nomes: `GET /subjects/{id}` devolve só
+  // os ids do vínculo. Quem não administra não as consulta.
+  const { data: orgClassrooms = [] } = useOrgClassrooms(canManageLinks)
+  const { data: orgTeachers = [] } = useTeacherCandidates(canManageLinks)
+
+  const linkedClassroomIds = subject?.classroomIds ?? []
+  const assignedMemberIds = subject?.teacherMemberIds ?? []
+
+  const linkedClassrooms = linkedClassroomIds.map((classroomId) => {
+    const found = orgClassrooms.find((c) => c.id === classroomId)
+    return { id: classroomId, name: found?.name ?? classroomId, archived: found?.status === 'ARCHIVED' }
+  })
+
+  const assignedTeachers = assignedMemberIds.map((memberId) => {
+    const found = orgTeachers.find((m) => m.id === memberId)
+    return {
+      id: memberId,
+      name: found?.name ?? found?.email ?? memberId,
+      role: found?.role ?? null,
+    }
+  })
+
+  const handleLinkClassroom = (classroomId: string) => {
+    linkClassroom.mutate({ classroomId }, { onSuccess: () => setShowLinkClassroom(false) })
+  }
+
+  const handleConfirmUnlink = () => {
+    if (!unlinkTarget) return
+    unlinkClassroom.mutate(unlinkTarget.id, { onSuccess: () => setUnlinkTarget(null) })
+  }
+
+  const handleAssignTeacher = (memberId: string) => {
+    assignTeacher.mutate({ memberId }, { onSuccess: () => setShowAssignTeacher(false) })
+  }
+
+  const handleConfirmRemoveTeacher = () => {
+    if (!removeTeacherTarget) return
+    removeTeacher.mutate(removeTeacherTarget.id, { onSuccess: () => setRemoveTeacherTarget(null) })
+  }
 
   const handleCreateTopic = (data: TopicFormData) => {
     createTopic.mutate(data.title, { onSuccess: () => setShowCreateTopic(false) })
@@ -126,6 +187,82 @@ function SubjectDetailPage({ dashboardSlot }: SubjectDetailPageProps) {
         </div>
       )}
 
+      {canManageLinks && (
+        <section className="space-y-4 rounded-2xl border border-border p-4">
+          <div className="flex items-center gap-2">
+            <Users className="h-4 w-4 text-accent" />
+            <h4 className="mb-0 text-muted-foreground">Turmas e Professores</h4>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h5 className="mb-0 text-sm">Turmas</h5>
+              <Button variant="secondary" onClick={() => setShowLinkClassroom(true)}>
+                <Plus className="h-4 w-4" /> Vincular turma
+              </Button>
+            </div>
+            {linkedClassrooms.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Nenhuma turma vinculada. Sem turma, os alunos não veem esta disciplina.
+              </p>
+            ) : (
+              <ul className="space-y-1">
+                {linkedClassrooms.map((classroom) => (
+                  <li key={classroom.id} className="flex items-center justify-between gap-2 text-sm">
+                    <span className="flex items-center gap-2">
+                      {classroom.name}
+                      {/* A turma pode ser arquivada depois de vinculada — o vínculo continua valendo. */}
+                      {classroom.archived && <Badge variant="neutral">Arquivada</Badge>}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      aria-label={`Desvincular ${classroom.name}`}
+                      onClick={() => setUnlinkTarget({ id: classroom.id, name: classroom.name })}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h5 className="mb-0 text-sm">Professores</h5>
+              <Button variant="secondary" onClick={() => setShowAssignTeacher(true)}>
+                <Plus className="h-4 w-4" /> Atribuir professor
+              </Button>
+            </div>
+            {assignedTeachers.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Nenhum professor atribuído. Sem professor, ninguém cria tarefas aqui.
+              </p>
+            ) : (
+              <ul className="space-y-1">
+                {assignedTeachers.map((teacher) => (
+                  <li key={teacher.id} className="flex items-center justify-between gap-2 text-sm">
+                    <span className="flex items-center gap-2">
+                      {teacher.name}
+                      {teacher.role && (
+                        <span className="text-xs text-muted-foreground">{roleLabel(teacher.role)}</span>
+                      )}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      aria-label={`Remover ${teacher.name}`}
+                      onClick={() => setRemoveTeacherTarget({ id: teacher.id, name: teacher.name })}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </section>
+      )}
+
       <div className="flex items-center justify-between">
         <h4 className="mb-0 text-muted-foreground">Tópicos e Materiais</h4>
         {canManage && (
@@ -194,6 +331,44 @@ function SubjectDetailPage({ dashboardSlot }: SubjectDetailPageProps) {
         confirmLabel="Excluir"
         onConfirm={handleConfirmDeleteContent}
         onCancel={() => setDeleteContentTarget(null)}
+      />
+
+      <LinkClassroomDialog
+        open={showLinkClassroom}
+        onClose={() => { setShowLinkClassroom(false); linkClassroom.reset() }}
+        onSubmit={handleLinkClassroom}
+        isPending={linkClassroom.isPending}
+        linkedClassroomIds={linkedClassroomIds}
+        error={linkClassroom.isError ? apiErrorMessage(linkClassroom.error) : null}
+      />
+
+      <AssignTeacherDialog
+        open={showAssignTeacher}
+        onClose={() => { setShowAssignTeacher(false); assignTeacher.reset() }}
+        onSubmit={handleAssignTeacher}
+        isPending={assignTeacher.isPending}
+        assignedMemberIds={assignedMemberIds}
+        error={assignTeacher.isError ? apiErrorMessage(assignTeacher.error) : null}
+      />
+
+      <ConfirmDialog
+        open={!!unlinkTarget}
+        title="Desvincular turma"
+        description={`Desvincular "${unlinkTarget?.name}" desta disciplina? Os alunos da turma deixam de ver o conteúdo.`}
+        confirmLabel="Desvincular"
+        error={unlinkClassroom.isError ? apiErrorMessage(unlinkClassroom.error) : null}
+        onConfirm={handleConfirmUnlink}
+        onCancel={() => { setUnlinkTarget(null); unlinkClassroom.reset() }}
+      />
+
+      <ConfirmDialog
+        open={!!removeTeacherTarget}
+        title="Remover professor"
+        description={`Remover "${removeTeacherTarget?.name}" desta disciplina? Ele deixa de criar tarefas aqui.`}
+        confirmLabel="Remover"
+        error={removeTeacher.isError ? apiErrorMessage(removeTeacher.error) : null}
+        onConfirm={handleConfirmRemoveTeacher}
+        onCancel={() => { setRemoveTeacherTarget(null); removeTeacher.reset() }}
       />
 
       <Dialog open={!!editContent} onOpenChange={(isOpen) => { if (!isOpen) setEditContent(null) }}>

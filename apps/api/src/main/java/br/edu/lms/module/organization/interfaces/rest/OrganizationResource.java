@@ -122,12 +122,12 @@ public class OrganizationResource {
 
     @GET
     @Path("/{id}/members")
-    @RolesAllowed("ADMIN_ORG")
+    @RolesAllowed({"ADMIN_ORG", "GESTOR"})
     @Operation(summary = "Listar membros da organização")
     @APIResponse(responseCode = "200", description = "Membros ativos, ordenados por nome")
     @APIResponse(responseCode = "403", description = "Sem permissão")
     public Response listMembers(@PathParam("id") String organizationId) {
-        if (!isAdminOf(organizationId)) {
+        if (!isAdminOrManagerOf(organizationId)) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
         return Response.ok(listOrganizationMembersUseCase.execute(organizationId)).build();
@@ -168,9 +168,25 @@ public class OrganizationResource {
 
     /** O ADMIN_ORG só age sobre a organização do próprio token (org do JWT, nunca do path). */
     private boolean isAdminOf(String organizationId) {
+        return hasRoleIn(organizationId, "ADMIN_ORG");
+    }
+
+    /** Leitura de membros: liberada também ao GESTOR, sempre na organização do próprio token. */
+    private boolean isAdminOrManagerOf(String organizationId) {
+        return hasRoleIn(organizationId, "ADMIN_ORG", "GESTOR");
+    }
+
+    private boolean hasRoleIn(String organizationId, String... roles) {
         var orgClaim = (String) jwt.getClaim("org");
         var groups = jwt.getGroups();
-        return orgClaim != null && orgClaim.equals(organizationId)
-                && groups != null && groups.contains("ADMIN_ORG");
+        if (orgClaim == null || !orgClaim.equals(organizationId) || groups == null) {
+            return false;
+        }
+        for (var role : roles) {
+            if (groups.contains(role)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
