@@ -7,6 +7,7 @@ import GradeFeedbackDrawer from './GradeFeedbackDrawer'
 import type { TaskWithGrade } from '../types'
 import type { SubmissionFormData } from '../schemas/submission.schema'
 import ListErrorState from '@components/shared/ListErrorState'
+import { apiErrorMessage } from '@lib/api-error'
 import { Card } from '@components/ui/card'
 import { Badge } from '@components/ui/badge'
 import { Button } from '@components/ui/button'
@@ -157,9 +158,10 @@ function StudentTaskListPage() {
           open={true}
           taskTitle={submitting.title}
           deadline={submitting.deadline}
-          onClose={() => setSubmitting(null)}
+          onClose={() => { setSubmitting(null); submitTask.reset() }}
           onSubmit={handleSubmit}
           isPending={submitTask.isPending}
+          error={submitTask.isError ? apiErrorMessage(submitTask.error) : null}
         />
       )}
 
@@ -169,9 +171,10 @@ function StudentTaskListPage() {
           mode="edit"
           taskTitle={editing.title}
           deadline={editing.deadline}
-          onClose={() => setEditing(null)}
+          onClose={() => { setEditing(null); editSubmission.reset() }}
           onSubmit={handleEdit}
           isPending={editSubmission.isPending}
+          error={editSubmission.isError ? apiErrorMessage(editSubmission.error) : null}
         />
       )}
 
