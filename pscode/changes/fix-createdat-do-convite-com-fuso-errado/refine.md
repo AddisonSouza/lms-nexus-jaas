@@ -51,6 +51,6 @@ corrige a resposta do `PUT` de submissão, que devolve `createdAt: null`.
 
 ## Subtasks
 
-- [ ] Corrigir o `@PrePersist` de `InvitationJpaEntity` para preservar o `createdAt` do domínio e usar referencial UTC no fallback
-- [ ] Mapear `createdAt`/`updatedAt` em `SubmissionMapper.toEntity` para o `merge` não devolver `createdAt: null`
-- [ ] Adicionar teste de integração do convite com a JVM em fuso não-UTC verificando `expiresAt - createdAt == 7 dias`
+- [x] Corrigir o `@PrePersist` de `InvitationJpaEntity` para preservar o `createdAt` do domínio e usar referencial UTC no fallback
+- [x] Mapear `createdAt`/`updatedAt` em `SubmissionMapper.toEntity` para o `merge` não devolver `createdAt: null`
+- [x] Adicionar teste de integração do convite com a JVM em fuso não-UTC verificando `expiresAt - createdAt == 7 dias`

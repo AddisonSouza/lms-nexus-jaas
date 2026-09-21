@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 @Data
 @Entity
@@ -43,6 +44,8 @@ public class InvitationJpaEntity {
 
     @PrePersist
     void prePersist() {
-        this.createdAt = LocalDateTime.now();
+        if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now(ZoneOffset.UTC);
+        }
     }
 }

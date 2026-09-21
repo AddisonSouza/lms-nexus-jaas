@@ -15,8 +15,8 @@ public interface SubmissionMapper {
 
     @Mapping(target = "id", expression = "java(domain.getId().getValue())")
     @Mapping(target = "status", expression = "java(domain.getStatus().name())")
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "createdAt", source = "createdAt")
+    @Mapping(target = "updatedAt", source = "updatedAt")
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "attachments", ignore = true)
     TaskSubmissionJpaEntity toEntity(TaskSubmission domain);
