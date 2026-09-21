@@ -10,6 +10,7 @@ import br.edu.lms.module.assessment.domain.exception.EmptySubmissionException;
 import br.edu.lms.module.assessment.domain.exception.InvalidTaskStateException;
 import br.edu.lms.module.assessment.domain.exception.SubmissionAlreadyExistsException;
 import br.edu.lms.module.assessment.domain.exception.TaskNotFoundException;
+import br.edu.lms.module.assessment.domain.model.AttachmentTypePolicy;
 import br.edu.lms.module.assessment.domain.model.SubmissionAttachment;
 import br.edu.lms.module.assessment.domain.model.SubmissionId;
 import br.edu.lms.module.assessment.domain.model.SubmissionStatus;
@@ -87,6 +88,14 @@ public class SubmitTaskService implements SubmitTaskUseCase {
 
     private List<SubmissionAttachment> buildAttachments(List<AttachmentInput> inputs) {
         if (inputs == null) return List.of();
+
+        // Todos os anexos são validados antes do primeiro `store`: um envio com
+        // três arquivos, um deles recusado, não pode deixar os outros dois no
+        // storage sem submissão que os referencie.
+        for (AttachmentInput input : inputs) {
+            AttachmentTypePolicy.validate(input.fileName(), input.mimeType());
+        }
+
         List<SubmissionAttachment> result = new ArrayList<>();
         for (AttachmentInput input : inputs) {
             var stored = storagePort.store(input.stream(), input.fileName(), input.mimeType(), input.sizeBytes(), StorageContext.SUBMISSION_ATTACHMENT);
