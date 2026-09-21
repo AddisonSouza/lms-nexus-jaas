@@ -15,6 +15,7 @@ import { Input } from '@components/ui/input'
 import { Textarea } from '@components/ui/textarea'
 import { Button } from '@components/ui/button'
 import { CardKicker } from '@components/ui/card'
+import AttachmentLink from '@components/shared/AttachmentLink'
 
 interface Props {
   open: boolean
@@ -68,8 +69,12 @@ function EvaluationDialog({ open, submission, task, onClose, onSubmit, isPending
                 <CardKicker>Anexos</CardKicker>
                 <ul className="mt-1 space-y-1">
                   {submission.attachments.map((a) => (
-                    <li key={a.id} className="text-xs text-accent">
-                      {a.originalName}
+                    <li key={a.id}>
+                      <AttachmentLink
+                        fileKey={a.fileKey}
+                        originalName={a.originalName}
+                        sizeBytes={a.sizeBytes}
+                      />
                     </li>
                   ))}
                 </ul>

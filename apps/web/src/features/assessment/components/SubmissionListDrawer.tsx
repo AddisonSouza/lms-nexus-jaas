@@ -14,6 +14,7 @@ import {
 } from '@components/ui/sheet'
 import { Card } from '@components/ui/card'
 import { Button } from '@components/ui/button'
+import AttachmentLink from '@components/shared/AttachmentLink'
 
 interface Props {
   open: boolean
@@ -79,10 +80,19 @@ function SubmissionListDrawer({ open, task, onClose }: Props) {
                   </p>
                 )}
 
+                {/* Contar os anexos não dizia qual era o arquivo nem dava como
+                    abri-lo; a lista baixável substitui o "N anexo(s)". */}
                 {sub.attachments.length > 0 && (
-                  <p className="text-xs text-muted-foreground">
-                    {sub.attachments.length} anexo(s)
-                  </p>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1">
+                    {sub.attachments.map((a) => (
+                      <AttachmentLink
+                        key={a.id}
+                        fileKey={a.fileKey}
+                        originalName={a.originalName}
+                        sizeBytes={a.sizeBytes}
+                      />
+                    ))}
+                  </div>
                 )}
 
                 {sub.status === 'EVALUATED' && (

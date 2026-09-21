@@ -7,7 +7,6 @@ import { Card } from '@components/ui/card'
 interface Props {
   topicsWithContents: TopicWithContents[]
   canManage: boolean
-  apiBaseUrl: string
   onEditTopic: (topicId: string, currentTitle: string) => void
   onDeleteTopic: (topicId: string, title: string) => void
   onAddContent: (topicId: string) => void
@@ -18,7 +17,6 @@ interface Props {
 function TopicList({
   topicsWithContents,
   canManage,
-  apiBaseUrl,
   onEditTopic,
   onDeleteTopic,
   onAddContent,
@@ -89,7 +87,6 @@ function TopicList({
                       key={c.id}
                       content={c}
                       canManage={canManage}
-                      apiBaseUrl={apiBaseUrl}
                       onEdit={onEditContent}
                       onDelete={() => onDeleteContent(c)}
                     />
