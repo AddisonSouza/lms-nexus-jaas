@@ -50,12 +50,19 @@ function ConfirmEmailCallbackPage() {
     staleTime: Infinity,
   })
 
+  // O 409 não é falha: a conta foi ativada no clique anterior. Quem clica duas
+  // vezes no link vê o mesmo desfecho do primeiro clique, em vez de um erro que
+  // sugere que a confirmação não valeu.
+  const status = (error as { response?: { status?: number } })?.response?.status
+  const alreadyConfirmed = isError && status === 409
+  const confirmed = isSuccess || alreadyConfirmed
+
   useEffect(() => {
-    if (isSuccess) {
+    if (confirmed) {
       const timer = setTimeout(() => navigate('/login?confirmed=true'), 2000)
       return () => clearTimeout(timer)
     }
-  }, [isSuccess, navigate])
+  }, [confirmed, navigate])
 
   if (!token) {
     return <StaticPendingPage />
@@ -70,39 +77,36 @@ function ConfirmEmailCallbackPage() {
     )
   }
 
-  if (isSuccess) {
+  if (confirmed) {
     return (
       <StatusCard>
         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent-2-100 text-accent-2-800">
           <CheckCircle className="h-6 w-6" />
         </div>
-        <h2 className="font-heading text-2xl">E-mail confirmado!</h2>
+        <h2 className="font-heading text-2xl">
+          {alreadyConfirmed ? 'E-mail já confirmado' : 'E-mail confirmado!'}
+        </h2>
         <p className="text-sm text-muted-foreground">
-          Sua conta está ativa. Redirecionando para o login...
+          {alreadyConfirmed
+            ? 'Sua conta já está ativa. Redirecionando para o login...'
+            : 'Sua conta está ativa. Redirecionando para o login...'}
         </p>
       </StatusCard>
     )
   }
 
   if (isError) {
-    const status = (error as { response?: { status?: number } })?.response?.status
-    const isAlreadyConfirmed = status === 409
-
     return (
       <StatusCard>
         <BackToLogin className="self-start" />
         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent-100 text-accent-800">
           <XCircle className="h-6 w-6" />
         </div>
-        <h2 className="font-heading text-2xl">
-          {isAlreadyConfirmed ? 'E-mail já confirmado' : 'Link inválido ou expirado'}
-        </h2>
+        <h2 className="font-heading text-2xl">Link inválido ou expirado</h2>
         <p className="text-sm text-muted-foreground">
-          {isAlreadyConfirmed
-            ? 'Sua conta já está ativa. Acesse o login.'
-            : 'O link de confirmação é inválido ou expirou.'}
+          O link de confirmação é inválido ou expirou.
         </p>
-        {!isAlreadyConfirmed && <ResendConfirmationForm />}
+        <ResendConfirmationForm />
       </StatusCard>
     )
   }

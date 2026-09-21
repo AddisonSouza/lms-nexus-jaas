@@ -47,7 +47,8 @@ class ConfirmEmailServiceTest {
         sut.execute(TOKEN);
 
         verify(userRepository).save(user);
-        verify(confirmationTokenRepository).invalidate(TOKEN);
+        // O token sobrevive ao primeiro clique para o segundo poder responder 409.
+        verify(confirmationTokenRepository, never()).invalidate(any());
     }
 
     @Test
