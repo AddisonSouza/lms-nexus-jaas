@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.lessThan;
 class ConfirmEmailResourceIT {
 
     static final String MAIL_EMAIL = "mail-confirm-it@test.com";
+    static final String TWICE_EMAIL = "confirm-twice-it@test.com";
 
     @Inject MockMailbox mailbox;
     @Inject EntityManager em;
@@ -32,7 +33,8 @@ class ConfirmEmailResourceIT {
     @AfterEach
     void tearDown() throws Exception {
         tx.begin();
-        em.createNativeQuery("DELETE FROM users WHERE email = ?").setParameter(1, MAIL_EMAIL).executeUpdate();
+        em.createNativeQuery("DELETE FROM users WHERE email IN (?,?)")
+                .setParameter(1, MAIL_EMAIL).setParameter(2, TWICE_EMAIL).executeUpdate();
         tx.commit();
     }
 
@@ -110,5 +112,48 @@ class ConfirmEmailResourceIT {
                 .when().post("/auth/resend-confirmation")
                 .then()
                 .statusCode(422);
+    }
+
+    // Clicar duas vezes no link de confirmação não é erro: a conta já foi ativada
+    // no primeiro clique. O token sobrevive (expira pelo TTL de 24h) para que o
+    // segundo clique resolva o usuário e responda 409, em vez do 400 de "Link
+    // inválido ou expirado" que aparecia quando o token era apagado na hora.
+    @Test
+    void confirmEmail_clickedTwice_returns204ThenAlreadyConfirmed() {
+        given()
+                .contentType(ContentType.JSON)
+                .body("""
+                        {"fullName":"Confirm Twice IT","email":"%s","password":"Senha@12345"}
+                        """.formatted(TWICE_EMAIL))
+                .when().post("/auth/register")
+                .then()
+                .statusCode(lessThan(300));
+
+        var token = confirmationTokenSentTo(TWICE_EMAIL);
+
+        given()
+                .queryParam("token", token)
+                .when().get("/auth/confirm-email")
+                .then()
+                .statusCode(204);
+
+        given()
+                .queryParam("token", token)
+                .when().get("/auth/confirm-email")
+                .then()
+                .statusCode(409)
+                .body("error", equalTo("EMAIL_ALREADY_CONFIRMED"));
+    }
+
+    private String confirmationTokenSentTo(String email) {
+        var mails = mailbox.getMailsSentTo(email);
+        assertThat(mails).hasSize(1);
+        var matcher = java.util.regex.Pattern
+                .compile("/confirm-email\\?token=([0-9a-f-]{36})")
+                .matcher(mails.get(0).getHtml());
+        assertThat(matcher.find())
+                .as("link de confirmação no corpo do e-mail")
+                .isTrue();
+        return matcher.group(1);
     }
 }

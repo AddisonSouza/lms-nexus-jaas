@@ -33,7 +33,12 @@ public class ConfirmEmailService implements ConfirmEmailUseCase {
 
         user.activate();
         userRepository.save(user);
-        confirmationTokenRepository.invalidate(token);
+        // O token não é invalidado aqui: a chave `ect:{token}` expira sozinha pelo
+        // TTL de 24h. Apagá-la fazia o segundo clique no link cair em
+        // `InvalidConfirmationTokenException` ("Link inválido ou expirado") em vez
+        // do 409 idempotente, alarmando quem só clicou duas vezes. O replay é
+        // inócuo: a única ação que o token habilita é `activate()`, já guardada
+        // pelo status logo acima.
 
         log.info("Email confirmed for user: {}", userId);
     }

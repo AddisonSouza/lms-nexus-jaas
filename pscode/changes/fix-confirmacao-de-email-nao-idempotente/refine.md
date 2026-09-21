@@ -48,7 +48,7 @@ ao login com mensagem de sucesso, igual ao primeiro.
 
 ## Subtasks
 
-- [ ] Remover `confirmationTokenRepository.invalidate(token)` de `ConfirmEmailService` e ajustar `ConfirmEmailServiceTest` (o `verify(...).invalidate(TOKEN)` vira `never()`)
-- [ ] Adicionar IT em `ConfirmEmailResourceIT`: confirmar duas vezes o mesmo token → 204 e depois 409 `EMAIL_ALREADY_CONFIRMED`
-- [ ] Em `ConfirmEmailCallbackPage`, renderizar o 409 como sucesso (CheckCircle, "E-mail já confirmado") e redirecionar para `/login?confirmed=true` após 2s
-- [ ] Cobrir o caso 409 em `ConfirmEmailCallbackPage.test.tsx` (card de sucesso + navegação para o login)
+- [x] Remover `confirmationTokenRepository.invalidate(token)` de `ConfirmEmailService` e ajustar `ConfirmEmailServiceTest` (o `verify(...).invalidate(TOKEN)` vira `never()`)
+- [x] Adicionar IT em `ConfirmEmailResourceIT`: confirmar duas vezes o mesmo token → 204 e depois 409 `EMAIL_ALREADY_CONFIRMED`
+- [x] Em `ConfirmEmailCallbackPage`, renderizar o 409 como sucesso (CheckCircle, "E-mail já confirmado") e redirecionar para `/login?confirmed=true` após 2s
+- [x] Cobrir o caso 409 em `ConfirmEmailCallbackPage.test.tsx` (card de sucesso + navegação para o login)

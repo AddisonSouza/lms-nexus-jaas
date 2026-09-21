@@ -72,16 +72,27 @@ describe('ConfirmEmailCallbackPage', () => {
     })
   })
 
+  // Segundo clique no mesmo link: a conta já foi ativada antes, então a tela
+  // repete o desfecho do primeiro clique em vez de acusar erro.
   describe('with already confirmed token (409)', () => {
-    it('shows already confirmed message without resend form', async () => {
+    it('shows the success card and redirects to the login', async () => {
       vi.mocked(authApi.confirmEmail).mockRejectedValue({ response: { status: 409 } })
       renderPage('/confirm-email?token=old-token')
 
       await waitFor(() => {
         expect(screen.getByText(/e-mail já confirmado/i)).toBeTruthy()
-        expect(screen.queryByRole('button', { name: /reenviar/i })).toBeNull()
-        expect(screen.getByRole('link', { name: 'Voltar ao login' })).toBeTruthy()
       })
+
+      expect(screen.getByText(/redirecionando para o login/i)).toBeTruthy()
+      expect(screen.queryByText(/link inválido ou expirado/i)).toBeNull()
+      expect(screen.queryByRole('button', { name: /reenviar/i })).toBeNull()
+
+      await waitFor(
+        () => {
+          expect(mockNavigate).toHaveBeenCalledWith('/login?confirmed=true')
+        },
+        { timeout: 3000 },
+      )
     })
   })
 })
