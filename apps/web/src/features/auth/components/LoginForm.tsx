@@ -9,9 +9,11 @@ import { Button } from '@components/ui/button'
 interface Props {
   onSubmit: (data: LoginFormData) => void
   isPending: boolean
+  /** Bloqueio por excesso de tentativas: enviar de novo só levaria outro 429. */
+  disabled?: boolean
 }
 
-function LoginForm({ onSubmit, isPending }: Props) {
+function LoginForm({ onSubmit, isPending, disabled = false }: Props) {
   const {
     register,
     handleSubmit,
@@ -34,7 +36,7 @@ function LoginForm({ onSubmit, isPending }: Props) {
         {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
       </div>
 
-      <Button type="submit" disabled={isPending} className="w-full">
+      <Button type="submit" disabled={isPending || disabled} className="w-full">
         {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
         Entrar
       </Button>
