@@ -1,5 +1,7 @@
 package br.edu.lms.module.storage.infrastructure;
 
+import br.edu.lms.module.storage.domain.exception.FileNotFoundException;
+import br.edu.lms.module.storage.domain.model.RetrievedFile;
 import br.edu.lms.module.storage.domain.model.StorageContext;
 import br.edu.lms.module.storage.domain.model.StoredFile;
 import br.edu.lms.module.storage.domain.port.out.StoragePort;
@@ -10,15 +12,20 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.UUID;
 
 @ApplicationScoped
 @Slf4j
 public class S3StorageAdapter implements StoragePort {
+
+    private static final int UUID_LENGTH = 36;
+    private static final String ORIGINAL_NAME_METADATA = "original-name";
 
     private final S3Client s3Client;
     private final String bucket;
@@ -49,6 +56,9 @@ public class S3StorageAdapter implements StoragePort {
                         .key(key)
                         .contentType(mimeType)
                         .contentLength(sizeBytes)
+                        // A chave leva o nome sanitizado; o original fica aqui para o
+                        // `Content-Disposition` devolver acento e espaço como vieram.
+                        .metadata(Map.of(ORIGINAL_NAME_METADATA, filename))
                         .build(),
                 RequestBody.fromInputStream(content, sizeBytes));
 
@@ -57,12 +67,38 @@ public class S3StorageAdapter implements StoragePort {
     }
 
     @Override
-    public InputStream retrieve(String fileKey) {
-        return s3Client.getObject(
-                GetObjectRequest.builder()
-                        .bucket(bucket)
-                        .key(fileKey)
-                        .build());
+    public RetrievedFile retrieve(String fileKey) {
+        try {
+            var response = s3Client.getObject(
+                    GetObjectRequest.builder()
+                            .bucket(bucket)
+                            .key(fileKey)
+                            .build());
+            var head = response.response();
+            return new RetrievedFile(
+                    new StoredFile(fileKey, originalNameOf(head, fileKey), head.contentType(), head.contentLength()),
+                    response);
+        } catch (NoSuchKeyException e) {
+            throw new FileNotFoundException(fileKey);
+        }
+    }
+
+    /**
+     * O nome original vem do metadado gravado no upload. Objetos anteriores a
+     * este campo caem no nome embutido na chave, já sanitizado.
+     */
+    private String originalNameOf(software.amazon.awssdk.services.s3.model.GetObjectResponse head, String fileKey) {
+        var stored = head.metadata() != null ? head.metadata().get(ORIGINAL_NAME_METADATA) : null;
+        return stored != null && !stored.isBlank() ? stored : originalNameFrom(fileKey);
+    }
+
+    /** A chave é `{contexto}/{ano}/{mês}/{uuid}-{nome}`; devolve a cauda sem o UUID. */
+    private String originalNameFrom(String fileKey) {
+        var tail = fileKey.substring(fileKey.lastIndexOf('/') + 1);
+        var separator = tail.indexOf('-', UUID_LENGTH - 1);
+        return separator >= 0 && separator < tail.length() - 1
+                ? tail.substring(separator + 1)
+                : tail;
     }
 
     @Override

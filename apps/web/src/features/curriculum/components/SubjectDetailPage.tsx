@@ -2,7 +2,6 @@ import { useState, type ReactNode } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, BookOpenCheck, Plus, Trash2, Users } from 'lucide-react'
 import { useAuthStore } from '@store/authStore'
-import { API_BASE_URL } from '@lib/axios'
 import { useSubject } from '../hooks/useSubject'
 import { useSubjectContents } from '../hooks/useSubjectContents'
 import { useTopics } from '../hooks/useTopics'
@@ -283,7 +282,6 @@ function SubjectDetailPage({ dashboardSlot }: SubjectDetailPageProps) {
         <TopicList
           topicsWithContents={grouped?.topics ?? []}
           canManage={canManage}
-          apiBaseUrl={`${API_BASE_URL}/api`}
           onEditTopic={(topicId, title) => setEditTopic({ id: topicId, title })}
           onDeleteTopic={(topicId, title) => handleDeleteTopic(topicId, title)}
           onAddContent={handleAddContent}

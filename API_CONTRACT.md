@@ -857,6 +857,36 @@ Métricas: próximas tarefas por urgência, tarefas entregues vs pendentes, últ
 
 ---
 
+## Módulo: `storage` — Arquivos
+
+### Download de anexo 📋
+
+**`GET /files/{fileKey}`** · `ADMIN_ORG` · `GESTOR` · `PROFESSOR` · `ALUNO`
+
+Serve o arquivo guardado no storage. O `fileKey` vem dos anexos de tarefa,
+submissão e conteúdo de disciplina (`attachments[].fileKey`, `content.fileKey`) e
+tem barras, que fazem parte do caminho.
+
+Resposta `200` com o corpo do arquivo e os cabeçalhos:
+
+| Cabeçalho | Valor |
+|---|---|
+| `Content-Type` | o tipo real gravado no upload (`application/pdf`, …) |
+| `Content-Disposition` | `attachment; filename="..."; filename*=UTF-8''...` |
+
+`Content-Disposition` está em `quarkus.http.cors.exposed-headers`; sem isso o
+navegador esconde o cabeçalho do JavaScript.
+
+| Código | Quando |
+|---|---|
+| `401` | sem JWT válido |
+| `404` | `fileKey` não existe no storage (`FILE_NOT_FOUND`) |
+
+> O endpoint **não** valida que o arquivo pertence à organização de quem pede —
+> o `fileKey` não carrega `organization_id`. Gap conhecido, card próprio.
+
+---
+
 ## Módulo: `gamification` — Gamificação 🔮
 
 > Fora do MVP. Módulo isolado, ativado sem alteração no núcleo.

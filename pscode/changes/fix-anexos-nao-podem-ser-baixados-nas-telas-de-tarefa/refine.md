@@ -50,12 +50,12 @@ o tipo e o nome originais.
 - Anexos de aviso (`AnnouncementCard`) — mesma correção, outro card.
 
 ## Subtasks
-- [ ] `lib/download.ts` com `downloadFile(fileKey, originalName)` e teste unitário (blob, nome, revoke)
-- [ ] `components/shared/AttachmentLink.tsx` (nome, tamanho, ícone, estado de carregando) com teste
-- [ ] BE: `@Path("/files")`, `Content-Type` e `Content-Disposition` no `FileResource`, com `ServeFileUseCase` devolvendo `StoredFile`
-- [ ] BE: 404 para `fileKey` inexistente (exceção de domínio + mapper) e `Content-Disposition` em `cors.exposed-headers`, com teste de integração
-- [ ] `StudentTaskListPage` renderizando `task.attachments` com `AttachmentLink`, com teste
-- [ ] `EvaluationDialog` e `SubmissionListDrawer` com os anexos baixáveis, com testes
-- [ ] `ContentCard` usando `downloadFile` no arquivo e mantendo o link externo, com teste
-- [ ] Atualizar `API_CONTRACT.md` e a spec `file-storage`; rodar lint, type-check e as duas suítes
+- [x] `lib/download.ts` com `downloadFile(fileKey, originalName)` e teste unitário (blob, nome, revoke)
+- [x] `components/shared/AttachmentLink.tsx` (nome, tamanho, ícone, estado de carregando) com teste
+- [x] BE: `@Path("/files")`, `Content-Type` e `Content-Disposition` no `FileResource`, com `ServeFileUseCase` devolvendo `StoredFile`
+- [x] BE: 404 para `fileKey` inexistente (exceção de domínio + mapper) e `Content-Disposition` em `cors.exposed-headers`, com teste de integração
+- [x] `StudentTaskListPage` renderizando `task.attachments` com `AttachmentLink`, com teste
+- [x] `EvaluationDialog` e `SubmissionListDrawer` com os anexos baixáveis, com testes
+- [x] `ContentCard` usando `downloadFile` no arquivo e mantendo o link externo, com teste
+- [x] Atualizar `API_CONTRACT.md` e a spec `file-storage`; rodar lint, type-check e as duas suítes
 - [ ] Validar no navegador: anexo de tarefa (aluno), de submissão (professor) e de conteúdo (disciplina)

@@ -1,6 +1,8 @@
-import { FileText, Video, Link2, Archive, ExternalLink, Download } from 'lucide-react'
+import { useState } from 'react'
+import { FileText, Video, Link2, Archive, ExternalLink, Download, Loader2 } from 'lucide-react'
 import type { SubjectContent, ContentType } from '../types'
 import { Badge } from '@components/ui/badge'
+import { downloadFile, fileNameFromKey } from '@lib/download'
 
 const ICONS: Record<ContentType, React.ElementType> = {
   VIDEO: Video,
@@ -28,13 +30,25 @@ interface Props {
   canManage: boolean
   onEdit: (content: SubjectContent) => void
   onDelete: (contentId: string) => void
-  apiBaseUrl: string
 }
 
-function ContentCard({ content, canManage, onEdit, onDelete, apiBaseUrl }: Props) {
+function ContentCard({ content, canManage, onEdit, onDelete }: Props) {
   const Icon = ICONS[content.contentType]
+  const [isDownloading, setIsDownloading] = useState(false)
 
-  const href = content.externalUrl ?? (content.fileKey ? `${apiBaseUrl}/files/${content.fileKey}` : undefined)
+  const fileKey = content.fileKey
+
+  // Arquivo do storage exige o JWT, então é um botão que baixa pelo `api`; o
+  // `<a href>` de antes abria uma aba em 401. Link externo continua link.
+  async function handleDownload() {
+    if (!fileKey) return
+    setIsDownloading(true)
+    try {
+      await downloadFile(fileKey, fileNameFromKey(fileKey))
+    } finally {
+      setIsDownloading(false)
+    }
+  }
 
   return (
     <div className="flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2 hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]">
@@ -52,15 +66,32 @@ function ContentCard({ content, canManage, onEdit, onDelete, apiBaseUrl }: Props
       <Badge variant="neutral">{LABELS[content.contentType]}</Badge>
 
       <div className="flex shrink-0 items-center gap-2">
-        {href && (
+        {fileKey && (
+          <button
+            type="button"
+            onClick={handleDownload}
+            disabled={isDownloading}
+            className="text-muted-foreground hover:text-foreground disabled:opacity-60"
+            aria-label={`Baixar ${content.title}`}
+            title="Download"
+          >
+            {isDownloading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
+          </button>
+        )}
+        {!fileKey && content.externalUrl && (
           <a
-            href={href}
+            href={content.externalUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="text-muted-foreground hover:text-foreground"
-            title={content.fileKey ? 'Download' : 'Abrir link'}
+            aria-label={`Abrir ${content.title}`}
+            title="Abrir link"
           >
-            {content.fileKey ? <Download className="h-4 w-4" /> : <ExternalLink className="h-4 w-4" />}
+            <ExternalLink className="h-4 w-4" />
           </a>
         )}
         {canManage && (

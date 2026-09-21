@@ -134,4 +134,34 @@ describe('SubmissionListDrawer', () => {
     )
     expect(submissionsApi.evaluateSubmission).toHaveBeenCalledTimes(1)
   })
+
+  // O drawer contava "N anexo(s)" e o diálogo mostrava só o nome: em nenhuma das
+  // duas telas o professor conseguia abrir o arquivo que o aluno entregou.
+  describe('submission attachments', () => {
+    const COM_ANEXO: TaskSubmission = {
+      ...SUBMISSION,
+      attachments: [
+        { id: 'att-1', fileKey: 'submission_attachment/2026/09/uuid-resposta.pdf', originalName: 'resposta.pdf', mimeType: 'application/pdf', sizeBytes: 4096 },
+      ],
+    }
+
+    it('lists the attachment for download instead of counting it', async () => {
+      vi.mocked(submissionsApi.listSubmissions).mockResolvedValue([COM_ANEXO])
+
+      renderDrawer()
+
+      expect(await screen.findByRole('button', { name: /baixar resposta\.pdf/i })).toBeTruthy()
+      expect(screen.queryByText(/anexo\(s\)/i)).toBeNull()
+    })
+
+    it('offers it inside the evaluation dialog too', async () => {
+      vi.mocked(submissionsApi.listSubmissions).mockResolvedValue([COM_ANEXO])
+
+      renderDrawer()
+      await openEvaluationDialog()
+
+      const downloads = await screen.findAllByRole('button', { name: /baixar resposta\.pdf/i })
+      expect(downloads.length).toBeGreaterThan(0)
+    })
+  })
 })

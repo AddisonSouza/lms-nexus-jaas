@@ -160,4 +160,33 @@ describe('StudentTaskListPage', () => {
       textResponse: 'resposta corrigida',
     })
   })
+
+  // Os anexos do enunciado já vinham no `my-grades` e nunca eram renderizados:
+  // o aluno via a tarefa mas não tinha como chegar ao arquivo.
+  describe('task attachments', () => {
+    const comAnexo: TaskWithGrade = {
+      ...tarefa,
+      attachments: [
+        { id: 'a-1', fileKey: 'task_attachment/2026/09/uuid-enunciado.pdf', originalName: 'enunciado.pdf', mimeType: 'application/pdf', sizeBytes: 2048 },
+      ],
+    }
+
+    it('offers the task attachment for download', async () => {
+      vi.mocked(submissionsApi.listStudentGrades).mockResolvedValue([comAnexo])
+
+      render(<StudentTaskListPage />, { wrapper })
+
+      expect(await screen.findByRole('button', { name: /baixar enunciado\.pdf/i })).toBeTruthy()
+      expect(screen.getByText('(2,0 KB)')).toBeTruthy()
+    })
+
+    it('shows no attachment row when the task has none', async () => {
+      vi.mocked(submissionsApi.listStudentGrades).mockResolvedValue([tarefa])
+
+      render(<StudentTaskListPage />, { wrapper })
+
+      await screen.findByText('Trabalho de Álgebra')
+      expect(screen.queryByRole('button', { name: /baixar/i })).toBeNull()
+    })
+  })
 })

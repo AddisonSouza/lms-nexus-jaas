@@ -9,6 +9,7 @@ import type { SubmissionFormData } from '../schemas/submission.schema'
 import ListErrorState from '@components/shared/ListErrorState'
 import { apiErrorMessage } from '@lib/api-error'
 import { Card } from '@components/ui/card'
+import AttachmentLink from '@components/shared/AttachmentLink'
 import { Badge } from '@components/ui/badge'
 import { Button } from '@components/ui/button'
 
@@ -101,6 +102,20 @@ function StudentTaskListPage() {
                     </p>
                     {task.maxScore != null && (
                       <p className="text-xs text-muted-foreground">Pontuação máxima: {task.maxScore}</p>
+                    )}
+                    {/* Os anexos do enunciado já vinham na resposta e nunca eram
+                        renderizados: o aluno não tinha como chegar ao arquivo. */}
+                    {task.attachments.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                        {task.attachments.map((attachment) => (
+                          <AttachmentLink
+                            key={attachment.id}
+                            fileKey={attachment.fileKey}
+                            originalName={attachment.originalName}
+                            sizeBytes={attachment.sizeBytes}
+                          />
+                        ))}
+                      </div>
                     )}
                     {isEvaluated && task.submission?.grade != null && (
                       <p className="mt-1 text-sm font-semibold text-accent-2-700">
