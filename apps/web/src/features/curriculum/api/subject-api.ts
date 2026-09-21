@@ -16,6 +16,9 @@ const subjectSchema = z.object({
   organizationId: z.string().default(''),
   classroomIds: z.array(z.string()).default([]),
   teacherMemberIds: z.array(z.string()).default([]),
+  // Os mesmos professores pelo `userId`, para a tela saber se quem está logado
+  // leciona a disciplina sem precisar listar os membros da organização.
+  teacherUserIds: z.array(z.string()).default([]),
   createdAt: z.string().default(''),
 })
 

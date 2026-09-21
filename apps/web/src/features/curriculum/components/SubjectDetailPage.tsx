@@ -46,6 +46,7 @@ function SubjectDetailPage({ dashboardSlot }: SubjectDetailPageProps) {
   const id = subjectId!
 
   const role = useAuthStore((s) => s.role)
+  const userId = useAuthStore((s) => s.userId)
   const canManage = role === 'PROFESSOR' || role === 'ADMIN_ORG' || role === 'GESTOR'
   // Vincular turma e atribuir professor é decisão de quem administra a
   // organização — o professor gerencia o conteúdo, não os vínculos.
@@ -84,6 +85,10 @@ function SubjectDetailPage({ dashboardSlot }: SubjectDetailPageProps) {
 
   const linkedClassroomIds = subject?.classroomIds ?? []
   const assignedMemberIds = subject?.teacherMemberIds ?? []
+  // `GetProfessorDashboardService` só devolve dados para quem leciona esta
+  // disciplina. Papel de professor na organização não basta: sem este casamento
+  // sobrava o cabeçalho "Dashboard da Disciplina" sobre um bloco vazio.
+  const teachesThisSubject = !!userId && (subject?.teacherUserIds ?? []).includes(userId)
 
   const linkedClassrooms = linkedClassroomIds.map((classroomId) => {
     const found = orgClassrooms.find((c) => c.id === classroomId)
@@ -180,7 +185,7 @@ function SubjectDetailPage({ dashboardSlot }: SubjectDetailPageProps) {
         </div>
       </div>
 
-      {dashboardSlot && (
+      {dashboardSlot && teachesThisSubject && (
         <div>
           <h4 className="mb-2 text-muted-foreground">Dashboard da Disciplina</h4>
           {dashboardSlot}

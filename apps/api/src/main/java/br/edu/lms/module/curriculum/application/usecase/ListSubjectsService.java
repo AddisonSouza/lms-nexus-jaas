@@ -3,6 +3,7 @@ package br.edu.lms.module.curriculum.application.usecase;
 import br.edu.lms.module.curriculum.application.dto.SubjectResponse;
 import br.edu.lms.module.curriculum.domain.port.in.ListSubjectsUseCase;
 import br.edu.lms.module.curriculum.domain.port.out.ClassroomQueryPort;
+import br.edu.lms.module.curriculum.domain.port.out.OrganizationMemberQueryPort;
 import br.edu.lms.module.curriculum.domain.port.out.SubjectRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ public class ListSubjectsService implements ListSubjectsUseCase {
 
     private final SubjectRepository subjectRepository;
     private final ClassroomQueryPort classroomQueryPort;
+    private final OrganizationMemberQueryPort organizationMemberQueryPort;
 
     @Override
     public List<SubjectResponse> execute(String organizationId, String requestingUserId, String requestingUserRole) {
@@ -31,7 +33,9 @@ public class ListSubjectsService implements ListSubjectsUseCase {
                 .map(s -> {
                     var classroomIds = subjectRepository.findClassroomIdsBySubject(s.getId().getValue());
                     var teacherIds = subjectRepository.findMemberIdsBySubject(s.getId().getValue());
-                    return CreateSubjectService.toResponse(s, classroomIds, teacherIds);
+                    var teacherUserIds = organizationMemberQueryPort.findUserIdsByMemberIds(
+                            teacherIds, organizationId);
+                    return CreateSubjectService.toResponse(s, classroomIds, teacherIds, teacherUserIds);
                 })
                 // Disciplina sem turma vinculada não alcança nenhum aluno.
                 .filter(response -> !isStudent

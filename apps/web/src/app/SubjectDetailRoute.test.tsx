@@ -5,9 +5,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import SubjectDetailRoute from './SubjectDetailRoute'
 
 let mockRole: string | null = 'PROFESSOR'
+let mockUserId: string | null = 'u-1'
 
 vi.mock('@store/authStore', () => ({
-  useAuthStore: vi.fn((selector) => selector({ role: mockRole, organizationId: 'org-1' })),
+  useAuthStore: vi.fn((selector) =>
+    selector({ role: mockRole, userId: mockUserId, organizationId: 'org-1' }),
+  ),
 }))
 
 // ADMIN_ORG e GESTOR abrem a seção "Turmas e Professores", que consulta as
@@ -25,10 +28,9 @@ vi.mock('@features/dashboard/components/ProfessorDashboard', () => ({
   ),
 }))
 
-let mockSubject: { name: string; code: string | null } | undefined = {
-  name: 'Matemática',
-  code: 'MAT1',
-}
+let mockSubject:
+  | { name: string; code: string | null; teacherMemberIds: string[]; teacherUserIds: string[] }
+  | undefined = { name: 'Matemática', code: 'MAT1', teacherMemberIds: ['m-1'], teacherUserIds: ['u-1'] }
 
 vi.mock('@features/curriculum/hooks/useSubject', () => ({
   useSubject: () => ({ data: mockSubject }),
@@ -58,7 +60,8 @@ vi.mock('@features/curriculum/hooks/useDeleteContent', () => ({
 beforeEach(() => {
   vi.clearAllMocks()
   mockRole = 'PROFESSOR'
-  mockSubject = { name: 'Matemática', code: 'MAT1' }
+  mockUserId = 'u-1'
+  mockSubject = { name: 'Matemática', code: 'MAT1', teacherMemberIds: ['m-1'], teacherUserIds: ['u-1'] }
 })
 
 function renderRoute(subjectId = 'subject-1') {
@@ -75,23 +78,37 @@ function renderRoute(subjectId = 'subject-1') {
 }
 
 describe('SubjectDetailRoute', () => {
-  it('renders the ProfessorDashboard for PROFESSOR users', () => {
+  // `GetProfessorDashboardService` casa o vínculo da disciplina com o `userId` do
+  // JWT: quem não leciona *esta* disciplina leva 403, por mais alto que seja seu
+  // papel na organização.
+  it('renders the ProfessorDashboard for the teacher assigned to the subject', () => {
     mockRole = 'PROFESSOR'
+    mockUserId = 'u-1'
     renderRoute('subject-1')
 
     expect(screen.getByTestId('professor-dashboard')).toBeTruthy()
     expect(screen.getByText('ProfessorDashboard for subject-1')).toBeTruthy()
   })
 
-  it.each(['GESTOR', 'ADMIN_ORG'])('renders the ProfessorDashboard for %s users who can teach', (role) => {
-    mockRole = role
+  it('does not render it for a professor who teaches another subject', () => {
+    mockRole = 'PROFESSOR'
+    mockUserId = 'u-outro'
     renderRoute('subject-1')
 
-    expect(screen.getByTestId('professor-dashboard')).toBeTruthy()
+    expect(screen.queryByTestId('professor-dashboard')).toBeNull()
+  })
+
+  it.each(['GESTOR', 'ADMIN_ORG'])('does not render it for %s, who does not teach', (role) => {
+    mockRole = role
+    mockUserId = 'u-admin'
+    renderRoute('subject-1')
+
+    expect(screen.queryByTestId('professor-dashboard')).toBeNull()
   })
 
   it('does not render the ProfessorDashboard for ALUNO users', () => {
     mockRole = 'ALUNO'
+    mockUserId = 'u-aluno'
     renderRoute('subject-1')
 
     expect(screen.queryByTestId('professor-dashboard')).toBeNull()

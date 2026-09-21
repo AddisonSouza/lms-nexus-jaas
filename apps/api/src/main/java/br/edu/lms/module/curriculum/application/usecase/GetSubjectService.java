@@ -6,6 +6,7 @@ import br.edu.lms.module.curriculum.domain.exception.SubjectNotFoundException;
 import br.edu.lms.module.curriculum.domain.model.SubjectId;
 import br.edu.lms.module.curriculum.domain.port.in.GetSubjectUseCase;
 import br.edu.lms.module.curriculum.domain.port.out.ClassroomQueryPort;
+import br.edu.lms.module.curriculum.domain.port.out.OrganizationMemberQueryPort;
 import br.edu.lms.module.curriculum.domain.port.out.SubjectRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ public class GetSubjectService implements GetSubjectUseCase {
 
     private final SubjectRepository subjectRepository;
     private final ClassroomQueryPort classroomQueryPort;
+    private final OrganizationMemberQueryPort organizationMemberQueryPort;
 
     @Override
     public SubjectResponse execute(SubjectId id, String organizationId, String requestingUserId, String requestingUserRole) {
@@ -32,7 +34,8 @@ public class GetSubjectService implements GetSubjectUseCase {
         }
 
         var teacherIds = subjectRepository.findMemberIdsBySubject(id.getValue());
+        var teacherUserIds = organizationMemberQueryPort.findUserIdsByMemberIds(teacherIds, organizationId);
 
-        return CreateSubjectService.toResponse(subject, classroomIds, teacherIds);
+        return CreateSubjectService.toResponse(subject, classroomIds, teacherIds, teacherUserIds);
     }
 }

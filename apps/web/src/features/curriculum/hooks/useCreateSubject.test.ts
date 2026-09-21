@@ -25,6 +25,7 @@ describe('useCreateSubject', () => {
       organizationId: 'org-1',
       classroomIds: [],
       teacherMemberIds: [],
+  teacherUserIds: [],
       createdAt: '',
     })
 

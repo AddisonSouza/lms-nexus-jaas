@@ -17,5 +17,8 @@ public class SubjectResponse {
     private String organizationId;
     private List<String> classroomIds;
     private List<String> teacherMemberIds;
+    // Os mesmos professores pelo `userId` do JWT: o front compara com quem está
+    // logado para decidir se mostra o painel da disciplina.
+    private List<String> teacherUserIds;
     private LocalDateTime createdAt;
 }

@@ -6,6 +6,7 @@ import br.edu.lms.module.curriculum.domain.exception.SubjectNotFoundException;
 import br.edu.lms.module.curriculum.domain.model.SubjectCode;
 import br.edu.lms.module.curriculum.domain.model.SubjectId;
 import br.edu.lms.module.curriculum.domain.port.in.UpdateSubjectUseCase;
+import br.edu.lms.module.curriculum.domain.port.out.OrganizationMemberQueryPort;
 import br.edu.lms.module.curriculum.domain.port.out.SubjectRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 public class UpdateSubjectService implements UpdateSubjectUseCase {
 
     private final SubjectRepository subjectRepository;
+    private final OrganizationMemberQueryPort organizationMemberQueryPort;
 
     @Override
     public SubjectResponse execute(SubjectId id, UpdateSubjectCommand command) {
@@ -34,7 +36,9 @@ public class UpdateSubjectService implements UpdateSubjectUseCase {
         var saved = subjectRepository.save(updated);
         var classroomIds = subjectRepository.findClassroomIdsBySubject(id.getValue());
         var teacherIds = subjectRepository.findMemberIdsBySubject(id.getValue());
+        var teacherUserIds = organizationMemberQueryPort.findUserIdsByMemberIds(
+                teacherIds, command.getOrganizationId());
 
-        return CreateSubjectService.toResponse(saved, classroomIds, teacherIds);
+        return CreateSubjectService.toResponse(saved, classroomIds, teacherIds, teacherUserIds);
     }
 }

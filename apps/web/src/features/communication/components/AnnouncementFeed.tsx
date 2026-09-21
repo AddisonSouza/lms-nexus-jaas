@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { useAuthStore } from '@store/authStore'
-import { canTeach } from '@lib/roles'
 import { useAnnouncements } from '../hooks/useAnnouncements'
 import { useCreateAnnouncement, useUpdateAnnouncement, useDeleteAnnouncement } from '../hooks/useAnnouncementMutations'
 import AnnouncementCard from './AnnouncementCard'
@@ -14,14 +13,24 @@ import { Button } from '@components/ui/button'
 
 interface Props {
   classroomId: string
+  /**
+   * Associação à turma, resolvida pela rota. `ListAnnouncementsService` exige
+   * `isMember` seja qual for o papel na organização, então admin e gestor levam
+   * 403 aqui — o mural inteiro some para quem não é membro.
+   */
+  isMember: boolean
+  /**
+   * Publicar exige ser membro **com papel PROFESSOR na turma**
+   * (`PostAnnouncementService`). O papel da organização é largo demais: gestor e
+   * admin viam um botão que sempre falhava.
+   */
+  canPost: boolean
 }
 
-function AnnouncementFeed({ classroomId }: Props) {
+function AnnouncementFeed({ classroomId, isMember, canPost }: Props) {
   const userId = useAuthStore((s) => s.userId)
-  const role = useAuthStore((s) => s.role)
-  const canPost = canTeach(role)
 
-  const { data: announcements = [], isLoading, isError } = useAnnouncements(classroomId)
+  const { data: announcements = [], isLoading, isError } = useAnnouncements(classroomId, isMember)
   const createAnnouncement = useCreateAnnouncement(classroomId)
   const updateAnnouncement = useUpdateAnnouncement(classroomId)
   const deleteAnnouncement = useDeleteAnnouncement(classroomId)
@@ -42,6 +51,10 @@ function AnnouncementFeed({ classroomId }: Props) {
   function handleConfirmDelete() {
     if (!deleting) return
     deleteAnnouncement.mutate(deleting.id, { onSuccess: () => setDeleting(null) })
+  }
+
+  if (!isMember) {
+    return null
   }
 
   return (

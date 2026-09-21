@@ -7,6 +7,7 @@ export interface Subject {
   organizationId: string
   classroomIds: string[]
   teacherMemberIds: string[]
+  teacherUserIds: string[]
   createdAt: string
 }
 
