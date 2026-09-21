@@ -1,8 +1,10 @@
 package br.edu.lms.module.assessment.application.usecase;
 
+import br.edu.lms.module.assessment.application.dto.AttachmentInput;
 import br.edu.lms.module.assessment.application.dto.EditSubmissionCommand;
 import br.edu.lms.module.assessment.domain.event.TaskSubmittedEvent;
 import br.edu.lms.module.assessment.domain.exception.DeadlineExpiredException;
+import br.edu.lms.module.assessment.domain.exception.InvalidAttachmentTypeException;
 import br.edu.lms.module.assessment.domain.exception.SubmissionAlreadyEvaluatedException;
 import br.edu.lms.module.assessment.domain.exception.SubmissionNotFoundException;
 import br.edu.lms.module.assessment.domain.exception.UnauthorizedTaskOperationException;
@@ -22,6 +24,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.ByteArrayInputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +32,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -127,5 +132,50 @@ class EditSubmissionServiceTest {
 
         assertThatThrownBy(() -> sut.execute(command("student-1")))
                 .isInstanceOf(SubmissionNotFoundException.class);
+    }
+
+    private AttachmentInput attachment(String fileName, String mimeType) {
+        return new AttachmentInput(new ByteArrayInputStream("conteudo".getBytes()), fileName, mimeType, 8L);
+    }
+
+    private EditSubmissionCommand commandWith(AttachmentInput... attachments) {
+        return EditSubmissionCommand.builder()
+                .submissionId("sub-1")
+                .taskId("task-1")
+                .studentId("student-1")
+                .textResponse("Resposta atualizada")
+                .attachments(List.of(attachments))
+                .build();
+    }
+
+    @Test
+    void shouldRefuseAnExecutableAttachmentWithoutStoringIt() {
+        when(submissionRepository.findById(SubmissionId.of("sub-1")))
+                .thenReturn(Optional.of(submission("student-1", SubmissionStatus.SUBMITTED)));
+        when(taskRepository.findById(TaskId.of("task-1")))
+                .thenReturn(Optional.of(publishedTask(LocalDateTime.now().plusDays(1))));
+
+        assertThatThrownBy(() -> sut.execute(commandWith(attachment("virus.exe", "application/x-msdownload"))))
+                .isInstanceOf(InvalidAttachmentTypeException.class);
+
+        verify(storagePort, never()).store(any(), any(), any(), anyLong(), any());
+        // A resposta anterior continua como estava: uma edição recusada não
+        // pode apagar o que o aluno já tinha entregue.
+        verify(submissionRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldStoreNothingWhenOneAttachmentOutOfManyIsRefused() {
+        when(submissionRepository.findById(SubmissionId.of("sub-1")))
+                .thenReturn(Optional.of(submission("student-1", SubmissionStatus.SUBMITTED)));
+        when(taskRepository.findById(TaskId.of("task-1")))
+                .thenReturn(Optional.of(publishedTask(LocalDateTime.now().plusDays(1))));
+
+        assertThatThrownBy(() -> sut.execute(commandWith(
+                attachment("resposta.pdf", "application/pdf"),
+                attachment("virus.exe", "application/x-msdownload"))))
+                .isInstanceOf(InvalidAttachmentTypeException.class);
+
+        verify(storagePort, never()).store(any(), any(), any(), anyLong(), any());
     }
 }

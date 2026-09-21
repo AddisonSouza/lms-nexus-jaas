@@ -7,6 +7,7 @@ import { useResetPassword } from '../hooks/useResetPassword'
 import AuthLayout from '@components/layout/AuthLayout'
 import BackToLogin from '@components/shared/BackToLogin'
 import { apiErrorMessage } from '@lib/api-error'
+import { rateLimitMessageFor } from '../schemas/rateLimitSchema'
 import { PasswordInput } from '@components/ui/password-input'
 import { Button } from '@components/ui/button'
 
@@ -30,12 +31,12 @@ function ResetPasswordPage() {
   // O back-end manda o texto do token inválido como `error`; a tela prefere o
   // seu, que diz o que fazer. O 422 da senha fraca vem do helper, com os
   // critérios que faltaram.
-  const errorMessage = error
+  const errorMessage = rateLimitMessageFor(error) ?? (error
     ? apiErrorMessage(error, {
         'Token inválido, expirado ou já utilizado':
           'O link de redefinição é inválido ou já expirou. Solicite um novo.',
       })
-    : null
+    : null)
 
   if (!token) {
     return (

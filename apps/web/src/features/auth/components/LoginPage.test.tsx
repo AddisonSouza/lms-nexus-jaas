@@ -76,6 +76,43 @@ describe('LoginPage', () => {
     expect(screen.getByRole('link', { name: 'Criar conta' }).getAttribute('href')).toBe('/register')
   })
 
+  it('shows how long the block lasts instead of blaming the password', async () => {
+    loginUser.mockRejectedValue({
+      response: { status: 429, headers: { 'retry-after': '900' }, data: { error: 'AUTH_RATE_LIMIT_EXCEEDED' } },
+    })
+    renderPage()
+
+    await submitLogin()
+
+    await waitFor(() =>
+      expect(screen.getByText('Muitas tentativas. Tente novamente em 15 minutos.')).toBeTruthy(),
+    )
+    expect(screen.queryByText('E-mail ou senha inválidos.')).toBeNull()
+  })
+
+  it('keeps the submit button closed while the block lasts', async () => {
+    loginUser.mockRejectedValue({
+      response: { status: 429, headers: { 'retry-after': '900' }, data: { error: 'AUTH_RATE_LIMIT_EXCEEDED' } },
+    })
+    renderPage()
+
+    await submitLogin()
+
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /entrar/i }).hasAttribute('disabled')).toBe(true),
+    )
+  })
+
+  it('still names a wrong password for a plain 401', async () => {
+    loginUser.mockRejectedValue({ response: { status: 401, headers: {}, data: {} } })
+    renderPage()
+
+    await submitLogin()
+
+    await waitFor(() => expect(screen.getByText('E-mail ou senha inválidos.')).toBeTruthy())
+    expect(screen.getByRole('button', { name: /entrar/i }).hasAttribute('disabled')).toBe(false)
+  })
+
   it('still greets a freshly confirmed email', () => {
     renderPage('?confirmed=true')
 
