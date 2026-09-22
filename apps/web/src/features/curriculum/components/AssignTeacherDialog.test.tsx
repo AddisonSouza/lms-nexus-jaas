@@ -116,6 +116,34 @@ describe('AssignTeacherDialog', () => {
     await waitFor(() => expect(screen.getByText('Este membro não pode lecionar.')).toBeTruthy())
   })
 
+  it('starts clean when reopened, instead of keeping the last pick', async () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    // O diálogo é modal: um botão fora dele ficaria `aria-hidden` e inalcançável.
+    // Alternar a prop `open` é também o que a página de fato faz.
+    const view = (open: boolean) => (
+      <QueryClientProvider client={qc}>
+        <AssignTeacherDialog
+          open={open}
+          onClose={vi.fn()}
+          onSubmit={vi.fn()}
+          isPending={false}
+          assignedMemberIds={[]}
+        />
+      </QueryClientProvider>
+    )
+    const { rerender } = render(view(true))
+
+    await userEvent.click(screen.getByLabelText(/membro \*/i))
+    await userEvent.click(await screen.findByText('Ana Professora'))
+    expect((screen.getByLabelText(/membro \*/i) as HTMLInputElement).value).toBe('Ana Professora')
+
+    // A página fecha o diálogo no sucesso; reabrir não pode trazer o anterior.
+    rerender(view(false))
+    rerender(view(true))
+
+    expect((screen.getByLabelText(/membro \*/i) as HTMLInputElement).value).toBe('')
+  })
+
   it('explains when every eligible member is already assigned', async () => {
     renderDialog({ assignedMemberIds: ['m-1', 'm-2'] })
 

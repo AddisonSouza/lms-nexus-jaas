@@ -137,6 +137,21 @@ describe('ClassroomMembersPanel', () => {
     expect(classroomApi.addClassroomMember).toHaveBeenCalledTimes(1)
   })
 
+  it('reopens clean instead of keeping the person just added', async () => {
+    vi.mocked(classroomApi.addClassroomMember).mockResolvedValue(NEW_MEMBER)
+
+    renderPanel()
+    await openAddDialog()
+    await fillAndSubmit()
+    await waitFor(() => expect(screen.queryByLabelText('Pessoa *')).toBeNull())
+
+    await openAddDialog()
+
+    // Reabrir trazendo quem acabou de entrar deixaria a lista filtrada por ela,
+    // escondendo justamente quem ainda pode ser adicionado.
+    expect((screen.getByLabelText('Pessoa *') as HTMLInputElement).value).toBe('')
+  })
+
   it('offers whoever is already in the classroom as marked, not as a pick', async () => {
     renderPanel()
     await openAddDialog()

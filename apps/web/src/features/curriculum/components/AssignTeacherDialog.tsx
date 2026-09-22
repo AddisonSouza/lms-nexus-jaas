@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -67,6 +67,16 @@ function AssignTeacherDialog({
     resolver: zodResolver(schema),
     defaultValues: { memberId: '' },
   })
+
+  // A página fecha o diálogo direto no sucesso, sem passar pelo Cancelar. Sem
+  // limpar aqui, reabrir traz o último escolhido e a lista filtrada pelo nome dele.
+  useEffect(() => {
+    if (!open) {
+      reset()
+      setTerm('')
+      setPicked(null)
+    }
+  }, [open, reset])
 
   const handleClose = () => {
     reset()

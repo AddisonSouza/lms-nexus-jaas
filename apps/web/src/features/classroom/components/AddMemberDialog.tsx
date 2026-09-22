@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from 'lucide-react'
@@ -50,6 +50,17 @@ function AddMemberDialog({ open, onClose, onSubmit, isPending, existingUserIds =
   } = useForm<AddMemberFormData>({
     resolver: zodResolver(addMemberSchema),
   })
+
+  // O painel fecha o diálogo direto no sucesso (`setShowAdd(false)`), sem passar
+  // pelo Cancelar. Sem limpar aqui, reabrir traz preenchida justamente a pessoa
+  // que acabou de entrar na turma — e a lista já filtrada pelo nome dela.
+  useEffect(() => {
+    if (!open) {
+      reset()
+      setTerm('')
+      setPicked(null)
+    }
+  }, [open, reset])
 
   const handleClose = () => {
     reset()
