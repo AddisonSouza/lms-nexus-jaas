@@ -89,6 +89,9 @@ function ClassroomMembersPanel({ classroomId, canManage }: Props) {
         onClose={() => setShowAdd(false)}
         onSubmit={handleAdd}
         isPending={addMember.isPending}
+        // Quem já está na turma aparece na busca marcado e desabilitado, em vez
+        // de sumir — procurar alguém e não achar é pior do que ver o porquê.
+        existingUserIds={members?.map((m) => m.userId) ?? []}
       />
 
       <ConfirmDialog
