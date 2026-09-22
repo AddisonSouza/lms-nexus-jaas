@@ -54,7 +54,7 @@ membros da organização, e faz a API suportar essa busca de forma paginada.
 - [x] BE: filtro por nome/e-mail e paginação em SQL no `OrganizationMemberRepositoryImpl`, com teste
 - [x] BE: porta + `ListOrganizationMembersService` devolvendo página, com teste unitário
 - [x] BE: `@QueryParam` no `OrganizationResource` e envelope na resposta, com `ListOrganizationMembersResourceIT` atualizado
-- [ ] Atualizar `API_CONTRACT.md` do endpoint e a spec `member-invitations`
+- [x] Atualizar `API_CONTRACT.md` do endpoint e a spec `member-invitations`
 - [ ] FE: `components/ui/combobox.tsx` sobre `@base-ui/react`, com teste
 - [ ] FE: hook `useDebouncedValue`, com teste
 - [ ] FE: adequar `organization-api`, `org-member-api` e seus hooks ao envelope, com testes
