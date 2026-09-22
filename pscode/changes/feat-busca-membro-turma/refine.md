@@ -55,7 +55,7 @@ membros da organização, e faz a API suportar essa busca de forma paginada.
 - [x] BE: porta + `ListOrganizationMembersService` devolvendo página, com teste unitário
 - [x] BE: `@QueryParam` no `OrganizationResource` e envelope na resposta, com `ListOrganizationMembersResourceIT` atualizado
 - [x] Atualizar `API_CONTRACT.md` do endpoint e a spec `member-invitations`
-- [ ] FE: `components/ui/combobox.tsx` sobre `@base-ui/react`, com teste
+- [x] FE: `components/ui/combobox.tsx` sobre `@base-ui/react`, com teste
 - [ ] FE: hook `useDebouncedValue`, com teste
 - [ ] FE: adequar `organization-api`, `org-member-api` e seus hooks ao envelope, com testes
 - [ ] FE: `AddMemberDialog` com busca e marcação "já na turma", com teste
