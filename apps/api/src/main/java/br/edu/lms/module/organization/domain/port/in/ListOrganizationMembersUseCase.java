@@ -3,10 +3,7 @@ package br.edu.lms.module.organization.domain.port.in;
 import br.edu.lms.module.organization.application.dto.OrganizationMemberResponse;
 import br.edu.lms.shared.domain.Page;
 
-import java.util.List;
-
 public interface ListOrganizationMembersUseCase {
-    List<OrganizationMemberResponse> execute(String organizationId);
 
     /**
      * Página de membros filtrada por nome ou e-mail e já ordenada por nome pelo

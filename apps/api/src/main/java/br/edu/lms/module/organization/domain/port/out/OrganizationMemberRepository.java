@@ -13,8 +13,6 @@ public interface OrganizationMemberRepository {
     boolean existsActiveMemberByEmail(String organizationId, String email);
     boolean existsActiveByOrgAndUser(String organizationId, String userId);
     Optional<OrganizationMember> findActiveByOrgAndUser(String organizationId, String userId);
-    List<OrganizationMember> findActiveMembersByOrganization(String organizationId);
-
     /**
      * Página de vínculos ativos da organização, filtrada por nome ou e-mail do
      * usuário e ordenada por nome. {@code search} nulo ou em branco não filtra.

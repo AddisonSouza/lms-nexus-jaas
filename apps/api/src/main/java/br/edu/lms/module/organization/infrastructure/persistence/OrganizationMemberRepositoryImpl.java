@@ -128,19 +128,6 @@ public class OrganizationMemberRepositoryImpl implements OrganizationMemberRepos
     }
 
     @Override
-    public List<OrganizationMember> findActiveMembersByOrganization(String organizationId) {
-        return em.createQuery(
-                        "SELECT m FROM OrganizationMemberJpaEntity m " +
-                        "WHERE m.organizationId = :orgId AND m.deletedAt IS NULL " +
-                        "ORDER BY m.joinedAt",
-                        OrganizationMemberJpaEntity.class)
-                .setParameter("orgId", organizationId)
-                .getResultStream()
-                .map(this::toDomain)
-                .toList();
-    }
-
-    @Override
     public Page<OrganizationMember> searchActiveMembers(String organizationId, String search, int page, int size) {
         int pageNumber = Math.max(page, 0);
         int pageSize = size <= 0 ? DEFAULT_PAGE_SIZE : Math.min(size, MAX_PAGE_SIZE);

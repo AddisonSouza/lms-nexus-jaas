@@ -86,18 +86,97 @@ class ListOrganizationMembersResourceIT {
                 .when().get("/organizations/" + ORG_ID + "/members")
                 .then()
                 .statusCode(200)
-                .body("size()", equalTo(3))
-                .body("[0].name", equalTo("Ana Professora"))
-                .body("[0].email", equalTo("members-it-teacher@test.com"))
-                .body("[0].userId", equalTo(TEACHER_ID))
-                .body("[0].role", equalTo("PROFESSOR"))
-                .body("[0].owner", equalTo(false))
-                .body("[0].joinedAt", notNullValue())
-                .body("[1].name", equalTo("Bruno Gestor"))
-                .body("[1].role", equalTo("GESTOR"))
-                .body("[2].name", equalTo("Zelia Owner"))
-                .body("[2].role", equalTo("ADMIN_ORG"))
-                .body("[2].owner", equalTo(true));
+                .body("content.size()", equalTo(3))
+                .body("totalElements", equalTo(3))
+                .body("totalPages", equalTo(1))
+                .body("number", equalTo(0))
+                .body("size", equalTo(20))
+                .body("content[0].name", equalTo("Ana Professora"))
+                .body("content[0].email", equalTo("members-it-teacher@test.com"))
+                .body("content[0].userId", equalTo(TEACHER_ID))
+                .body("content[0].role", equalTo("PROFESSOR"))
+                .body("content[0].owner", equalTo(false))
+                .body("content[0].joinedAt", notNullValue())
+                .body("content[1].name", equalTo("Bruno Gestor"))
+                .body("content[1].role", equalTo("GESTOR"))
+                .body("content[2].name", equalTo("Zelia Owner"))
+                .body("content[2].role", equalTo("ADMIN_ORG"))
+                .body("content[2].owner", equalTo(true));
+    }
+
+    @Test
+    @TestSecurity(user = OWNER_ID, roles = {"ADMIN_ORG"})
+    @JwtSecurity(claims = {
+            @Claim(key = "sub", value = OWNER_ID),
+            @Claim(key = "org", value = ORG_ID) })
+    void listMembers_searchingByName_returnsOnlyTheMatches() {
+        // "ana" sozinho casaria também com members-it-m<b>ana</b>ger@test.com pelo e-mail;
+        // o termo aqui é inequívoco e ainda prova que a busca ignora maiúsculas.
+        given()
+                .queryParam("search", "ANA PRO")
+                .when().get("/organizations/" + ORG_ID + "/members")
+                .then()
+                .statusCode(200)
+                .body("content.size()", equalTo(1))
+                .body("totalElements", equalTo(1))
+                .body("content[0].userId", equalTo(TEACHER_ID));
+    }
+
+    @Test
+    @TestSecurity(user = OWNER_ID, roles = {"ADMIN_ORG"})
+    @JwtSecurity(claims = {
+            @Claim(key = "sub", value = OWNER_ID),
+            @Claim(key = "org", value = ORG_ID) })
+    void listMembers_searchingByEmail_returnsOnlyTheMatches() {
+        given()
+                .queryParam("search", "members-it-manager@")
+                .when().get("/organizations/" + ORG_ID + "/members")
+                .then()
+                .statusCode(200)
+                .body("content.size()", equalTo(1))
+                .body("content[0].userId", equalTo(MANAGER_ID));
+    }
+
+    @Test
+    @TestSecurity(user = OWNER_ID, roles = {"ADMIN_ORG"})
+    @JwtSecurity(claims = {
+            @Claim(key = "sub", value = OWNER_ID),
+            @Claim(key = "org", value = ORG_ID) })
+    void listMembers_searchingSomethingAbsent_returnsAnEmptyPage() {
+        given()
+                .queryParam("search", "ninguem-com-esse-nome")
+                .when().get("/organizations/" + ORG_ID + "/members")
+                .then()
+                .statusCode(200)
+                .body("content.size()", equalTo(0))
+                .body("totalElements", equalTo(0))
+                .body("totalPages", equalTo(0));
+    }
+
+    @Test
+    @TestSecurity(user = OWNER_ID, roles = {"ADMIN_ORG"})
+    @JwtSecurity(claims = {
+            @Claim(key = "sub", value = OWNER_ID),
+            @Claim(key = "org", value = ORG_ID) })
+    void listMembers_paginating_splitsTheResultAndKeepsTheTotals() {
+        given()
+                .queryParam("page", 0).queryParam("size", 2)
+                .when().get("/organizations/" + ORG_ID + "/members")
+                .then()
+                .statusCode(200)
+                .body("content.name", contains("Ana Professora", "Bruno Gestor"))
+                .body("totalElements", equalTo(3))
+                .body("totalPages", equalTo(2))
+                .body("number", equalTo(0))
+                .body("size", equalTo(2));
+
+        given()
+                .queryParam("page", 1).queryParam("size", 2)
+                .when().get("/organizations/" + ORG_ID + "/members")
+                .then()
+                .statusCode(200)
+                .body("content.name", contains("Zelia Owner"))
+                .body("number", equalTo(1));
     }
 
     @Test
@@ -110,8 +189,8 @@ class ListOrganizationMembersResourceIT {
                 .when().get("/organizations/" + ORG_ID + "/members")
                 .then()
                 .statusCode(200)
-                .body("size()", equalTo(3))
-                .body("name", contains("Ana Professora", "Bruno Gestor", "Zelia Owner"));
+                .body("content.size()", equalTo(3))
+                .body("content.name", contains("Ana Professora", "Bruno Gestor", "Zelia Owner"));
     }
 
     @Test
