@@ -51,7 +51,7 @@ membros da organização, e faz a API suportar essa busca de forma paginada.
 - Unificar `userId` vs `memberId` entre os dois contratos.
 
 ## Subtasks
-- [ ] BE: filtro por nome/e-mail e paginação em SQL no `OrganizationMemberRepositoryImpl`, com teste
+- [x] BE: filtro por nome/e-mail e paginação em SQL no `OrganizationMemberRepositoryImpl`, com teste
 - [ ] BE: porta + `ListOrganizationMembersService` devolvendo página, com teste unitário
 - [ ] BE: `@QueryParam` no `OrganizationResource` e envelope na resposta, com `ListOrganizationMembersResourceIT` atualizado
 - [ ] Atualizar `API_CONTRACT.md` do endpoint e a spec `member-invitations`

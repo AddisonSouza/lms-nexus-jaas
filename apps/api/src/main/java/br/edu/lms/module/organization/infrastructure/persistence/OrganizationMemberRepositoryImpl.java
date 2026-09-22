@@ -6,6 +6,7 @@ import br.edu.lms.module.organization.domain.model.MemberRole;
 import br.edu.lms.module.organization.domain.model.OrganizationMember;
 import br.edu.lms.module.organization.domain.model.UserOrganization;
 import br.edu.lms.module.organization.domain.port.out.OrganizationMemberRepository;
+import br.edu.lms.shared.domain.Page;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
@@ -18,6 +19,14 @@ import java.util.Optional;
 @ApplicationScoped
 @RequiredArgsConstructor
 public class OrganizationMemberRepositoryImpl implements OrganizationMemberRepository, OrganizationMemberLookupPort {
+
+    // Nome e e-mail vivem no identity; referenciados por FQN como no UserDirectoryAdapter,
+    // para filtrar e ordenar no banco sem depender das classes daquele módulo.
+    private static final String USER_ENTITY =
+            "br.edu.lms.module.identity.infrastructure.persistence.UserJpaEntity";
+
+    private static final int DEFAULT_PAGE_SIZE = 20;
+    private static final int MAX_PAGE_SIZE = 100;
 
     private final EntityManager em;
 
@@ -129,6 +138,53 @@ public class OrganizationMemberRepositoryImpl implements OrganizationMemberRepos
                 .getResultStream()
                 .map(this::toDomain)
                 .toList();
+    }
+
+    @Override
+    public Page<OrganizationMember> searchActiveMembers(String organizationId, String search, int page, int size) {
+        int pageNumber = Math.max(page, 0);
+        int pageSize = size <= 0 ? DEFAULT_PAGE_SIZE : Math.min(size, MAX_PAGE_SIZE);
+        var term = likeTerm(search);
+        var filter = term == null
+                ? ""
+                : " AND (LOWER(u.fullName) LIKE :term OR LOWER(u.email) LIKE :term)";
+
+        var countQuery = em.createQuery(
+                        "SELECT COUNT(m) FROM OrganizationMemberJpaEntity m " +
+                        "JOIN " + USER_ENTITY + " u ON u.id = m.userId " +
+                        "WHERE m.organizationId = :orgId AND m.deletedAt IS NULL" + filter,
+                        Long.class)
+                .setParameter("orgId", organizationId);
+
+        var pageQuery = em.createQuery(
+                        "SELECT m FROM OrganizationMemberJpaEntity m " +
+                        "JOIN " + USER_ENTITY + " u ON u.id = m.userId " +
+                        "WHERE m.organizationId = :orgId AND m.deletedAt IS NULL" + filter +
+                        " ORDER BY u.fullName",
+                        OrganizationMemberJpaEntity.class)
+                .setParameter("orgId", organizationId);
+
+        if (term != null) {
+            countQuery.setParameter("term", term);
+            pageQuery.setParameter("term", term);
+        }
+
+        var content = pageQuery
+                .setFirstResult(pageNumber * pageSize)
+                .setMaxResults(pageSize)
+                .getResultStream()
+                .map(this::toDomain)
+                .toList();
+
+        return Page.of(content, countQuery.getSingleResult(), pageNumber, pageSize);
+    }
+
+    /** {@code null} quando não há busca; senão o termo em minúsculas entre curingas. */
+    private static String likeTerm(String search) {
+        if (search == null || search.isBlank()) {
+            return null;
+        }
+        return "%" + search.trim().toLowerCase() + "%";
     }
 
     @Override
