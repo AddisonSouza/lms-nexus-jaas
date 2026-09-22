@@ -33,7 +33,13 @@ function renderDialog(props: Partial<React.ComponentProps<typeof AssignTeacherDi
 beforeEach(() => {
   vi.clearAllMocks()
   useAuthStore.setState({ organizationId: 'org-1' })
-  vi.mocked(orgMemberApi.listOrgMembers).mockResolvedValue(MEMBERS)
+  vi.mocked(orgMemberApi.listOrgMembers).mockResolvedValue({
+    content: MEMBERS,
+    totalElements: MEMBERS.length,
+    totalPages: 1,
+    number: 0,
+    size: 20,
+  })
 })
 
 describe('AssignTeacherDialog', () => {

@@ -88,7 +88,13 @@ beforeEach(() => {
   vi.clearAllMocks()
   mockSubject = { classroomIds: [], teacherMemberIds: [], teacherUserIds: [] }
   vi.mocked(orgClassroomApi.listOrgClassrooms).mockResolvedValue(CLASSROOMS)
-  vi.mocked(orgMemberApi.listOrgMembers).mockResolvedValue(MEMBERS)
+  vi.mocked(orgMemberApi.listOrgMembers).mockResolvedValue({
+    content: MEMBERS,
+    totalElements: MEMBERS.length,
+    totalPages: 1,
+    number: 0,
+    size: 20,
+  })
 })
 
 describe('SubjectDetailPage — Turmas e Professores', () => {

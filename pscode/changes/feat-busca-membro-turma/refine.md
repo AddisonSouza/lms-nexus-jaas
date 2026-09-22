@@ -57,7 +57,7 @@ membros da organização, e faz a API suportar essa busca de forma paginada.
 - [x] Atualizar `API_CONTRACT.md` do endpoint e a spec `member-invitations`
 - [x] FE: `components/ui/combobox.tsx` sobre `@base-ui/react`, com teste
 - [x] FE: hook `useDebouncedValue`, com teste
-- [ ] FE: adequar `organization-api`, `org-member-api` e seus hooks ao envelope, com testes
+- [x] FE: adequar `organization-api`, `org-member-api` e seus hooks ao envelope, com testes
 - [ ] FE: `AddMemberDialog` com busca e marcação "já na turma", com teste
 - [ ] FE: `AssignTeacherDialog` adotando o combobox, com teste
 - [ ] Validar os dois fluxos no navegador; rodar lint, type-check e as duas suítes

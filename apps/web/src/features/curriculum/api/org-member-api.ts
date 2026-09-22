@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import api from '@lib/axios'
+import { pageSchema, type Page, type PageParams } from '@lib/pagination'
 
 /**
  * Membros da organização, vistos pela disciplina — mesmo motivo do
@@ -17,7 +18,10 @@ const orgMemberSchema = z.object({
 
 export type OrgMember = z.infer<typeof orgMemberSchema>
 
-export async function listOrgMembers(organizationId: string): Promise<OrgMember[]> {
-  const res = await api.get(`/organizations/${organizationId}/members`)
-  return z.array(orgMemberSchema).parse(res.data)
+export async function listOrgMembers(
+  organizationId: string,
+  params: PageParams = {}
+): Promise<Page<OrgMember>> {
+  const res = await api.get(`/organizations/${organizationId}/members`, { params })
+  return pageSchema(orgMemberSchema).parse(res.data)
 }

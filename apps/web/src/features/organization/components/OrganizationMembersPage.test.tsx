@@ -53,7 +53,13 @@ const pendingInvite = {
 
 beforeEach(() => {
   vi.clearAllMocks()
-  vi.mocked(orgApi.listMembers).mockResolvedValue([teacher, owner])
+  vi.mocked(orgApi.listMembers).mockResolvedValue({
+    content: [teacher, owner],
+    totalElements: 2,
+    totalPages: 1,
+    number: 0,
+    size: 20,
+  })
   vi.mocked(orgApi.listInvitations).mockResolvedValue([])
 })
 
@@ -211,7 +217,13 @@ describe('OrganizationMembersPage', () => {
   })
 
   it('tells the admin when the organization has no members', async () => {
-    vi.mocked(orgApi.listMembers).mockResolvedValue([])
+    vi.mocked(orgApi.listMembers).mockResolvedValue({
+      content: [],
+      totalElements: 0,
+      totalPages: 0,
+      number: 0,
+      size: 20,
+    })
     renderPage()
 
     expect(await screen.findByText('Nenhum membro nesta organização.')).toBeTruthy()
@@ -325,9 +337,13 @@ describe('OrganizationMembersPage', () => {
   })
 
   it('shows a role badge instead of a select when the role is not assignable', async () => {
-    vi.mocked(orgApi.listMembers).mockResolvedValue([
-      { ...teacher, role: 'ADMIN_ORG', owner: false },
-    ])
+    vi.mocked(orgApi.listMembers).mockResolvedValue({
+      content: [{ ...teacher, role: 'ADMIN_ORG', owner: false }],
+      totalElements: 1,
+      totalPages: 1,
+      number: 0,
+      size: 20,
+    })
     renderPage()
 
     expect(await screen.findByText('Administrador')).toBeTruthy()
@@ -344,7 +360,13 @@ describe('OrganizationMembersPage', () => {
   })
 
   it('falls back to the user id when identity has no name for the member', async () => {
-    vi.mocked(orgApi.listMembers).mockResolvedValue([{ ...teacher, name: null, email: null }])
+    vi.mocked(orgApi.listMembers).mockResolvedValue({
+      content: [{ ...teacher, name: null, email: null }],
+      totalElements: 1,
+      totalPages: 1,
+      number: 0,
+      size: 20,
+    })
     renderPage()
 
     expect(await screen.findByText('user-1')).toBeTruthy()

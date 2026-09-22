@@ -36,7 +36,13 @@ const member = {
 
 describe('useOrganizationMembers', () => {
   it('exposes the members of the organization', async () => {
-    vi.mocked(orgApi.listMembers).mockResolvedValue([member])
+    vi.mocked(orgApi.listMembers).mockResolvedValue({
+      content: [member],
+      totalElements: 1,
+      totalPages: 1,
+      number: 0,
+      size: 20,
+    })
 
     const { result } = renderHook(() => useOrganizationMembers('org-1'), { wrapper })
 
