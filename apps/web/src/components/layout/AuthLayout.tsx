@@ -16,7 +16,7 @@ function AuthLayout({ children }: AuthLayoutProps) {
         </div>
         <div className="relative max-w-md">
           <h1 className="mb-4 font-heading text-4xl leading-tight">
-            Sua turma toda em um lugar quentinho.
+            Tudo da sua turma em um só lugar.
           </h1>
           <p className="text-base opacity-85">
             Turmas, disciplinas, tarefas e notas — organizados por tópico, do jeito que
