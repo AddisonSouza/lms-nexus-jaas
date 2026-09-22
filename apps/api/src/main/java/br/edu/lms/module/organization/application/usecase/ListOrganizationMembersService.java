@@ -8,6 +8,7 @@ import br.edu.lms.module.organization.domain.port.in.ListOrganizationMembersUseC
 import br.edu.lms.module.organization.domain.port.out.OrganizationMemberRepository;
 import br.edu.lms.module.organization.domain.port.out.OrganizationRepository;
 import br.edu.lms.module.organization.domain.port.out.UserDirectoryPort;
+import br.edu.lms.shared.domain.Page;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 
@@ -44,5 +45,27 @@ public class ListOrganizationMembersService implements ListOrganizationMembersUs
                         organization.getOwnerId().equals(m.getUserId())))
                 .sorted(BY_NAME)
                 .toList();
+    }
+
+    @Override
+    public Page<OrganizationMemberResponse> execute(String organizationId, String search, int page, int size) {
+        var organization = organizationRepository.findById(OrganizationId.of(organizationId))
+                .orElseThrow(() -> new IllegalArgumentException("Organization not found"));
+
+        var members = memberRepository.searchActiveMembers(organizationId, search, page, size);
+
+        var profiles = userDirectoryPort.findProfilesByIds(
+                members.content().stream().map(OrganizationMember::getUserId).toList());
+
+        // A ordem vem do banco (ORDER BY u.fullName); reordenar aqui quebraria a paginação.
+        var content = members.content().stream()
+                .map(m -> memberMapper.toResponse(
+                        m,
+                        profiles.get(m.getUserId()),
+                        organization.getOwnerId().equals(m.getUserId())))
+                .toList();
+
+        return new Page<>(content, members.totalElements(), members.totalPages(),
+                members.number(), members.size());
     }
 }
