@@ -20,4 +20,7 @@ export const orgDirectoryKeys = {
   classrooms: () => [...orgDirectoryKeys.all, 'classrooms'] as const,
   members: (organizationId: string) =>
     [...orgDirectoryKeys.all, 'members', organizationId] as const,
+  /** Busca por termo — cache à parte do `members`, que é a lista inteira. */
+  search: (organizationId: string, term: string) =>
+    [...orgDirectoryKeys.all, 'members', organizationId, 'search', term] as const,
 }

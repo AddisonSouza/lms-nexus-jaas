@@ -59,5 +59,5 @@ membros da organização, e faz a API suportar essa busca de forma paginada.
 - [x] FE: hook `useDebouncedValue`, com teste
 - [x] FE: adequar `organization-api`, `org-member-api` e seus hooks ao envelope, com testes
 - [x] FE: `AddMemberDialog` com busca e marcação "já na turma", com teste
-- [ ] FE: `AssignTeacherDialog` adotando o combobox, com teste
+- [x] FE: `AssignTeacherDialog` adotando o combobox, com teste
 - [ ] Validar os dois fluxos no navegador; rodar lint, type-check e as duas suítes

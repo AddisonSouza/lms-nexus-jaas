@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import SubjectDetailPage from './SubjectDetailPage'
@@ -10,6 +10,23 @@ import { useAuthStore } from '@store/authStore'
 
 vi.mock('../api/org-classroom-api')
 vi.mock('../api/org-member-api')
+
+// O diálogo de atribuir professor usa combobox, e o jsdom não traz nada disso
+// que o Positioner do base-ui precisa.
+beforeAll(() => {
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    }
+  )
+  Element.prototype.scrollIntoView = vi.fn()
+  if (!Element.prototype.hasPointerCapture) {
+    Element.prototype.hasPointerCapture = () => false
+  }
+})
 
 let mockSubject:
   | { classroomIds: string[]; teacherMemberIds: string[]; teacherUserIds: string[] }
@@ -178,10 +195,9 @@ describe('SubjectDetailPage — Turmas e Professores', () => {
     renderPage('ADMIN_ORG')
 
     await userEvent.click(screen.getByRole('button', { name: /atribuir professor/i }))
-    await waitFor(() =>
-      expect(screen.getByRole('option', { name: /bruno gestor/i })).toBeTruthy(),
-    )
-    await userEvent.selectOptions(screen.getByLabelText(/membro \*/i), 'm-2')
+    // O combobox só monta a lista depois que o campo é clicado.
+    await userEvent.click(await screen.findByLabelText(/membro \*/i))
+    await userEvent.click(await screen.findByText('Bruno Gestor'))
     await userEvent.click(screen.getByRole('button', { name: /^atribuir$/i }))
 
     await waitFor(() =>
