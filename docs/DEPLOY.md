@@ -30,9 +30,12 @@ No console da OCI: **Compute → Instances → Create**.
   O shape AMD micro (1 GB) **não** serve — não segura Quarkus + MySQL + Redis.
 - **Imagem:** Ubuntu 22.04 (aarch64).
 - **Boot volume:** 50 GB bastam; o Always Free dá 200 GB no total.
+- **Região:** a home region da tenancy. Recurso Always Free criado fora dela
+  é cobrado.
 
-> `Out of capacity` em ARM é comum. Tente outro Availability Domain, ou repita
-> mais tarde — não é erro de configuração.
+> `Out of capacity` em ARM é comum e não é erro de configuração. Onde a região
+> tem mais de um Availability Domain, tente outro; em região de AD único —
+> como Vinhedo (`sa-vinhedo-1`) — só resta repetir mais tarde.
 
 Guarde o **IP público** e a chave SSH.
 
