@@ -1,13 +1,32 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import ClassroomMembersPanel from './ClassroomMembersPanel'
 import * as classroomApi from '../api/classroom-api'
+import * as orgMemberApi from '../api/org-member-api'
 import { classroomKeys } from '../api/query-keys'
+import { useAuthStore } from '@store/authStore'
 import type { ClassroomMember } from '../types'
 
 vi.mock('../api/classroom-api')
+vi.mock('../api/org-member-api')
+
+// O jsdom não traz nada disso, e o Positioner do combobox usa os três.
+beforeAll(() => {
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    }
+  )
+  Element.prototype.scrollIntoView = vi.fn()
+  if (!Element.prototype.hasPointerCapture) {
+    Element.prototype.hasPointerCapture = () => false
+  }
+})
 
 const MEMBER: ClassroomMember = {
   id: 'member-1',
@@ -42,18 +61,32 @@ function renderPanel() {
 
 async function openAddDialog() {
   await userEvent.click(screen.getByRole('button', { name: /adicionar/i }))
-  await waitFor(() => expect(screen.getByLabelText(/id do usuário/i)).toBeTruthy())
+  await waitFor(() => expect(screen.getByLabelText('Pessoa *')).toBeTruthy())
 }
 
 async function fillAndSubmit() {
-  await userEvent.type(screen.getByLabelText(/id do usuário/i), NEW_MEMBER.userId)
+  // Abrir a lista, escolher a pessoa pelo nome e só então o papel: é o caminho
+  // do usuário, sem UUID em nenhum momento.
+  await userEvent.click(screen.getByLabelText('Pessoa *'))
+  await userEvent.click(await screen.findByText('Bruno Aluno'))
   await userEvent.selectOptions(screen.getByLabelText(/papel/i), 'ALUNO')
-  await userEvent.click(screen.getByRole('button', { name: /^adicionar$/i, hidden: false }))
+  await userEvent.click(screen.getAllByRole('button', { name: /^adicionar$/i }).at(-1)!)
 }
 
 beforeEach(() => {
   vi.clearAllMocks()
+  useAuthStore.setState({ organizationId: 'org-1' })
   vi.mocked(classroomApi.getClassroomMembers).mockResolvedValue([MEMBER])
+  vi.mocked(orgMemberApi.searchOrgMembers).mockResolvedValue({
+    content: [
+      { id: 'om-1', userId: MEMBER.userId, name: 'Ana Aluna', email: 'ana@test.com', role: 'ALUNO' },
+      { id: 'om-2', userId: NEW_MEMBER.userId, name: 'Bruno Aluno', email: 'bruno@test.com', role: 'ALUNO' },
+    ],
+    totalElements: 2,
+    totalPages: 1,
+    number: 0,
+    size: 20,
+  })
 })
 
 describe('ClassroomMembersPanel', () => {
@@ -64,7 +97,7 @@ describe('ClassroomMembersPanel', () => {
     await openAddDialog()
     await fillAndSubmit()
 
-    await waitFor(() => expect(screen.queryByLabelText(/id do usuário/i)).toBeNull())
+    await waitFor(() => expect(screen.queryByLabelText('Pessoa *')).toBeNull())
   })
 
   it('invalidates the member list so the table refreshes without a reload', async () => {
@@ -89,7 +122,7 @@ describe('ClassroomMembersPanel', () => {
     await fillAndSubmit()
 
     await waitFor(() => expect(classroomApi.addClassroomMember).toHaveBeenCalled())
-    expect(screen.getByLabelText(/id do usuário/i)).toBeTruthy()
+    expect(screen.getByLabelText('Pessoa *')).toBeTruthy()
   })
 
   it('disables the submit button while the request is in flight, so a second click cannot add twice', async () => {
@@ -102,5 +135,29 @@ describe('ClassroomMembersPanel', () => {
     const submit = screen.getAllByRole('button', { name: /adicionar/i }).at(-1)!
     await waitFor(() => expect(submit.hasAttribute('disabled')).toBe(true))
     expect(classroomApi.addClassroomMember).toHaveBeenCalledTimes(1)
+  })
+
+  it('reopens clean instead of keeping the person just added', async () => {
+    vi.mocked(classroomApi.addClassroomMember).mockResolvedValue(NEW_MEMBER)
+
+    renderPanel()
+    await openAddDialog()
+    await fillAndSubmit()
+    await waitFor(() => expect(screen.queryByLabelText('Pessoa *')).toBeNull())
+
+    await openAddDialog()
+
+    // Reabrir trazendo quem acabou de entrar deixaria a lista filtrada por ela,
+    // escondendo justamente quem ainda pode ser adicionado.
+    expect((screen.getByLabelText('Pessoa *') as HTMLInputElement).value).toBe('')
+  })
+
+  it('offers whoever is already in the classroom as marked, not as a pick', async () => {
+    renderPanel()
+    await openAddDialog()
+    await userEvent.click(screen.getByLabelText('Pessoa *'))
+
+    // Ana já é membro da turma; aparece na busca, mas rotulada.
+    expect(await screen.findByText(/já na turma/)).toBeTruthy()
   })
 })

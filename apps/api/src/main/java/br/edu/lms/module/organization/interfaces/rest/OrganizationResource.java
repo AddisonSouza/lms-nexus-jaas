@@ -124,13 +124,17 @@ public class OrganizationResource {
     @Path("/{id}/members")
     @RolesAllowed({"ADMIN_ORG", "GESTOR"})
     @Operation(summary = "Listar membros da organização")
-    @APIResponse(responseCode = "200", description = "Membros ativos, ordenados por nome")
+    @APIResponse(responseCode = "200",
+            description = "Página de membros ativos, filtrada por nome ou e-mail e ordenada por nome")
     @APIResponse(responseCode = "403", description = "Sem permissão")
-    public Response listMembers(@PathParam("id") String organizationId) {
+    public Response listMembers(@PathParam("id") String organizationId,
+                                @QueryParam("search") String search,
+                                @QueryParam("page") @DefaultValue("0") int page,
+                                @QueryParam("size") @DefaultValue("20") int size) {
         if (!isAdminOrManagerOf(organizationId)) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
-        return Response.ok(listOrganizationMembersUseCase.execute(organizationId)).build();
+        return Response.ok(listOrganizationMembersUseCase.execute(organizationId, search, page, size)).build();
     }
 
     @PATCH

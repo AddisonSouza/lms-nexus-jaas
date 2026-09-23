@@ -3,10 +3,10 @@ import api from '@lib/axios'
 import { pageSchema, type Page, type PageParams } from '@lib/pagination'
 
 /**
- * Membros da organização, vistos pela disciplina — mesmo motivo do
- * `org-classroom-api`: `curriculum` mantém o próprio client, com o mínimo que a
- * seção precisa. `id` é o **id do vínculo** em `organization_members`, que é o
- * `memberId` esperado por `POST/DELETE /subjects/{id}/teachers` — não o `userId`.
+ * Membros da organização, vistos pela turma. `classroom` mantém o próprio
+ * client pelo mesmo motivo que `curriculum` mantém o dele: uma feature não
+ * importa da outra. O que interessa aqui é o `userId` — é ele que
+ * `POST /classrooms/{id}/members` espera, não o id do vínculo.
  */
 const orgMemberSchema = z.object({
   id: z.string(),
@@ -18,7 +18,7 @@ const orgMemberSchema = z.object({
 
 export type OrgMember = z.infer<typeof orgMemberSchema>
 
-export async function listOrgMembers(
+export async function searchOrgMembers(
   organizationId: string,
   params: PageParams = {}
 ): Promise<Page<OrgMember>> {

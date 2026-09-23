@@ -1,7 +1,10 @@
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from 'lucide-react'
 import { addMemberSchema, type AddMemberFormData } from '../schemas/addMemberSchema'
+import { useOrgMemberSearch } from '../hooks/useOrgMemberSearch'
+import type { OrgMember } from '../api/org-member-api'
 import {
   Dialog,
   DialogContent,
@@ -9,7 +12,14 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@components/ui/dialog'
-import { Input } from '@components/ui/input'
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from '@components/ui/combobox'
 import { Button } from '@components/ui/button'
 
 interface Props {
@@ -17,14 +27,52 @@ interface Props {
   onClose: () => void
   onSubmit: (data: AddMemberFormData) => void
   isPending: boolean
+  /** Quem já está na turma — aparece na busca, marcado e sem poder ser escolhido. */
+  existingUserIds?: string[]
 }
 
-function AddMemberDialog({ open, onClose, onSubmit, isPending }: Props) {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<AddMemberFormData>({
+function memberLabel(member: OrgMember) {
+  return member.name ?? member.email ?? member.userId
+}
+
+function AddMemberDialog({ open, onClose, onSubmit, isPending, existingUserIds = [] }: Props) {
+  const [term, setTerm] = useState('')
+  const [picked, setPicked] = useState<OrgMember | null>(null)
+  const { data } = useOrgMemberSearch(term, open)
+  const members = data?.content ?? []
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors },
+  } = useForm<AddMemberFormData>({
     resolver: zodResolver(addMemberSchema),
   })
 
-  const handleClose = () => { reset(); onClose() }
+  // O painel fecha o diálogo direto no sucesso (`setShowAdd(false)`), sem passar
+  // pelo Cancelar. Sem limpar aqui, reabrir traz preenchida justamente a pessoa
+  // que acabou de entrar na turma — e a lista já filtrada pelo nome dela.
+  useEffect(() => {
+    if (!open) {
+      reset()
+      setTerm('')
+      setPicked(null)
+    }
+  }, [open, reset])
+
+  const handleClose = () => {
+    reset()
+    setTerm('')
+    setPicked(null)
+    onClose()
+  }
+
+  const handlePick = (member: OrgMember | null) => {
+    setPicked(member)
+    setValue('userId', member?.userId ?? '', { shouldValidate: true })
+  }
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) handleClose() }}>
@@ -35,13 +83,40 @@ function AddMemberDialog({ open, onClose, onSubmit, isPending }: Props) {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-1">
-            <label htmlFor="add-member-user-id" className="text-xs text-muted-foreground">ID do usuário *</label>
-            <Input
-              {...register('userId')}
-              id="add-member-user-id"
-              placeholder="UUID do membro"
-              aria-invalid={!!errors.userId}
-            />
+            <label htmlFor="add-member-search" className="text-xs text-muted-foreground">
+              Pessoa *
+            </label>
+            <Combobox
+              items={members}
+              value={picked}
+              onValueChange={handlePick}
+              itemToStringLabel={memberLabel}
+              onInputValueChange={setTerm}
+            >
+              <ComboboxInput
+                id="add-member-search"
+                placeholder="Buscar por nome ou e-mail"
+                aria-invalid={!!errors.userId}
+              />
+              <ComboboxContent>
+                <ComboboxList>
+                  {members.map((member) => {
+                    const alreadyMember = existingUserIds.includes(member.userId)
+                    return (
+                      <ComboboxItem key={member.userId} value={member} disabled={alreadyMember}>
+                        <span className="text-foreground">{memberLabel(member)}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {member.email ?? member.userId}
+                          {alreadyMember && ' · já na turma'}
+                        </span>
+                      </ComboboxItem>
+                    )
+                  })}
+                </ComboboxList>
+                <ComboboxEmpty>Ninguém encontrado nesta organização.</ComboboxEmpty>
+              </ComboboxContent>
+            </Combobox>
+            <input type="hidden" {...register('userId')} />
             {errors.userId && (
               <p role="alert" className="text-xs text-destructive">{errors.userId.message}</p>
             )}

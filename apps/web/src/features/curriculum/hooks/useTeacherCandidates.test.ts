@@ -20,12 +20,18 @@ beforeEach(() => {
 
 describe('useTeacherCandidates', () => {
   it('keeps only the members the API accepts as teacher', async () => {
-    vi.mocked(orgMemberApi.listOrgMembers).mockResolvedValue([
-      { id: 'm-1', userId: 'u-1', name: 'Ana', email: 'ana@test.com', role: 'PROFESSOR' },
-      { id: 'm-2', userId: 'u-2', name: 'Bruno', email: 'bruno@test.com', role: 'GESTOR' },
-      { id: 'm-3', userId: 'u-3', name: 'Caio', email: 'caio@test.com', role: 'ADMIN_ORG' },
-      { id: 'm-4', userId: 'u-4', name: 'Duda', email: 'duda@test.com', role: 'ALUNO' },
-    ])
+    vi.mocked(orgMemberApi.listOrgMembers).mockResolvedValue({
+      content: [
+        { id: 'm-1', userId: 'u-1', name: 'Ana', email: 'ana@test.com', role: 'PROFESSOR' },
+        { id: 'm-2', userId: 'u-2', name: 'Bruno', email: 'bruno@test.com', role: 'GESTOR' },
+        { id: 'm-3', userId: 'u-3', name: 'Caio', email: 'caio@test.com', role: 'ADMIN_ORG' },
+        { id: 'm-4', userId: 'u-4', name: 'Duda', email: 'duda@test.com', role: 'ALUNO' },
+      ],
+      totalElements: 4,
+      totalPages: 1,
+      number: 0,
+      size: 20,
+    })
 
     const { result } = renderHook(() => useTeacherCandidates(), { wrapper })
 

@@ -354,27 +354,42 @@ uma credencial. O e-mail é comparado sem diferenciar maiúsculas de minúsculas
 
 **`GET /organizations/{id}/members`** · `ADMIN_ORG | GESTOR`
 
-Lista os membros ativos da organização, ordenados por nome. Nome e e-mail vêm do
-módulo `identity`. `owner` marca o criador da organização, que não pode ser
-removido nem ter o papel alterado. Vínculos removidos (soft delete) não aparecem.
+Lista os membros ativos da organização, ordenados por nome, no envelope paginado
+desta seção de [Paginação](#paginação). Nome e e-mail vêm do módulo `identity`.
+`owner` marca o criador da organização, que não pode ser removido nem ter o papel
+alterado. Vínculos removidos (soft delete) não aparecem.
+
+**Parâmetros de query**
+
+| Parâmetro | Padrão | Descrição |
+|---|---|---|
+| `search` | — | Filtra por nome **ou** e-mail, sem diferenciar maiúsculas e em qualquer posição do valor. Nulo ou em branco não filtra. |
+| `page` | `0` | Página desejada, base zero. |
+| `size` | `20` | Itens por página; valores acima de `100` são limitados a `100`. |
 
 ```json
-[
-  {
-    "id": "uuid do vínculo",
-    "userId": "uuid",
-    "name": "string",
-    "email": "string",
-    "role": "ADMIN_ORG | GESTOR | PROFESSOR | ALUNO",
-    "joinedAt": "2026-08-30T10:00:00",
-    "owner": true
-  }
-]
+{
+  "content": [
+    {
+      "id": "uuid do vínculo",
+      "userId": "uuid",
+      "name": "string",
+      "email": "string",
+      "role": "ADMIN_ORG | GESTOR | PROFESSOR | ALUNO",
+      "joinedAt": "2026-08-30T10:00:00",
+      "owner": true
+    }
+  ],
+  "totalElements": 42,
+  "totalPages": 3,
+  "number": 0,
+  "size": 20
+}
 ```
 
 | Código | Descrição |
 |---|---|
-| `200` | Membros da organização. |
+| `200` | Página de membros da organização. |
 | `401` | Não autenticado. |
 | `403` | Não é `ADMIN_ORG` nem `GESTOR` desta organização (o `{id}` precisa bater com o claim `org`). |
 

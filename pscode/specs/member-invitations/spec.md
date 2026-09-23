@@ -202,3 +202,24 @@ Re-inviting an email SHALL cancel its pending, unexpired invitation in the same 
 #### Scenario: The invitee opens a cancelled link
 - **WHEN** an authenticated user accepts a cancelled invitation
 - **THEN** 410 `INVITATION_CANCELLED`, no membership is created, and the page shows "Este convite foi cancelado pelo administrador"
+
+---
+
+### Requirement: The admin and the manager search the organization's members
+`GET /organizations/{id}/members` SHALL return a page of the organization's active members, ordered by name, and SHALL accept `search`, `page` and `size`. `search` matches the member's name or email, case-insensitively, anywhere in the value; null or blank does not filter. The response carries the paginated envelope `{ content, totalElements, totalPages, number, size }`, with `size` defaulting to 20 and capped at 100. Removed memberships (soft delete) never appear.
+
+#### Scenario: Members without a search term
+- **WHEN** an `ADMIN_ORG` or `GESTOR` of the organization calls the endpoint with no `search`
+- **THEN** 200 with every active member in `content`, ordered by name, and the totals describing the whole set
+
+#### Scenario: The search matches name or email
+- **WHEN** `search` is part of a member's name or email, in any letter case
+- **THEN** 200 with only the matching members; a term matching nothing returns an empty `content` with `totalElements` 0
+
+#### Scenario: Paging through the members
+- **WHEN** `page` and `size` split the result
+- **THEN** each response carries that slice in `content`, `totalElements` and `totalPages` describe the whole set, and `number` echoes the requested page
+
+#### Scenario: Another organization's member listing
+- **WHEN** the JWT `org` claim differs from `{id}`, or the caller is neither `ADMIN_ORG` nor `GESTOR`
+- **THEN** 403

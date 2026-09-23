@@ -12,12 +12,10 @@ import { canTeach } from '@lib/roles'
 export function useTeacherCandidates(enabled = true) {
   const organizationId = useAuthStore((s) => s.organizationId)
 
-  return useQuery<OrgMember[]>({
+  return useQuery({
     queryKey: orgDirectoryKeys.members(organizationId ?? ''),
-    queryFn: async () => {
-      const members = await listOrgMembers(organizationId as string)
-      return members.filter((m) => canTeach(m.role))
-    },
+    queryFn: () => listOrgMembers(organizationId as string),
+    select: (page): OrgMember[] => page.content.filter((m) => canTeach(m.role)),
     enabled: enabled && !!organizationId,
   })
 }
