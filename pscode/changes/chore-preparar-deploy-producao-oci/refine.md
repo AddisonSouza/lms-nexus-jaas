@@ -55,7 +55,7 @@ numa VM ARM (Ampere A1) da OCI free tier, atrás de um nginx com HTTPS, num
 
 ## Subtasks
 
-- [ ] Adicionar `quarkus-smallrye-health` ao `pom.xml` e completar o perfil `%prod` do `application.properties` (storage OCI, base URLs, CORS, issuer)
+- [x] Adicionar `quarkus-smallrye-health` ao `pom.xml` e completar o perfil `%prod` do `application.properties` (storage OCI, base URLs, CORS, issuer)
 - [ ] Dockerfile de produção da API: multi-stage Maven → fast-jar em JRE 21 slim, com `.dockerignore`
 - [ ] Dockerfile de produção do web: build Vite → nginx servindo `dist/` com fallback de SPA
 - [ ] `infra/nginx/`: vhost do domínio único (`/` SPA, `/api/` → Quarkus) com bloco ACME e redirect 80→443
