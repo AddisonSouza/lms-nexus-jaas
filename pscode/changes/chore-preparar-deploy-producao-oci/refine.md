@@ -56,9 +56,9 @@ numa VM ARM (Ampere A1) da OCI free tier, atrás de um nginx com HTTPS, num
 ## Subtasks
 
 - [x] Adicionar `quarkus-smallrye-health` ao `pom.xml` e completar o perfil `%prod` do `application.properties` (storage OCI, base URLs, CORS, issuer)
-- [ ] Dockerfile de produção da API: multi-stage Maven → fast-jar em JRE 21 slim, com `.dockerignore`
-- [ ] Dockerfile de produção do web: build Vite → nginx servindo `dist/` com fallback de SPA
-- [ ] `infra/nginx/`: vhost do domínio único (`/` SPA, `/api/` → Quarkus) com bloco ACME e redirect 80→443
-- [ ] `infra/docker-compose.prod.yml`: api, web, mysql, redis, nginx e certbot, sem publicar portas internas, com healthchecks e `restart: unless-stopped`
-- [ ] Script de backup `mysqldump` com retenção + entrada de cron
-- [ ] `.env.prod.example` e `docs/DEPLOY.md` com o runbook (VM, Security List + firewall, chaves JWT, primeiro `up`, emissão do certificado)
+- [x] Dockerfile de produção da API: multi-stage Maven → fast-jar em JRE 21 slim, com `.dockerignore`
+- [x] Dockerfile de produção do web: build Vite → nginx servindo `dist/` com fallback de SPA
+- [x] `infra/nginx/`: vhost do domínio único (`/` SPA, `/api/` → Quarkus) com bloco ACME e redirect 80→443
+- [x] `infra/docker-compose.prod.yml`: api, web, mysql, redis, nginx e certbot, sem publicar portas internas, com healthchecks e `restart: unless-stopped`
+- [x] Script de backup `mysqldump` com retenção + entrada de cron
+- [x] `.env.prod.example` e `docs/DEPLOY.md` com o runbook (VM, Security List + firewall, chaves JWT, primeiro `up`, emissão do certificado)
