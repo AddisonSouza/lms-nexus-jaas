@@ -1,0 +1,149 @@
+# Compose de produção — uma VM ARM (Ampere A1) da OCI free tier.
+#
+#   docker compose -f infra/docker-compose.prod.yml --env-file infra/.env up -d --build
+#
+# Diferenças deliberadas em relação ao docker-compose.yml de desenvolvimento:
+# nenhuma porta de banco, cache ou API é publicada no host (o único caminho de
+# fora é o nginx, nas 80/443), não existe Mailpit, e as variáveis sem default
+# usam `:?` para o compose recusar a subida em vez de assumir um valor de dev.
+name: lms
+
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?defina no infra/.env}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-lms_db}
+      # A API não se conecta como root: este usuário nasce com permissão só
+      # sobre o schema da aplicação, que é o bastante para o Flyway migrar.
+      MYSQL_USER: ${MYSQL_USER:-lms}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?defina no infra/.env}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    # AOF ligado não é detalhe de performance: além do rate limit, o Redis
+    # guarda refresh token, token de confirmação de e-mail e token de reset de
+    # senha. Sem persistir, um restart desloga todo mundo e mata os links de
+    # confirmação que ainda estavam dentro das 24h de validade.
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:?defina no infra/.env}", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ../apps/api
+      dockerfile: ../../infra/docker/api/Dockerfile
+    restart: unless-stopped
+    environment:
+      QUARKUS_PROFILE: prod
+
+      DB_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-lms_db}
+      DB_USERNAME: ${MYSQL_USER:-lms}
+      DB_PASSWORD: ${MYSQL_PASSWORD:?}
+
+      REDIS_URL: redis://redis:6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?}
+
+      # Par novo, gerado na VM. Nunca as chaves do repositório: aquelas vazaram
+      # no histórico do git (c9123de).
+      JWT_PRIVATE_KEY_PATH: /keys/privateKey.pem
+      JWT_PUBLIC_KEY_PATH: /keys/publicKey.pem
+      JWT_ISSUER: https://${DOMAIN:?defina no infra/.env}
+
+      # Entram nos e-mails de convite, confirmação e reset. Erre aqui e os
+      # links saem apontando para localhost.
+      APP_BASE_URL: https://${DOMAIN}
+      PASSWORD_RESET_URL: https://${DOMAIN}/reset-password
+      # Mesma origem torna o CORS inócuo; fica declarado como rede de segurança.
+      CORS_ORIGINS: https://${DOMAIN}
+
+      MAIL_HOST: ${MAIL_HOST:?}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:?}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:?}
+      MAIL_FROM: ${MAIL_FROM:?}
+
+      # OCI Object Storage pela API S3-compatible. As credenciais são uma
+      # Customer Secret Key, não a chave de API da OCI.
+      STORAGE_ENDPOINT: ${STORAGE_ENDPOINT:?}
+      STORAGE_BUCKET: ${STORAGE_BUCKET:?}
+      STORAGE_REGION: ${STORAGE_REGION:?}
+      MINIO_ACCESS_KEY: ${STORAGE_ACCESS_KEY:?}
+      MINIO_SECRET_KEY: ${STORAGE_SECRET_KEY:?}
+    volumes:
+      - ${JWT_KEYS_DIR:-./keys}:/keys:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/q/health/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      # O Flyway migra na subida; a primeira partida é a mais lenta.
+      start_period: 90s
+
+  # Serve a SPA e, com a config de infra/nginx/ montada aqui, é também o nginx
+  # de borda: termina o TLS e encaminha /api para o Quarkus.
+  web:
+    build:
+      context: ../apps/web
+      dockerfile: ../../infra/docker/web/Dockerfile
+      args:
+        # Relativo de propósito: mesma origem, sem CORS e com o cookie
+        # SameSite=Strict funcionando.
+        VITE_API_URL: /api
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      # Consumido pelo envsubst da imagem oficial ao gerar a conf.
+      DOMAIN: ${DOMAIN:?}
+    volumes:
+      - ./nginx/default.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - certbot_conf:/etc/letsencrypt:ro
+      - certbot_www:/var/www/certbot
+    # Sem `condition: service_healthy` de propósito: se a API não subir, o nginx
+    # ainda precisa atender o desafio do ACME e servir a SPA. Amarrar os dois
+    # deixaria o certificado refém de um erro de configuração da API.
+    depends_on:
+      - api
+    # Certificado renovado só entra em vigor depois de um reload; o laço faz
+    # isso de tempos em tempos sem derrubar o processo principal.
+    command: >
+      sh -c "while :; do sleep 6h & wait $${!}; nginx -s reload; done & exec nginx -g 'daemon off;'"
+
+  certbot:
+    image: certbot/certbot:latest
+    restart: unless-stopped
+    volumes:
+      - certbot_conf:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    # O certificado inicial sai do infra/nginx/init-letsencrypt.sh; daqui para
+    # frente este laço só renova o que estiver perto de vencer.
+    entrypoint: >
+      sh -c "trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot; sleep 12h & wait $${!}; done"
+
+volumes:
+  mysql_data:
+  redis_data:
+  certbot_conf:
+  certbot_www:
