@@ -26,12 +26,20 @@ host; só se enxergam pela rede interna do compose.
 
 No console da OCI: **Compute → Instances → Create**.
 
-- **Shape:** `VM.Standard.A1.Flex`, 4 OCPU / 24 GB (Always Free).
-  O shape AMD micro (1 GB) **não** serve — não segura Quarkus + MySQL + Redis.
+- **Shape:** `VM.Standard.A1.Flex`, **2 OCPU / 12 GB** — a cota Always Free
+  inteira. O shape AMD micro (1 GB) **não** serve — não segura Quarkus +
+  MySQL + Redis.
 - **Imagem:** Ubuntu 22.04 (aarch64).
 - **Boot volume:** 50 GB bastam; o Always Free dá 200 GB no total.
 - **Região:** a home region da tenancy. Recurso Always Free criado fora dela
   é cobrado.
+
+> **Não peça 4 OCPU / 24 GB.** Era a cota até 15/06/2026, quando a Oracle a
+> cortou pela metade sem anúncio — só editando a documentação. Desde
+> 18/08/2026 o limite é aplicado: instância acima da cota é **terminada
+> automaticamente** (ou cobrada, em conta Pay-As-You-Go). O selo
+> `Always Free-eligible` no console é do *shape*, não da quantidade de OCPU —
+> ele aparece em 4 OCPU do mesmo jeito.
 
 > `Out of capacity` em ARM é comum e não é erro de configuração. Onde a região
 > tem mais de um Availability Domain, tente outro; em região de AD único —
