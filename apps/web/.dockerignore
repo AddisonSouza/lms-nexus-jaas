@@ -1,0 +1,13 @@
+# `npm ci` reinstala tudo dentro da imagem; copiar node_modules do host manda
+# binários compilados para a arquitetura errada e engorda o contexto em centenas
+# de MB.
+node_modules/
+dist/
+.vite/
+
+.env
+.env.local
+.env.*.local
+
+ARCHITECTURE_BREAKS.md
+*.log
