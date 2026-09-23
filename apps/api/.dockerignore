@@ -1,0 +1,11 @@
+# Artefatos de build — a imagem compila do zero.
+target/
+.quarkus/
+
+# Chaves JWT. O `.gitignore` já impede o commit, mas elas existem na máquina de
+# quem desenvolve e o contexto de build lê o diretório, não o git: sem esta
+# linha o par de dev entraria na imagem de produção.
+src/main/resources/*.pem
+
+.mvn/wrapper/maven-wrapper.jar
+*.log
