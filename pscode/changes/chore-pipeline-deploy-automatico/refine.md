@@ -28,6 +28,6 @@ servidor para atualizar a aplicação.
 ## Subtasks
 
 - [x] Criar `infra/scripts/deploy.sh` (pull ff-only, compose up --build, espera health, prune)
-- [ ] Criar `.github/workflows/deploy.yml` com triggers, concurrency e os jobs `test-api` e `test-web`
+- [x] Criar `.github/workflows/deploy.yml` com triggers, concurrency e os jobs `test-api` e `test-web`
 - [ ] Adicionar o job `deploy` (SSH via Secrets + `environment: production`) chamando o script
 - [ ] Atualizar `docs/DEPLOY.md`: setup da chave/Secrets, disparo manual e seção "Atualizar"

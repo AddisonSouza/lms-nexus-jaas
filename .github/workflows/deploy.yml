@@ -1,0 +1,58 @@
+# Todo push na main que mexa em código ou infra roda os testes e, se passarem,
+# publica em produção. Também dá para disparar à mão pela aba Actions.
+# Runbook: docs/DEPLOY.md.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/**"
+      - "infra/**"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+
+# Deploys enfileiram em vez de cancelar: dois `compose up --build` ao mesmo
+# tempo na VM brigariam pelo mesmo stack.
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  test-api:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          cache-dependency-path: apps/api/pom.xml
+      # verify roda os *Test (surefire) e os *IT (failsafe). O Testcontainers
+      # usa o Docker que já vem no runner.
+      - run: mvn -B verify
+
+  test-web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          # Mesma versão do infra/docker/web/Dockerfile.
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npx vitest run
+      - run: npm run build
