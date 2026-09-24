@@ -26,6 +26,6 @@ quando o link é compartilhado em WhatsApp, LinkedIn, Slack etc.
 
 ## Subtasks
 - [x] Criar o SVG da marca e gerar favicon.svg, favicon.ico e apple-touch-icon.png em apps/web/public
-- [ ] Criar a OG image 1200x630 (monograma + "LMS Nexus" + slogan) em apps/web/public
+- [x] Criar a OG image 1200x630 (monograma + "LMS Nexus" + slogan) em apps/web/public
 - [ ] Adicionar links de ícone, meta description e tags Open Graph/Twitter no index.html
 - [ ] Validar build e o preview (arquivos no dist, tags no HTML servido, debugger de OG após deploy)
