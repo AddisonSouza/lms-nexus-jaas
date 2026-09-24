@@ -120,7 +120,13 @@ mkdir -p infra/keys && cd infra/keys
 openssl genrsa -out private.pem 2048
 openssl pkcs8 -topk8 -inform PEM -in private.pem -out privateKey.pem -nocrypt
 openssl rsa -in private.pem -pubout -out publicKey.pem
-rm private.pem && chmod 600 privateKey.pem && cd /opt/lms-nexus-jaas
+rm private.pem
+# A API roda como UID 1001 no container (infra/docker/api/Dockerfile); o
+# usuário da VM é outro UID. Com o dono errado a API não lê a chave e morre na
+# subida — o diretório é montado read-only, então o dono tem que ser o 1001.
+sudo chown 1001:1001 privateKey.pem publicKey.pem
+sudo chmod 400 privateKey.pem && sudo chmod 444 publicKey.pem
+cd /opt/lms-nexus-jaas
 ```
 
 ## 6. Primeira subida
