@@ -28,6 +28,6 @@
 
 ## Fora deste card (seguem abertos)
 
-- O `DEPLOY.md` não diz que, numa VM nova, é preciso um `git pull` antes do
-  primeiro deploy automático (o `deploy.sh` ainda não existe no checkout).
+- ~~O `DEPLOY.md` não diz que, numa VM nova, é preciso um `git pull` antes do
+  primeiro deploy automático.~~ Resolvido no #414 (passo 5 do setup).
 - CI em PRs, branch protection, staging, rollback e alertas (fora de escopo).
