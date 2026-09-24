@@ -26,6 +26,10 @@ O sistema deve invalidar o Refresh Token no Redis ao receber `POST /auth/logout`
 ### REQ-AUTH-04 — Refresh de tokens
 O sistema deve emitir novo par de tokens (Access + Refresh) ao receber `POST /auth/refresh` com Refresh Token válido via cookie. O Refresh Token usado deve ser deletado (rotation obrigatória).
 
+#### Scenario: Cookie de refresh atrás do prefixo `/api` em produção
+- **WHEN** Em produção o front chama `POST /api/auth/refresh` (ou `/api/auth/logout`, `/api/auth/switch-organization`) e o nginx de borda remove o prefixo `/api` antes de repassar ao Quarkus
+- **THEN** O cookie de refresh chega ao navegador com `Path=/api/auth` — a API o emite com `Path=/auth` e o nginx reescreve o path (`proxy_cookie_path`) —, então o navegador o envia de volta nessas rotas; em dev, sem o prefixo, o `Path=/auth` original vale
+
 ### REQ-AUTH-REFRESH-01 — Refresh com contexto de organização
 O endpoint `POST /auth/refresh` aceita o campo opcional `organizationId` no body. Quando presente, o backend valida a membership do usuário e emite um access token com claim `org` e claim `roles` com o papel do usuário naquela organização. Quando **ausente**, o backend tenta resolver automaticamente a organização do usuário: se ele pertencer a exatamente uma organização ativa, o token emitido inclui `org`/`roles` dessa organização; caso contrário, mantém o comportamento anterior (token sem `org`, `roles` vazio).
 
