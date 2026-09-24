@@ -45,7 +45,21 @@ $COMPOSE run --rm --entrypoint sh certbot -c "
     -subj '/CN=$DOMAIN'"
 
 echo "==> Subindo o nginx para responder o desafio do ACME"
-$COMPOSE up -d web
+# --force-recreate: se uma tentativa anterior deixou o web num laço de restart
+# (sem certificado ele morre na subida), um `up -d` simples não o recria e ele
+# pode voltar só depois que o certificado temporário já foi apagado.
+$COMPOSE up -d --force-recreate web
+
+# Só segue com o nginx de pé de verdade: o certificado temporário é apagado a
+# seguir e, se o nginx (re)iniciar depois disso, ele cai de novo.
+for _ in $(seq 1 30); do
+  curl -s -o /dev/null http://localhost/.well-known/acme-challenge/ping && break
+  sleep 1
+done
+curl -s -o /dev/null http://localhost/.well-known/acme-challenge/ping || {
+  echo "O nginx não respondeu na porta 80. Veja: $COMPOSE logs web" >&2
+  exit 1
+}
 
 echo "==> Removendo o certificado temporário"
 $COMPOSE run --rm --entrypoint sh certbot -c "rm -rf '$CERT_PATH' /etc/letsencrypt/archive/$DOMAIN /etc/letsencrypt/renewal/$DOMAIN.conf"
@@ -53,7 +67,10 @@ $COMPOSE run --rm --entrypoint sh certbot -c "rm -rf '$CERT_PATH' /etc/letsencry
 echo "==> Pedindo o certificado ao Let's Encrypt"
 # --staging enquanto testa: o limite de emissões por domínio é de 5 por semana e
 # queimá-lo custa dias de espera. Tire a flag quando o fluxo estiver redondo.
-$COMPOSE run --rm certbot certonly \
+# O --entrypoint é obrigatório: o serviço certbot tem como entrypoint o laço de
+# renovação, e sem sobrescrevê-lo os argumentos abaixo vão para o `sh -c` e são
+# ignorados — o container fica preso no `sleep 12h` sem emitir nada.
+$COMPOSE run --rm --entrypoint certbot certbot certonly \
   --webroot --webroot-path /var/www/certbot \
   --email "$CERTBOT_EMAIL" \
   --agree-tos --no-eff-email \
