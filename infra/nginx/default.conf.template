@@ -81,7 +81,11 @@ server {
         proxy_set_header X-Real-IP         $remote_addr;
         # O rate limit de login identifica o cliente por este header — ver
         # quarkus.http.proxy.proxy-address-forwarding no application.properties.
-        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        # $remote_addr, não $proxy_add_x_forwarded_for: este nginx é a borda, e
+        # acrescentar ao header que o cliente mandou deixaria o valor forjado na
+        # frente — o Quarkus usaria o IP inventado e quem trocasse o header a
+        # cada tentativa nunca seria bloqueado.
+        proxy_set_header X-Forwarded-For   $remote_addr;
         proxy_set_header X-Forwarded-Proto $scheme;
 
         # Relatório em PDF pode passar dos 60s padrão.
