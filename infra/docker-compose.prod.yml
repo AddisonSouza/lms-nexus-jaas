@@ -3,8 +3,8 @@
 #   docker compose -f infra/docker-compose.prod.yml --env-file infra/.env up -d --build
 #
 # Diferenças deliberadas em relação ao docker-compose.yml de desenvolvimento:
-# nenhuma porta de banco, cache ou API é publicada no host (o único caminho de
-# fora é o nginx, nas 80/443), não existe Mailpit, e as variáveis sem default
+# nenhuma porta de cache ou API é publicada no host (o único caminho de fora é
+# o nginx, nas 80/443; o MySQL só no loopback da VM), não existe Mailpit, e as variáveis sem default
 # usam `:?` para o compose recusar a subida em vez de assumir um valor de dev.
 name: lms
 
@@ -19,6 +19,11 @@ services:
       # sobre o schema da aplicação, que é o bastante para o Flyway migrar.
       MYSQL_USER: ${MYSQL_USER:-lms}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:?defina no infra/.env}
+    # Só no loopback da VM: de fora continua fechado (a 3306 não está liberada
+    # nem na Security List nem no iptables). Serve para um cliente de banco
+    # chegar por túnel SSH num endereço fixo, sem depender do IP do container.
+    ports:
+      - "127.0.0.1:3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
