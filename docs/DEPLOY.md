@@ -187,8 +187,14 @@ curl -fsS https://<domínio>/api/q/health/ready
 
 ## 8. Backup
 
+O cron roda como o seu usuário, não como root: o diretório dos dumps e o
+arquivo de log precisam ser dele. Com um `sudo mkdir` simples os dois ficam do
+root e o job falha toda noite sem avisar ninguém.
+
 ```bash
-sudo mkdir -p /var/backups/lms
+sudo install -d -o "$USER" -g "$USER" -m 750 /var/backups/lms
+sudo install -o "$USER" -g "$USER" -m 640 /dev/null /var/log/lms-backup.log
+./infra/scripts/backup-mysql.sh          # primeiro dump, na mão
 crontab -e
 ```
 
@@ -196,12 +202,27 @@ crontab -e
 0 3 * * * /opt/lms-nexus-jaas/infra/scripts/backup-mysql.sh >> /var/log/lms-backup.log 2>&1
 ```
 
-Rode uma restauração de teste logo depois do primeiro dump — backup que nunca
-foi restaurado é suposição, não backup:
+A VM fica em UTC: `0 3` é meia-noite em Brasília.
+
+Teste a restauração logo depois do primeiro dump — backup que nunca foi
+restaurado é suposição, não backup. Faça o teste num banco descartável, não em
+cima do `lms_db`: o `restore-mysql.sh` sobrescreve produção e para a API, e
+qualquer escrita entre o dump e a restauração se perde.
 
 ```bash
-./infra/scripts/restore-mysql.sh /var/backups/lms/<arquivo>.sql.gz
+set -a; . infra/.env; set +a
+M="docker compose -f infra/docker-compose.prod.yml --env-file infra/.env exec -T -e MYSQL_PWD=$MYSQL_ROOT_PASSWORD mysql mysql --user=root"
+$M -e "CREATE DATABASE lms_restore_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+zcat /var/backups/lms/<arquivo>.sql.gz | $M lms_restore_test
+$M -e "SELECT table_name FROM information_schema.tables WHERE table_schema='lms_restore_test'"
+$M -e "DROP DATABASE lms_restore_test"
 ```
+
+O `restore-mysql.sh` fica para a restauração de verdade, num incidente.
+
+> Os dumps ficam no disco da própria VM: protegem de `down -v`, de migration
+> ruim e de erro humano, **não** da perda da VM. Para isso, copie-os para fora
+> (o bucket do Object Storage serve).
 
 ## 9. Atualizar
 
