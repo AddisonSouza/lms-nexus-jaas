@@ -10,6 +10,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,6 +35,21 @@ class AuthRateLimiterRedisAdapterIT {
     @ConfigProperty(name = "lms.auth.rate-limit.max-failures") int maxFailures;
     @ConfigProperty(name = "lms.auth.rate-limit.block-seconds") long blockSeconds;
 
+    /** Logger do adapter, visto pelo JUL: o JBoss LogManager do Quarkus o estende. */
+    private final Logger adapterLogger = Logger.getLogger(AuthRateLimiterRedisAdapter.class.getName());
+    private final List<LogRecord> warnings = new CopyOnWriteArrayList<>();
+    private final Handler warningCollector = new Handler() {
+        @Override
+        public void publish(LogRecord record) {
+            if (record.getLevel().intValue() >= Level.WARNING.intValue()) {
+                warnings.add(record);
+            }
+        }
+
+        @Override public void flush() { }
+        @Override public void close() { }
+    };
+
     private void clearKeys() {
         for (var origin : new String[]{ORIGIN, OTHER_ORIGIN}) {
             redis.key().del("auth-rl:fail:" + origin, "auth-rl:block:" + origin);
@@ -36,14 +57,29 @@ class AuthRateLimiterRedisAdapterIT {
     }
 
     @BeforeEach
-    void setUp() { clearKeys(); }
+    void setUp() {
+        clearKeys();
+        adapterLogger.addHandler(warningCollector);
+    }
 
     @AfterEach
-    void tearDown() { clearKeys(); }
+    void tearDown() {
+        adapterLogger.removeHandler(warningCollector);
+        clearKeys();
+    }
 
     @Test
     void unknownOrigin_isNotBlocked() {
         assertTrue(rateLimiter.remainingBlock(ORIGIN).isEmpty());
+    }
+
+    @Test
+    void unknownOrigin_isNotReportedAsAnOutage() {
+        rateLimiter.remainingBlock(ORIGIN);
+
+        // Origem sem bloqueio é o caso de todo login: um warn aqui enche o log de
+        // falsos "Redis fora" e esconde a queda de verdade.
+        assertTrue(warnings.isEmpty(), () -> "warn inesperado: " + warnings.get(0).getMessage());
     }
 
     @Test

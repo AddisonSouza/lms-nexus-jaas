@@ -16,4 +16,4 @@ correção cala esse aviso falso e mantém o aviso quando o Redis cai de verdade
 - Política de fail-open, limites (5 / 60 s / 900 s) e identificação da origem.
 - Testar o fail-open com o Redis realmente fora do ar.
 ## Subtasks
-- [ ] `remainingBlock`: `catch (RedisKeyNotFoundException)` → sem bloqueio e sem log; IT com handler JUL provando que a origem sem bloqueio não gera WARN
+- [x] `remainingBlock`: `catch (RedisKeyNotFoundException)` → sem bloqueio e sem log; IT com handler JUL provando que a origem sem bloqueio não gera WARN
