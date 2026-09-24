@@ -128,8 +128,12 @@ services:
       - api
     # Certificado renovado só entra em vigor depois de um reload; o laço faz
     # isso de tempos em tempos sem derrubar o processo principal.
+    # O exec final passa pelo /docker-entrypoint.sh de propósito: é ele que roda
+    # o envsubst dos templates, e só quando o comando começa com `nginx`. Como
+    # este command começa com `sh`, chamar o nginx direto pularia a renderização
+    # e o container subiria com o default.conf de fábrica da imagem.
     command: >
-      sh -c "while :; do sleep 6h & wait $${!}; nginx -s reload; done & exec nginx -g 'daemon off;'"
+      sh -c "while :; do sleep 6h & wait $${!}; nginx -s reload; done & exec /docker-entrypoint.sh nginx -g 'daemon off;'"
 
   certbot:
     image: certbot/certbot:latest
