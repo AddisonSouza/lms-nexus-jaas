@@ -88,6 +88,12 @@ seguir — o certbot falha se o nome ainda não resolver:
 dig +short lms.seudominio.com.br
 ```
 
+**`www`:** se `www.<domínio>` resolver (um CNAME para o domínio raiz basta), o
+`init-letsencrypt.sh` o inclui no certificado sozinho e o nginx o redireciona
+com 301 para o domínio raiz. Se não resolver, fica de fora sem quebrar nada. Não
+deixe o `www` apontando para a VM sem estar no certificado: o HSTS sai com
+`includeSubDomains`, e o navegador bloqueia o `www` sem opção de prosseguir.
+
 ## 4. Docker na VM
 
 ```bash

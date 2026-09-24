@@ -8,15 +8,35 @@
 # resto para o HTTPS.
 server {
     listen 80;
-    server_name ${DOMAIN};
+    server_name ${DOMAIN} www.${DOMAIN};
 
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
     }
 
+    # Direto para o domínio canônico: quem chega pelo www não passa por um
+    # segundo redirect no HTTPS.
     location / {
-        return 301 https://$host$request_uri;
+        return 301 https://${DOMAIN}$request_uri;
     }
+}
+
+# O www só existe para ser redirecionado. O certificado o cobre quando o nome
+# resolve no DNS (ver init-letsencrypt.sh); sem isso este bloco fica inerte.
+# O HSTS com includeSubDomains é o que torna este bloco necessário: com ele o
+# navegador exige HTTPS válido no www e não deixa o usuário passar do erro.
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name www.${DOMAIN};
+
+    ssl_certificate     /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    return 301 https://${DOMAIN}$request_uri;
 }
 
 server {

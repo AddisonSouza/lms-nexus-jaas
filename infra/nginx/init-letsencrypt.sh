@@ -30,6 +30,14 @@ set -a; . infra/.env; set +a
 
 CERT_PATH="/etc/letsencrypt/live/$DOMAIN"
 
+# O www entra no certificado só se resolver: pedir um nome sem DNS derruba a
+# emissão inteira. Num deploy em subdomínio (lms.exemplo.com.br) ele
+# normalmente não existe e fica de fora sozinho.
+WWW_DOMAIN=""
+if getent hosts "www.$DOMAIN" > /dev/null; then
+  WWW_DOMAIN="www.$DOMAIN"
+fi
+
 if $COMPOSE run --rm --entrypoint "test -f $CERT_PATH/fullchain.pem" certbot 2>/dev/null; then
   echo "Certificado para $DOMAIN já existe. Nada a fazer."
   echo "Para forçar a reemissão, remova o volume: docker volume rm lms_certbot_conf"
@@ -75,7 +83,7 @@ $COMPOSE run --rm --entrypoint certbot certbot certonly \
   --email "$CERTBOT_EMAIL" \
   --agree-tos --no-eff-email \
   ${CERTBOT_STAGING:+--staging} \
-  -d "$DOMAIN"
+  -d "$DOMAIN" ${WWW_DOMAIN:+-d "$WWW_DOMAIN"}
 
 echo "==> Recarregando o nginx com o certificado definitivo"
 $COMPOSE exec web nginx -s reload
