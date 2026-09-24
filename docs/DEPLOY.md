@@ -224,6 +224,7 @@ O Flyway migra sozinho na subida da API.
 | Upload falha com 413 | `client_max_body_size` do nginx abaixo do limite da API (50 MiB) |
 | Upload falha com erro de bucket | `STORAGE_ENDPOINT` errado, ou credencial de API no lugar da Customer Secret Key |
 | Certificado não renova | `docker compose ... logs certbot`; a 80 precisa estar aberta nos dois firewalls |
+| `certbot renew` manual parece travado em "Processing ..." | Não está: sem TTY o certbot espera um atraso aleatório de até 8 min antes de renovar. O log mostra `random delay of N seconds` |
 
 ```bash
 # logs de tudo, seguindo
