@@ -1,0 +1,85 @@
+# Todo push na main que mexa em código ou infra roda os testes e, se passarem,
+# publica em produção. Também dá para disparar à mão pela aba Actions.
+# Runbook: docs/DEPLOY.md.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/**"
+      - "infra/**"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+
+# Deploys enfileiram em vez de cancelar: dois `compose up --build` ao mesmo
+# tempo na VM brigariam pelo mesmo stack.
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  test-api:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          cache-dependency-path: apps/api/pom.xml
+      # verify roda os *Test (surefire) e os *IT (failsafe). O Testcontainers
+      # usa o Docker que já vem no runner.
+      - run: mvn -B verify
+
+  test-web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          # Mesma versão do infra/docker/web/Dockerfile.
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npx vitest run
+      - run: npm run build
+
+  deploy:
+    needs: [test-api, test-web]
+    runs-on: ubuntu-latest
+    # O environment agrupa os Secrets de deploy e dá o histórico de deploys na
+    # página do repositório.
+    environment: production
+    steps:
+      # Chave dedicada a este job e known_hosts fixado: sem
+      # StrictHostKeyChecking=no, um host trocado derruba o deploy em vez de
+      # receber a chave.
+      - name: Configurar SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+      - name: Rodar deploy.sh na VM
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          ssh -i ~/.ssh/id_deploy -o IdentitiesOnly=yes -o BatchMode=yes \
+            "$DEPLOY_USER@$DEPLOY_HOST" /opt/lms-nexus-jaas/infra/scripts/deploy.sh

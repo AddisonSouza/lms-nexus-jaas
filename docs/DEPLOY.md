@@ -1,8 +1,8 @@
 # Deploy de produção — OCI free tier
 
 Runbook do deploy numa VM ARM (Ampere A1) da Oracle Cloud free tier, com Docker
-e nginx. Uma unidade de deploy, uma VM, sem CI/CD: o deploy é `git pull` +
-`docker compose up -d --build`.
+e nginx. Uma unidade de deploy, uma VM. Todo merge na `main` roda os testes e,
+se passarem, o GitHub Actions publica a nova versão por SSH (seção 9).
 
 ## Topologia
 
@@ -226,13 +226,75 @@ O `restore-mysql.sh` fica para a restauração de verdade, num incidente.
 
 ## 9. Atualizar
 
+Todo push na `main` que mexa em `apps/`, `infra/` ou no próprio workflow dispara
+`.github/workflows/deploy.yml`. Ele roda os testes da API (`mvn verify`) e do web
+(lint, vitest e build). Se passarem, entra por SSH na VM e roda
+`infra/scripts/deploy.sh`. O script faz `git pull --ff-only` e
+`compose up -d --build`, espera a API ficar `healthy` e faz `image prune`. Os
+deploys entram numa fila e nunca rodam dois ao mesmo tempo. O Flyway migra
+sozinho quando a API sobe.
+
+Para rodar sem push: aba **Actions → Deploy → Run workflow**, ou
+`gh workflow run deploy.yml && gh run watch`. Para rodar direto na VM, sem
+passar pelos testes:
+
 ```bash
-cd /opt/lms-nexus-jaas && git pull
-docker compose -f infra/docker-compose.prod.yml --env-file infra/.env up -d --build
-docker image prune -f
+/opt/lms-nexus-jaas/infra/scripts/deploy.sh
 ```
 
-O Flyway migra sozinho na subida da API.
+O `pull --ff-only` recusa sobrescrever mudanças locais em arquivos versionados.
+Não edite o checkout da VM. `infra/.env` e `infra/keys` são gitignored e não
+entram nessa regra.
+
+### Configurar o deploy automático (uma vez)
+
+**1. Chave dedicada**, gerada na sua máquina e usada só pelo Actions:
+
+```bash
+ssh-keygen -t ed25519 -N "" -C "github-actions-deploy" -f lms-deploy
+```
+
+**2. `authorized_keys` na VM.** O `command=` força essa chave a rodar só o
+script, e `restrict` corta pty e forwarding. Se a chave vazar, ela só consegue
+fazer um deploy da `main`:
+
+```bash
+echo "restrict,command=\"/opt/lms-nexus-jaas/infra/scripts/deploy.sh\" $(cat lms-deploy.pub)" \
+  | ssh <usuario>@<ip-da-vm> 'cat >> ~/.ssh/authorized_keys'
+```
+
+O `git pull` roda sem ninguém digitando nada. Por isso a chave que a VM usa no
+GitHub (a do `git clone` da seção 5) não pode ter passphrase.
+
+**3. `known_hosts`.** Confira se a impressão digital do `ssh-keyscan` é a mesma
+que a VM mostra. Sem essa checagem, fixar o host não protege nada:
+
+```bash
+ssh-keyscan -t ed25519 <ip-da-vm> > lms-known-hosts
+ssh-keygen -lf lms-known-hosts                                   # na sua máquina
+ssh <usuario>@<ip-da-vm> ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub   # na VM
+```
+
+**4. Environment e Secrets.** Os Secrets ficam no environment `production`.
+Só o job de deploy os enxerga:
+
+```bash
+gh api -X PUT repos/AddisonSouza/lms-nexus-jaas/environments/production
+gh secret set DEPLOY_HOST        --env production --body "<ip-da-vm>"
+gh secret set DEPLOY_USER        --env production --body "<usuario>"
+gh secret set DEPLOY_SSH_KEY     --env production < lms-deploy
+gh secret set DEPLOY_KNOWN_HOSTS --env production < lms-known-hosts
+shred -u lms-deploy          # a privada só precisa existir no GitHub
+```
+
+| Secret | Conteúdo |
+|---|---|
+| `DEPLOY_HOST` | IP público da VM |
+| `DEPLOY_USER` | Usuário SSH da VM (o dono de `/opt/lms-nexus-jaas`, no grupo `docker`) |
+| `DEPLOY_SSH_KEY` | Chave privada `lms-deploy`, inteira |
+| `DEPLOY_KNOWN_HOSTS` | Linha do `ssh-keyscan` conferida no passo 3 |
+
+**5. Testar:** `gh workflow run deploy.yml && gh run watch`.
 
 ## Diagnóstico
 
@@ -246,6 +308,9 @@ O Flyway migra sozinho na subida da API.
 | Upload falha com erro de bucket | `STORAGE_ENDPOINT` errado, ou credencial de API no lugar da Customer Secret Key |
 | Certificado não renova | `docker compose ... logs certbot`; a 80 precisa estar aberta nos dois firewalls |
 | `certbot renew` manual parece travado em "Processing ..." | Não está: sem TTY o certbot espera um atraso aleatório de até 8 min antes de renovar. O log mostra `random delay of N seconds` |
+| Deploy falha com `Host key verification failed` | `DEPLOY_KNOWN_HOSTS` não bate com a chave atual da VM (VM recriada?). Refaça o passo 3 |
+| Deploy falha no `git pull --ff-only` | Alguém mexeu em arquivo versionado na VM: `git status` lá, e descarte ou mova a mudança |
+| Deploy falha esperando a API | O job mostra as últimas linhas do log da API. Se a subida for só lenta, aumente o default de `HEALTH_TIMEOUT` no `deploy.sh` |
 
 ```bash
 # logs de tudo, seguindo
