@@ -71,6 +71,12 @@ server {
     location /api/ {
         proxy_pass http://api:8080/;
 
+        # O outro lado da remoção do prefixo: a API emite o cookie de refresh
+        # com Path=/auth, mas o navegador chama /api/auth/*, então não o
+        # enviaria — refresh, switch-organization e logout voltariam 401. Aqui
+        # o Path de todo Set-Cookie ganha o /api de volta.
+        proxy_cookie_path /auth /api/auth;
+
         proxy_set_header Host              $host;
         proxy_set_header X-Real-IP         $remote_addr;
         # O rate limit de login identifica o cliente por este header — ver
