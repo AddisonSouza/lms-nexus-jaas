@@ -115,6 +115,12 @@
       <artifactId>quarkus-smallrye-openapi</artifactId>
     </dependency>
 
+    <!-- Health checks (/q/health) — usado pelo healthcheck do container -->
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-smallrye-health</artifactId>
+    </dependency>
+
     <!-- Templating (PDF reports) -->
     <dependency>
       <groupId>io.quarkus</groupId>

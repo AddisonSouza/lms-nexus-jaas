@@ -16,6 +16,8 @@ hs_err_pid*
 # ── JWT keys (gerar localmente, nunca commitar — ENV-04) ──────
 apps/api/src/main/resources/privateKey.pem
 apps/api/src/main/resources/publicKey.pem
+# Par de produção, gerado na VM e montado no container (ver docs/DEPLOY.md)
+infra/keys/
 
 # ── Maven ────────────────────────────────────────────────────
 apps/api/.mvn/wrapper/maven-wrapper.jar

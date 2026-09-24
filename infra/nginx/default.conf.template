@@ -1,0 +1,110 @@
+# Config do nginx de borda. A imagem oficial roda `envsubst` sobre
+# /etc/nginx/templates/*.template na subida e escreve o resultado em
+# /etc/nginx/conf.d/ — só os nomes presentes no ambiente do container são
+# trocados, então ${DOMAIN} vira o domínio e $host, $uri e companhia passam
+# intactos para o nginx.
+
+# HTTP só existe para dois motivos: responder o desafio do ACME e empurrar o
+# resto para o HTTPS.
+server {
+    listen 80;
+    server_name ${DOMAIN} www.${DOMAIN};
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    # Direto para o domínio canônico: quem chega pelo www não passa por um
+    # segundo redirect no HTTPS.
+    location / {
+        return 301 https://${DOMAIN}$request_uri;
+    }
+}
+
+# O www só existe para ser redirecionado. O certificado o cobre quando o nome
+# resolve no DNS (ver init-letsencrypt.sh); sem isso este bloco fica inerte.
+# O HSTS com includeSubDomains é o que torna este bloco necessário: com ele o
+# navegador exige HTTPS válido no www e não deixa o usuário passar do erro.
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name www.${DOMAIN};
+
+    ssl_certificate     /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    return 301 https://${DOMAIN}$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name ${DOMAIN};
+
+    ssl_certificate     /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_session_cache   shared:SSL:10m;
+    ssl_session_timeout 1d;
+
+    # O cookie de sessão sai HttpOnly + Secure + SameSite=Strict; o HSTS fecha a
+    # janela em que o navegador ainda tentaria HTTP antes do redirect.
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Content-Type-Options    "nosniff" always;
+    add_header X-Frame-Options           "DENY" always;
+    add_header Referrer-Policy           "strict-origin-when-cross-origin" always;
+
+    # Acompanha quarkus.http.limits.max-body-size (50 MiB): se o nginx cortar
+    # antes, o upload morre com um 413 que a aplicação nunca vê.
+    client_max_body_size 50m;
+
+    gzip on;
+    gzip_types text/css application/javascript application/json image/svg+xml;
+    gzip_min_length 1024;
+
+    # A barra final do proxy_pass é o que remove o prefixo: /api/auth/login
+    # chega no Quarkus como /auth/login, que é o @Path real do resource. Por
+    # isso nenhum código da API precisou mudar.
+    location /api/ {
+        proxy_pass http://api:8080/;
+
+        # O outro lado da remoção do prefixo: a API emite o cookie de refresh
+        # com Path=/auth, mas o navegador chama /api/auth/*, então não o
+        # enviaria — refresh, switch-organization e logout voltariam 401. Aqui
+        # o Path de todo Set-Cookie ganha o /api de volta.
+        proxy_cookie_path /auth /api/auth;
+
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        # O rate limit de login identifica o cliente por este header — ver
+        # quarkus.http.proxy.proxy-address-forwarding no application.properties.
+        # $remote_addr, não $proxy_add_x_forwarded_for: este nginx é a borda, e
+        # acrescentar ao header que o cliente mandou deixaria o valor forjado na
+        # frente — o Quarkus usaria o IP inventado e quem trocasse o header a
+        # cada tentativa nunca seria bloqueado.
+        proxy_set_header X-Forwarded-For   $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Relatório em PDF pode passar dos 60s padrão.
+        proxy_read_timeout 120s;
+    }
+
+    # Assets do Vite carregam hash no nome, então o conteúdo nunca muda. Só
+    # `expires` aqui: um `add_header` neste bloco cancelaria os headers de
+    # segurança herdados do server.
+    location /assets/ {
+        root /usr/share/nginx/html;
+        expires 1y;
+    }
+
+    location / {
+        root /usr/share/nginx/html;
+        # Rotas do react-router não existem como arquivo em disco: qualquer
+        # caminho desconhecido devolve o index e o roteamento acontece no
+        # cliente. Sem isto, dar F5 em /classrooms/123 responde 404.
+        try_files $uri $uri/ /index.html;
+    }
+}

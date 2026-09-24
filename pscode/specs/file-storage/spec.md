@@ -10,9 +10,9 @@ O módulo `storage` define `StoragePort` em `domain/port/out/`. Nenhuma referên
 - **WHEN** Use case chama `StoragePort.store(inputStream, filename, mimeType, context)`
 - **THEN** Arquivo enviado ao bucket S3/MinIO com key `{context}/{ano}/{mes}/{uuid}-{filename}` e o nome original no metadado `original-name`; retorna `StoredFile` com `fileKey`
 
-#### Scenario: Trocar de MinIO (dev) para S3 real (prod) sem alterar use cases
-- **WHEN** Variáveis de ambiente alteradas de endpoint MinIO para AWS S3 real
-- **THEN** `S3StorageAdapter` passa a usar S3 sem qualquer alteração nos use cases — `StoragePort` permanece idêntico
+#### Scenario: Trocar de MinIO (dev) para OCI Object Storage (prod) sem alterar use cases
+- **WHEN** O perfil `%prod` aponta `quarkus.s3.endpoint-override` para o endpoint S3-compatible da OCI (`https://<namespace>.compat.objectstorage.<region>.oraclecloud.com`), com `path-style-access=true` e uma Customer Secret Key como credencial
+- **THEN** `S3StorageAdapter` grava e lê no bucket da OCI sem qualquer alteração nos use cases — `StoragePort` permanece idêntico; o bucket é privado e o download continua passando por `GET /files/{fileKey}`
 
 ---
 
