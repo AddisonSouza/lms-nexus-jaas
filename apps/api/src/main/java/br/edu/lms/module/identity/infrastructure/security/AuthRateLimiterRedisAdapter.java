@@ -2,6 +2,7 @@ package br.edu.lms.module.identity.infrastructure.security;
 
 import br.edu.lms.module.identity.domain.port.out.AuthRateLimiter;
 import io.quarkus.redis.datasource.RedisDataSource;
+import io.quarkus.redis.datasource.keys.RedisKeyNotFoundException;
 import io.quarkus.redis.datasource.value.SetArgs;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
@@ -46,8 +47,12 @@ public class AuthRateLimiterRedisAdapter implements AuthRateLimiter {
     public Optional<Duration> remainingBlock(String origin) {
         try {
             long ttl = redis.key().ttl(BLOCK_PREFIX + origin);
-            // -2 = chave não existe, -1 = existe sem TTL (não acontece aqui).
+            // -1 = existe sem TTL (não acontece aqui).
             return ttl > 0 ? Optional.of(Duration.ofSeconds(ttl)) : Optional.empty();
+        } catch (RedisKeyNotFoundException e) {
+            // O cliente traduz o -2 (chave não existe) nesta exceção: é a origem
+            // sem bloqueio, o caso de todo login, e não uma falha do Redis.
+            return Optional.empty();
         } catch (RuntimeException e) {
             log.warn("Rate limiter unavailable, letting the request through", e);
             return Optional.empty();
