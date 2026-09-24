@@ -294,7 +294,18 @@ shred -u lms-deploy          # a privada só precisa existir no GitHub
 | `DEPLOY_SSH_KEY` | Chave privada `lms-deploy`, inteira |
 | `DEPLOY_KNOWN_HOSTS` | Linha do `ssh-keyscan` conferida no passo 3 |
 
-**5. Testar:** `gh workflow run deploy.yml && gh run watch`.
+**5. Atualizar o checkout da VM uma vez, à mão.** O `command=` do passo 2
+aponta para o `deploy.sh` *que já está na VM*. Se o checkout for anterior ao
+script, a chave do Actions não acha o que executar e o primeiro deploy falha
+antes mesmo do `git pull`:
+
+```bash
+ssh <usuario>@<ip-da-vm> 'cd /opt/lms-nexus-jaas && git pull --ff-only && test -x infra/scripts/deploy.sh && echo ok'
+```
+
+Depois disso o próprio script faz o `git pull` a cada deploy.
+
+**6. Testar:** `gh workflow run deploy.yml && gh run watch`.
 
 ## Acessar o banco
 
