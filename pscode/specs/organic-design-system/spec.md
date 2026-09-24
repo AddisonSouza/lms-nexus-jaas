@@ -58,3 +58,14 @@ O sistema SHALL renderizar os e-mails transacionais (confirmação de e-mail, re
 #### Scenario: Cliente de e-mail que não exibe o botão
 - **WHEN** o destinatário abre o e-mail em um cliente que bloqueia ou não renderiza o botão
 - **THEN** o mesmo endereço aparece logo abaixo em texto, como link copiável
+
+### Requirement: Favicon e preview social com a marca Nexus
+O web app SHALL expor a marca Nexus — monograma "N" em `#c67139` sobre `#f5ead8` — como favicon (`favicon.svg`, com `favicon.ico` de fallback e `apple-touch-icon.png` 180px) e SHALL declarar no `index.html` as meta tags Open Graph e Twitter Card (`summary_large_image`) apontando para `og-image.png` 1200x630 por URL absoluta em `https://lmsnexus.com.br`. Os assets são estáticos em `apps/web/public/`; não há preview por página nem por organização.
+
+#### Scenario: Aba do navegador
+- **WHEN** o usuário abre qualquer rota do web app
+- **THEN** a aba exibe o monograma "N" (SVG nos navegadores modernos, `.ico` nos demais) e o iOS usa o `apple-touch-icon.png` ao salvar na tela inicial
+
+#### Scenario: Link compartilhado
+- **WHEN** alguém cola `https://lmsnexus.com.br` no WhatsApp, LinkedIn ou Slack
+- **THEN** o preview mostra o título "LMS Nexus", a descrição e a imagem `og-image.png` com monograma, nome e slogan
