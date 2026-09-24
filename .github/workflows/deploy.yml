@@ -56,3 +56,30 @@ jobs:
       - run: npm run lint
       - run: npx vitest run
       - run: npm run build
+
+  deploy:
+    needs: [test-api, test-web]
+    runs-on: ubuntu-latest
+    # O environment agrupa os Secrets de deploy e dá o histórico de deploys na
+    # página do repositório.
+    environment: production
+    steps:
+      # Chave dedicada a este job e known_hosts fixado: sem
+      # StrictHostKeyChecking=no, um host trocado derruba o deploy em vez de
+      # receber a chave.
+      - name: Configurar SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+      - name: Rodar deploy.sh na VM
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          ssh -i ~/.ssh/id_deploy -o IdentitiesOnly=yes -o BatchMode=yes \
+            "$DEPLOY_USER@$DEPLOY_HOST" /opt/lms-nexus-jaas/infra/scripts/deploy.sh
