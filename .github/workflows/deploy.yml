@@ -35,6 +35,15 @@ jobs:
           java-version: "21"
           cache: maven
           cache-dependency-path: apps/api/pom.xml
+      # As chaves JWT de dev são gitignored. Os *IT emitem e validam tokens, então
+      # o job gera um par descartável que só existe durante o run.
+      - name: Gerar chaves JWT de teste
+        working-directory: apps/api/src/main/resources
+        run: |
+          openssl genrsa -out private.pem 2048
+          openssl pkcs8 -topk8 -inform PEM -in private.pem -out privateKey.pem -nocrypt
+          openssl rsa -in private.pem -pubout -out publicKey.pem
+          rm private.pem
       # verify roda os *Test (surefire) e os *IT (failsafe). O Testcontainers
       # usa o Docker que já vem no runner.
       - run: mvn -B verify
