@@ -56,13 +56,28 @@ instância continua descartando o pacote, sem log e sem mensagem.
 List → Add Ingress Rules*): TCP 80 e 443, origem `0.0.0.0/0`.
 
 **b) Firewall da instância** (as imagens Ubuntu da OCI vêm com regras que
-rejeitam tudo fora do SSH):
+rejeitam tudo fora do SSH). As regras novas precisam entrar **antes** do
+`REJECT` final — o que vier depois dele nunca é avaliado. Confira a posição:
 
 ```bash
-sudo iptables -I INPUT 6 -p tcp --dport  80 -j ACCEPT
-sudo iptables -I INPUT 6 -p tcp --dport 443 -j ACCEPT
+sudo iptables -L INPUT -n --line-numbers   # na imagem 22.04 o REJECT é a linha 5
+```
+
+Insira na linha do `REJECT` (ele desce para depois delas):
+
+```bash
+sudo iptables -I INPUT 5 -p tcp -m state --state NEW --dport 443 -j ACCEPT
+sudo iptables -I INPUT 5 -p tcp -m state --state NEW --dport  80 -j ACCEPT
 sudo netfilter-persistent save        # sem isto as regras somem no reboot
 ```
+
+Faça isso **antes** de instalar o Docker: um `netfilter-persistent save` com o
+Docker rodando grava também as chains dele em `/etc/iptables/rules.v4`.
+
+Para testar de fora, com o Docker já instalado (seção 4) e antes do nginx de
+verdade existir: `curl http://<ip>` com um `docker run --rm -p 80:80 nginx:alpine` na VM deve
+dar 200. Na 443, `Connection refused` é bom sinal (o pacote chegou e ninguém
+escuta); `No route to host` é o `REJECT` ainda na frente.
 
 ## 3. DNS
 
