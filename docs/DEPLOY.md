@@ -296,6 +296,20 @@ shred -u lms-deploy          # a privada só precisa existir no GitHub
 
 **5. Testar:** `gh workflow run deploy.yml && gh run watch`.
 
+## Acessar o banco
+
+O MySQL publica a 3306 só no loopback da VM, então o acesso de fora é por
+túnel SSH. No DBeaver (ou outro cliente):
+
+- **SSH:** host `<IP da VM>`, porta 22, usuário `ubuntu`, chave privada da VM.
+- **Main:** host `localhost`, porta `3306`, database `lms_db`, usuário `lms`,
+  senha `MYSQL_PASSWORD` do `infra/.env`.
+- **Driver properties:** `allowPublicKeyRetrieval=true` e `useSSL=false` (o
+  tráfego já vai cifrado pelo SSH).
+
+Marque a conexão como somente leitura. Schema muda só por migration do Flyway;
+antes de alterar dado à mão, tire um dump (passo 8).
+
 ## Diagnóstico
 
 | Sintoma | Onde olhar |
