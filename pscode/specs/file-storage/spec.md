@@ -16,25 +16,44 @@ O módulo `storage` define `StoragePort` em `domain/port/out/`. Nenhuma referên
 
 ---
 
-### Requirement: Servir arquivo com autenticação
-Endpoint `GET /files/{fileKey}` serve o arquivo a qualquer um dos quatro papéis, desde que autenticado. O prefixo `/api` foi removido para a rota seguir o padrão das demais (`/tasks`, `/classrooms`).
+### Requirement: Servir arquivo a quem enxerga o recurso dono
+Endpoint `GET /files/{fileKey}` (qualquer um dos quatro papéis, autenticado) só serve o arquivo a quem enxerga o recurso que o referencia, na organização do JWT. O `ServeFileUseCase` lê o `StorageContext` pelo prefixo da chave e consulta o `FileAccessPort` do módulo dono, que aplica a mesma regra da tela que lista o recurso:
 
-**Gap conhecido:** o endpoint não valida que o arquivo pertence à organização de quem pede — o `fileKey` não carrega `organization_id`. Card próprio.
+| Contexto | Módulo | Quem lê |
+|---|---|---|
+| `LESSON_MATERIAL` | curriculum | qualquer papel da org; `ALUNO` só se membro de turma vinculada à disciplina |
+| `TASK_ATTACHMENT` | assessment | qualquer papel da org; `ALUNO` só se a tarefa está `PUBLISHED`/`CLOSED` |
+| `SUBMISSION_ATTACHMENT` | assessment | o aluno autor e o professor que criou a tarefa |
+| `ANNOUNCEMENT_ATTACHMENT` | communication | membros da turma do aviso |
+
+Negado responde 404 — o mesmo de chave inexistente — para não confirmar a quem tem uma chave alheia que o arquivo existe. O padrão é fechado: sem organização no JWT, prefixo desconhecido ou contexto sem `FileAccessPort` também dão 404.
 
 #### Scenario: Acesso autorizado
-- **WHEN** Usuário autenticado faz `GET /files/{fileKey}`
+- **WHEN** Usuário com acesso ao recurso dono faz `GET /files/{fileKey}`
 - **THEN** Resposta 200 com o stream do arquivo, `Content-Type` real gravado no upload e `Content-Disposition: attachment` com o nome original
 
 #### Scenario: Nome original preservado no download
 - **WHEN** O arquivo foi enviado como `prova final.pdf`
 - **THEN** `Content-Disposition` traz `filename="prova_final.pdf"` (fallback ASCII) e `filename*=UTF-8''prova%20final.pdf` (RFC 5987), com o nome vindo do metadado `original-name` do objeto; objetos anteriores a esse metadado caem no nome embutido na chave
 
+#### Scenario: Arquivo de outra organização
+- **WHEN** O JWT traz uma organização diferente da do recurso dono do arquivo
+- **THEN** 404 `{"error":"FILE_NOT_FOUND"}`, sem ler o storage
+
+#### Scenario: Usuário da organização sem acesso ao recurso
+- **WHEN** Aluno pede material de disciplina fora das suas turmas, anexo de tarefa em rascunho, entrega de outro aluno, ou anexo de aviso de turma da qual não é membro
+- **THEN** 404 `{"error":"FILE_NOT_FOUND"}`
+
+#### Scenario: Chave que nenhum recurso referencia
+- **WHEN** O objeto existe no bucket, mas nenhum registro ativo da organização aponta para ele (ex.: recurso excluído)
+- **THEN** 404 `{"error":"FILE_NOT_FOUND"}`
+
 #### Scenario: Acesso não autenticado
 - **WHEN** Request sem JWT válido
 - **THEN** 401 Unauthorized
 
 #### Scenario: Arquivo não encontrado
-- **WHEN** `fileKey` não existe no storage
+- **WHEN** O acesso foi liberado, mas a chave não existe no storage
 - **THEN** `NoSuchKeyException` do SDK vira `FileNotFoundException` do domínio e a resposta é 404 com `{"error":"FILE_NOT_FOUND"}` — antes subia crua como 500
 
 ---
@@ -45,19 +64,3 @@ Endpoint `GET /files/{fileKey}` serve o arquivo a qualquer um dos quatro papéis
 #### Scenario: Arquivo com extensão não permitida no contexto
 - **WHEN** Upload com MIME type proibido para o contexto
 - **THEN** `StoragePort.store()` lança `InvalidFileTypeException`; use case propaga como 422
-
-
-### Requirement: LocalStorageAdapter para desenvolvimento sem MinIO
-O sistema SHALL fornecer uma implementação `LocalStorageAdapter` que armazena arquivos no filesystem local, selecionada automaticamente no profile `dev` sem necessidade de infraestrutura S3/MinIO.
-
-#### Scenario: Upload de arquivo em ambiente de desenvolvimento
-- **WHEN** use case chama `StoragePort.store(inputStream, filename, mimeType, context)` no profile `dev`
-- **THEN** arquivo é salvo em `{project.root}/data/uploads/{context}/{ano}/{mes}/{uuid}-{filename}`; retorna `StoredFile` com `fileKey` equivalente ao caminho relativo
-
-#### Scenario: Profile de produção não usa LocalStorageAdapter
-- **WHEN** aplicação iniciada com profile `prod`
-- **THEN** CDI injeta `S3StorageAdapter` — `LocalStorageAdapter` não é instanciado
-
-#### Scenario: Serve arquivo salvo localmente
-- **WHEN** usuário autenticado faz `GET /files/{fileKey}` e adaptador local está ativo
-- **THEN** sistema lê o arquivo do filesystem local e retorna stream com `Content-Type` correto
