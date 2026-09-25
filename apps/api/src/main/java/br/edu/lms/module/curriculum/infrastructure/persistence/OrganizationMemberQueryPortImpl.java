@@ -50,4 +50,17 @@ public class OrganizationMemberQueryPortImpl implements OrganizationMemberQueryP
                 .setParameter("orgId", organizationId)
                 .getResultList();
     }
+
+    @Override
+    public List<String> findActiveUserIdsByMemberIds(List<String> memberIds) {
+        if (memberIds == null || memberIds.isEmpty()) {
+            return List.of();
+        }
+        return em.createQuery(
+                        "SELECT m.userId FROM br.edu.lms.module.organization.infrastructure.persistence.OrganizationMemberJpaEntity m " +
+                        "WHERE m.id IN :ids AND m.deletedAt IS NULL",
+                        String.class)
+                .setParameter("ids", memberIds)
+                .getResultList();
+    }
 }

@@ -9,7 +9,10 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.Optional;
 
 @ApplicationScoped
@@ -131,5 +134,24 @@ public class SubjectRepositoryImpl implements SubjectRepository {
                         String.class)
                 .setParameter("sid", subjectId)
                 .getResultList();
+    }
+
+    @Override
+    public List<String> findSubjectIdsByClassrooms(Collection<String> classroomIds) {
+        return em.createQuery(
+                        "SELECT sc.id.subjectId FROM SubjectClassroomJpaEntity sc WHERE sc.id.classroomId IN :cids",
+                        String.class)
+                .setParameter("cids", classroomIds)
+                .getResultList();
+    }
+
+    @Override
+    public Map<String, String> findNamesByIdsIncludingDeleted(Collection<String> subjectIds) {
+        return em.createQuery(
+                        "SELECT s FROM SubjectJpaEntity s WHERE s.id IN :ids",
+                        SubjectJpaEntity.class)
+                .setParameter("ids", subjectIds)
+                .getResultStream()
+                .collect(Collectors.toMap(SubjectJpaEntity::getId, SubjectJpaEntity::getName));
     }
 }

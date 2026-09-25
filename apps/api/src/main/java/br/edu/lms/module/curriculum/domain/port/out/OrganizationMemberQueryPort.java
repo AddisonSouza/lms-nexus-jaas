@@ -13,4 +13,7 @@ public interface OrganizationMemberQueryPort {
      * não tem como saber se quem está olhando leciona a disciplina.
      */
     List<String> findUserIdsByMemberIds(List<String> memberIds, String organizationId);
+
+    /** Como {@link #findUserIdsByMemberIds}, sem restringir a organização — só membros ativos. */
+    List<String> findActiveUserIdsByMemberIds(List<String> memberIds);
 }
