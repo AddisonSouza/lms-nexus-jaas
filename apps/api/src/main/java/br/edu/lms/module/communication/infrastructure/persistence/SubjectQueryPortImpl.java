@@ -1,8 +1,8 @@
 package br.edu.lms.module.communication.infrastructure.persistence;
 
 import br.edu.lms.module.communication.domain.port.out.SubjectQueryPort;
+import br.edu.lms.module.curriculum.domain.port.in.SubjectDirectoryPort;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -11,27 +11,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SubjectQueryPortImpl implements SubjectQueryPort {
 
-    private final EntityManager em;
+    private final SubjectDirectoryPort subjectDirectory;
 
     @Override
     public List<String> findClassroomIdsBySubject(String subjectId) {
-        return em.createQuery(
-                        "SELECT sc.id.classroomId FROM br.edu.lms.module.curriculum.infrastructure.persistence.SubjectClassroomJpaEntity sc " +
-                                "WHERE sc.id.subjectId = :sid",
-                        String.class)
-                .setParameter("sid", subjectId)
-                .getResultList();
+        return subjectDirectory.findClassroomIdsBySubject(subjectId);
     }
 
     @Override
     public List<String> findTeacherUserIdsBySubject(String subjectId) {
-        return em.createQuery(
-                        "SELECT om.userId FROM br.edu.lms.module.curriculum.infrastructure.persistence.SubjectTeacherJpaEntity st " +
-                                "JOIN br.edu.lms.module.organization.infrastructure.persistence.OrganizationMemberJpaEntity om " +
-                                "ON om.id = st.id.memberId " +
-                                "WHERE st.id.subjectId = :sid AND om.deletedAt IS NULL",
-                        String.class)
-                .setParameter("sid", subjectId)
-                .getResultList();
+        return subjectDirectory.findTeacherUserIdsBySubject(subjectId);
     }
 }
