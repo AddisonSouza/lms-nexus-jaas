@@ -17,6 +17,19 @@ describe('RecentGradesList', () => {
     expect(screen.getByText('Bom trabalho')).toBeTruthy()
   })
 
+  it('shows a dash instead of a grade for a feedback-only evaluation', () => {
+    render(
+      <RecentGradesList
+        grades={[
+          { taskId: 't-1', title: 'Redação', subjectName: 'Disciplina A', grade: null, feedback: 'Texto bem estruturado' },
+        ]}
+      />,
+    )
+
+    expect(screen.getByLabelText('Sem nota')).toBeTruthy()
+    expect(screen.getByText('Texto bem estruturado')).toBeTruthy()
+  })
+
   it('shows an empty state when there are no grades yet', () => {
     render(<RecentGradesList grades={[]} />)
 
