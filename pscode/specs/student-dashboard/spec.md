@@ -33,6 +33,10 @@ O sistema SHALL calcular a média geral de notas do aluno autenticado agrupada p
 - **WHEN** o aluno não possui nenhuma submissão avaliada em uma disciplina das suas turmas
 - **THEN** essa disciplina não aparece na lista de médias por disciplina, sem erro
 
+#### Scenario: Avaliação sem nota
+- **WHEN** o aluno possui submissão `EVALUATED` com nota nula (avaliação só com feedback)
+- **THEN** ela fica fora da média por disciplina, aparece nas últimas notas com nota ausente e o feedback, e o dashboard é retornado sem erro
+
 ### Requirement: Restrição de acesso aos próprios dados do aluno
 O sistema SHALL restringir o acesso ao dashboard exclusivamente a usuários com papel `ALUNO`, retornando apenas dados associados ao próprio `userId` extraído do JWT (`sub`), nunca de outro aluno.
 

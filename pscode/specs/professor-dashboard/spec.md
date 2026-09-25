@@ -15,6 +15,10 @@ O sistema SHALL retornar, para a disciplina informada, os seguintes indicadores 
 - **WHEN** a última tarefa da disciplina não possui nenhuma submissão com status `EVALUATED`
 - **THEN** a distribuição de notas dessa tarefa é retornada vazia, sem erro
 
+#### Scenario: Avaliação sem nota
+- **WHEN** existem submissões `EVALUATED` com nota nula (avaliação só com feedback)
+- **THEN** elas ficam fora da distribuição de notas e da média por aluno; aluno cujas avaliações não têm nota não aparece na média, e o dashboard é retornado sem erro
+
 ### Requirement: Alunos sem entrega na última tarefa
 O sistema SHALL identificar, para a última tarefa da disciplina (mais recente por data de criação), todos os alunos elegíveis (matriculados em turmas vinculadas à disciplina) que não possuem nenhuma submissão registrada para essa tarefa.
 
