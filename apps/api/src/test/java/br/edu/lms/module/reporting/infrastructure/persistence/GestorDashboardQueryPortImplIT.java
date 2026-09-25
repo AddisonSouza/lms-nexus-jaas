@@ -144,6 +144,19 @@ class GestorDashboardQueryPortImplIT {
     }
 
     @Test
+    void getClassroomsHealth_evaluatedSubmissionWithoutGrade_isLeftOutOfAverageGrade() throws Exception {
+        // Avaliação só com feedback: EVALUATED sem nota não pode derrubar a média da turma.
+        tx.begin();
+        em.createNativeQuery("UPDATE task_submissions SET status = 'EVALUATED', grade = NULL WHERE task_id = ?")
+                .setParameter(1, taskLateId).executeUpdate();
+        tx.commit();
+
+        var result = sut.getClassroomsHealth(ORG_ID);
+
+        assertThat(result.get(0).getAverageGrade()).isEqualByComparingTo(new BigDecimal("8.00"));
+    }
+
+    @Test
     void listAtRiskStudents_ranksStudentWithMorePendenciesFirst() {
         var result = sut.listAtRiskStudents(classroomId, 5);
 

@@ -110,7 +110,8 @@ public class GestorDashboardQueryPortImpl implements GestorDashboardQueryPort {
 
         List<BigDecimal> grades = em.createQuery(
                         "SELECT s.grade FROM " + SUBMISSION_ENTITY + " s " +
-                                "WHERE s.taskId IN :taskIds AND s.deletedAt IS NULL AND s.status = 'EVALUATED'",
+                                "WHERE s.taskId IN :taskIds AND s.deletedAt IS NULL AND s.status = 'EVALUATED' " +
+                                "AND s.grade IS NOT NULL",
                         BigDecimal.class)
                 .setParameter("taskIds", taskIds)
                 .getResultList();
