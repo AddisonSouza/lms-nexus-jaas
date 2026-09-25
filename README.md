@@ -159,9 +159,22 @@ completo (VM, TLS, backup, acesso ao banco) está no [`docs/DEPLOY.md`](./docs/D
 ## Como o projeto é desenvolvido
 
 Specification-Driven Development: requisitos e decisões arquiteturais são
-**contrato**, e toda mudança é rastreável a um RF ou ADR. Cada mudança passa por
-`draft → refine → dev → complete` no board do GitHub e deixa sua spec em
-[`pscode/`](./pscode/).
+**contrato**, e toda mudança é rastreável a um RF ou ADR.
+
+O fluxo é guiado pelo **[PSCode](https://github.com/eipastel/pscode)**, um
+framework de SDD para assistentes de código com IA. Cada mudança passa por
+passos curtos, cada um validado por uma pessoa antes do próximo, espelhados
+nas colunas do board do GitHub:
+
+| Comando | Board | O que acontece |
+|---|---|---|
+| `/ps:draft` | Backlog | O pedido vira um rascunho curto |
+| `/ps:refine` | In Refinement → Ready to Dev | Análise do código, perguntas de esclarecimento e subtarefas |
+| `/ps:dev` | In Development → Ready to Deploy | PR em rascunho, uma subtarefa por vez, code review e teste |
+| `/ps:complete` | Done | Delta da spec registrado e mudança arquivada |
+
+As specs vivas por capability ficam em [`pscode/specs/`](./pscode/specs/), e o
+histórico de cada mudança, em [`pscode/changes/archive/`](./pscode/changes/archive/).
 
 - **Commits:** [Conventional Commits](https://www.conventionalcommits.org/) em inglês
 - **Branches:** `feat/…`, `fix/…`, `chore/…`, `docs/…`
