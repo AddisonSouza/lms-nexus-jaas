@@ -21,9 +21,11 @@ interface Props {
   onClose: () => void
   onSubmit: (data: TaskFormData) => void
   isPending: boolean
+  /** Recusa da API já traduzida; o formulário continua preenchido para corrigir e reenviar. */
+  error?: string | null
 }
 
-function TaskFormDialog({ open, subjectId, onClose, onSubmit, isPending }: Props) {
+function TaskFormDialog({ open, subjectId, onClose, onSubmit, isPending, error }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const { register, handleSubmit, reset, setValue, control, formState: { errors } } = useForm<TaskFormData>({
@@ -101,6 +103,12 @@ function TaskFormDialog({ open, subjectId, onClose, onSubmit, isPending }: Props
             <p className="text-xs text-muted-foreground">PDF, DOC, DOCX, ZIP, JPG, PNG — máx. 50MB cada</p>
             {errors.files && <p className="text-xs text-destructive">{errors.files.message}</p>}
           </div>
+
+          {error && (
+            <p role="alert" className="text-sm text-destructive">
+              {error}
+            </p>
+          )}
 
           <DialogFooter>
             <Button type="button" variant="secondary" onClick={onClose}>

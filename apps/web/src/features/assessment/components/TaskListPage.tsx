@@ -13,6 +13,7 @@ import type { TaskFormData } from '../schemas/task.schema'
 import { Card } from '@components/ui/card'
 import { Badge } from '@components/ui/badge'
 import { Button } from '@components/ui/button'
+import { apiErrorMessage } from '@lib/api-error'
 
 // A lista mostrava o enum cru ("PUBLISHED"). Encerrada é derivada do prazo no
 // back-end, então chega aqui como qualquer outro status.
@@ -21,6 +22,12 @@ const TASK_STATUS_LABEL: Record<TaskStatus, string> = {
   PUBLISHED: 'Publicada',
   CLOSED: 'Encerrada',
   GRADED: 'Avaliada',
+}
+
+// `TASK_FORBIDDEN` é genérico no mapa compartilhado; na criação, o único motivo
+// é quem cria não lecionar a disciplina escolhida.
+const CREATE_ERROR_OVERRIDES = {
+  TASK_FORBIDDEN: 'Você não leciona esta disciplina, então não pode criar tarefas nela.',
 }
 
 function publishErrorMessage(error: unknown): string {
@@ -44,6 +51,12 @@ function TaskListPage() {
 
   const createTask = useCreateTask()
   const publishTask = usePublishTask()
+
+  function openDialog() {
+    // Sem isto o diálogo reabre mostrando a recusa da tentativa anterior.
+    createTask.reset()
+    setDialogOpen(true)
+  }
 
   function handleSubmit(data: TaskFormData) {
     createTask.mutate(
@@ -76,7 +89,7 @@ function TaskListPage() {
               </option>
             ))}
           </select>
-          <Button onClick={() => setDialogOpen(true)} disabled={!selectedSubjectId}>
+          <Button onClick={openDialog} disabled={!selectedSubjectId}>
             <Plus className="h-4 w-4" />
             Nova Tarefa
           </Button>
@@ -145,6 +158,7 @@ function TaskListPage() {
         onClose={() => setDialogOpen(false)}
         onSubmit={handleSubmit}
         isPending={createTask.isPending}
+        error={createTask.isError ? apiErrorMessage(createTask.error, CREATE_ERROR_OVERRIDES) : null}
       />
 
       {submissionsTask && (
