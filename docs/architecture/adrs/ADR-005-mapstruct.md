@@ -17,4 +17,6 @@ MapStruct 1.5+ para todos os mapeamentos entre camadas.
 
 ## Consequências
 - Proibido mapeamento manual entre camadas
-- Cada módulo tem seu próprio mapper em `infrastructure/persistence/mapper/` e `interfaces/mapper/`
+- Mapper Domain ↔ JPA Entity fica em `infrastructure/persistence/` (ex: `TaskMapper`, `SubjectMapper`)
+- Mapper Domain → DTO de aplicação, quando necessário, fica em `application/mapper/` (ex: `TaskSummaryMapper`, `OrganizationMemberMapper`)
+- Os Resources devolvem os DTOs de aplicação (records em `application/dto/`) diretamente; não existe pacote `interfaces/mapper/`

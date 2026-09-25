@@ -13,7 +13,7 @@ rastreável a uma regra ou requisito deles.
 | Documento | O que responde |
 |---|---|
 | `docs/architecture/DECISIONS.md` | Regras de código e decisões arquiteturais. É a fonte da verdade: stack, módulos, camadas, convenções (`NOM-*`, `GIT-*`, `MOD-*`, `LOM-*`) e o Checklist de Conformidade da seção 8. |
-| `docs/architecture/adrs/` | ADR-001 a ADR-010 — o *porquê* de cada decisão (MySQL, Redis, monorepo, StoragePort, MapStruct, shadcn, banco único, monolito modular, React SPA, Lombok). |
+| `docs/architecture/adrs/` | ADR-001 a ADR-014 — o *porquê* de cada decisão (MySQL, Redis, monorepo, StoragePort, MapStruct, shadcn, banco único, monolito modular, React SPA, Lombok, sessão JWT, deploy OCI, storage S3, notificações por polling). |
 | `docs/requirements/RF.md` | Os 26 requisitos funcionais (RF-01 a RF-26): 20 do MVP, 6 de evolução futura. |
 | `API_CONTRACT.md` | Contrato de API: endpoints, payloads, códigos de erro. |
 | `pscode/specs/<capability>/spec.md` | Specs vivas por capability, no formato Requirement/Scenario. Refletem o comportamento **já implementado**. |

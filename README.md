@@ -185,7 +185,7 @@ histórico de cada mudança, em [`pscode/changes/archive/`](./pscode/changes/arc
 | Documento | Conteúdo |
 |---|---|
 | [`DECISIONS.md`](./docs/architecture/DECISIONS.md) | Stack, camadas, convenções e checklist de conformidade |
-| [ADRs](./docs/architecture/adrs/) | ADR-001 a ADR-010: o porquê de cada decisão |
+| [ADRs](./docs/architecture/adrs/) | ADR-001 a ADR-014: o porquê de cada decisão |
 | [`RF.md`](./docs/requirements/RF.md) | Os 26 requisitos funcionais, com fluxos e critérios de aceite |
 | [`API_CONTRACT.md`](./API_CONTRACT.md) | Endpoints, payloads e códigos de erro |
 | [`DEPLOY.md`](./docs/DEPLOY.md) | Runbook de produção |

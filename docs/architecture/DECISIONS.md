@@ -27,10 +27,10 @@ No modelo SDD, a especificação **precede** a implementação. Cada decisão de
 | Banco principal | MySQL 8.x |
 | Cache | Redis 7 |
 | Arquitetura | Monolito Modular + DDD + Clean Arch + Hexagonal |
-| Armazenamento | Local → S3/MinIO (abstrato via StoragePort) |
-| Autenticação | OAuth2 + JWT (RS256) |
+| Armazenamento | Object storage S3-compatible via StoragePort — MinIO (dev), OCI Object Storage (prod) — ADR-013 |
+| Autenticação | JWT RS256 próprio + refresh token em cookie httpOnly — ADR-011 |
 | Repo | Monorepo |
-| Infra | Docker + Compose |
+| Infra | Docker + Compose; produção em VM OCI com nginx e deploy via GitHub Actions — ADR-012 |
 
 ---
 
@@ -164,14 +164,14 @@ apps/api/src/main/java/br/edu/lms/
 | ORM | Hibernate ORM com Panache — modo Active Record **proibido**; usar Repository Pattern |
 | Banco | MySQL 8.x via JDBC |
 | Cache | Redis via Quarkus Redis Client (Lettuce) |
-| Auth | Quarkus OIDC + Smallrye JWT — tokens JWT assinados com RS256 |
+| Auth | SmallRye JWT — tokens emitidos pela própria API, assinados com RS256 (sem OIDC) — ADR-011 |
 | Senhas | BCrypt via Quarkus Security — fator de custo mínimo 12 |
 | E-mail | Quarkus Mailer (SMTP configurável por variável de ambiente) |
 | Mapeamento | MapStruct 1.5+ — proibido mapeamento manual entre camadas |
 | Validação | Bean Validation (Jakarta) — todas as entradas validadas nos Ports de entrada |
 | API Docs | SmallRye OpenAPI + Swagger UI (desativado em produção) |
 | Migrations | Flyway — obrigatório. Proibido `quarkus.hibernate-orm.database.generation=update` |
-| Testes | JUnit 5 + Mockito + @QuarkusTest + Testcontainers (MySQL + Redis) |
+| Testes | JUnit 5 + Mockito + @QuarkusTest + Testcontainers via Dev Services (MySQL, Redis, LocalStack S3) |
 | Build | Maven com Quarkus Maven Plugin |
 
 ### 3.2 Lombok — Regras de Uso
@@ -277,7 +277,7 @@ public class RegisterUserService implements RegisterUserUseCase {
 | **DB-03** | Tabelas e colunas: `snake_case`. JPA Entities com `@Table(name=)` e `@Column(name=)` sempre explícitos. |
 | **DB-04** | Toda tabela organizacional tem `organization_id NOT NULL FK`. |
 | **DB-05** | Soft delete obrigatório: `User`, `Organization`, `Classroom`, `Subject`, `Task`. Coluna `deleted_at TIMESTAMP NULL`. |
-| **DB-06** | Redis: Refresh Tokens, rate limiting, contador de notificações não lidas. Chaves: `{módulo}:{tipo}:{id}`. |
+| **DB-06** | Redis: Refresh Tokens, tokens de confirmação/reset, sessão obsoleta, rate limiting, contador de notificações não lidas. Chaves novas: `{módulo}:{tipo}:{id}` (prefixos legados listados na ADR-002). |
 | **DB-07** | Nenhuma query JPQL ou nativa fora de `infrastructure/persistence/`. |
 | **DB-08** | Relacionamentos N:M com tabela associativa explícita. |
 
@@ -286,21 +286,20 @@ public class RegisterUserService implements RegisterUserUseCase {
 ```java
 // domain/port/out/StoragePort.java
 public interface StoragePort {
-    StoredFile store(InputStream content, String filename, String mimeType, StorageContext context);
-    InputStream retrieve(String fileKey);
+    StoredFile store(InputStream content, String filename, String mimeType, long sizeBytes, StorageContext context);
+    RetrievedFile retrieve(String fileKey);
     void delete(String fileKey);
     String getPublicUrl(String fileKey);
 }
-// Implementações:
-// infrastructure/storage/LocalStorageAdapter.java  (dev)
-// infrastructure/storage/S3StorageAdapter.java     (produção — futuro)
-// Seleção via @ConfigProperty(name = "storage.provider")
+// Implementação única (ADR-013):
+// module/storage/infrastructure/S3StorageAdapter.java
+// Endpoint por perfil: MinIO (dev), LocalStack (test), OCI Object Storage (prod)
 ```
 
 | ID | Regra |
 |---|---|
 | **STG-01** | `StoragePort` definido em `domain/port/out/` — nenhuma referência a S3/disco no domínio. |
-| **STG-02** | Implementação local armazena em `{project.root}/data/uploads/{contexto}/{ano}/{mes}/`. |
+| **STG-02** | Chave do objeto: `{contexto}/{ano}/{mes}/{uuid}-{nome-sanitizado}`; nome original em metadado. |
 | **STG-03** | Arquivos servidos via endpoint `/api/files/{fileKey}` com validação de permissão. |
 | **STG-04** | Tamanho máximo de upload: 50MB (configurável via `application.properties`). |
 | **STG-05** | Tipos aceitos: `task_attachment` (pdf, doc, docx, zip, jpg, png), `lesson_material` (pdf, mp4, webm). |
@@ -320,7 +319,7 @@ public interface StoragePort {
 | Server State | TanStack Query v5 — toda comunicação com API via queries/mutations |
 | Client State | Zustand — apenas estado global verdadeiramente compartilhado |
 | Formulários | React Hook Form + Zod — Zod é o schema de validação único |
-| UI Base | Shadcn/ui (sobre Radix UI) — acessível sem vendor lock-in |
+| UI Base | Shadcn/ui, style `base-nova` (Base UI) — acessível sem vendor lock-in — ADR-006 |
 | Estilização | Tailwind CSS — utility-first. Proibido `style=` inline exceto casos dinâmicos justificados |
 | HTTP Client | Axios com instância centralizada — interceptors para JWT e refresh token |
 | Ícones | Lucide React — único pacote de ícones permitido |
@@ -391,14 +390,12 @@ lms/
 ├── apps/
 │   ├── web/                   # React SPA (Vite)
 │   └── api/                   # Quarkus Monolito Modular
-├── packages/
-│   └── shared-types/          # Contratos TypeScript compartilhados
 ├── infra/
 │   ├── docker/
-│   │   ├── api/Dockerfile.dev
-│   │   ├── api/Dockerfile.prod
-│   │   └── web/Dockerfile.dev
-│   ├── mysql/init/
+│   │   ├── api/Dockerfile(.dev)
+│   │   └── web/Dockerfile(.dev)
+│   ├── nginx/                 # Borda TLS + proxy /api (prod)
+│   ├── scripts/               # deploy, backup e restore
 │   ├── docker-compose.yml
 │   └── docker-compose.prod.yml
 ├── docs/
