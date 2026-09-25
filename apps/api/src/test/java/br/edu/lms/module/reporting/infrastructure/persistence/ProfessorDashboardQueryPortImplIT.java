@@ -194,4 +194,27 @@ class ProfessorDashboardQueryPortImplIT {
         assertThat(result.get(0).getStudentId()).isEqualTo(STUDENT_A_ID);
         assertThat(result.get(0).getAverageGrade()).isEqualByComparingTo(new BigDecimal("8.00"));
     }
+
+    @Test
+    void getLastTaskGradeDistribution_leavesOutEvaluationsWithoutGrade() throws Exception {
+        // Avaliação só com feedback: nota nula não entra na distribuição.
+        tx.begin();
+        em.createNativeQuery("UPDATE task_submissions SET grade = NULL WHERE task_id = ?")
+                .setParameter(1, taskNewerId).executeUpdate();
+        tx.commit();
+
+        assertThat(sut.getLastTaskGradeDistribution(subjectId)).isEmpty();
+    }
+
+    @Test
+    void getAverageGradePerStudent_studentWithOnlyUngradedEvaluations_isLeftOut() throws Exception {
+        tx.begin();
+        em.createNativeQuery("UPDATE task_submissions SET status = 'EVALUATED', grade = NULL WHERE student_id = ?")
+                .setParameter(1, STUDENT_B_ID).executeUpdate();
+        tx.commit();
+
+        var result = sut.getAverageGradePerStudent(subjectId);
+
+        assertThat(result).extracting("studentId").containsExactly(STUDENT_A_ID);
+    }
 }

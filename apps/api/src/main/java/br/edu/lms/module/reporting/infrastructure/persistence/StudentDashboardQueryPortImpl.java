@@ -127,7 +127,7 @@ public class StudentDashboardQueryPortImpl implements StudentDashboardQueryPort 
                                 "FROM " + SUBMISSION_ENTITY + " s, " + TASK_ENTITY + " t " +
                                 "WHERE s.taskId = t.id AND t.deletedAt IS NULL " +
                                 "AND s.studentId = :studentId AND s.organizationId = :organizationId " +
-                                "AND s.deletedAt IS NULL AND s.status = 'EVALUATED' " +
+                                "AND s.deletedAt IS NULL AND s.status = 'EVALUATED' AND s.grade IS NOT NULL " +
                                 "GROUP BY t.subjectId",
                         Tuple.class)
                 .setParameter("studentId", studentId)

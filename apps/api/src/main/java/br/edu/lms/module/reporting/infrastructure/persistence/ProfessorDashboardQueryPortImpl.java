@@ -58,7 +58,8 @@ public class ProfessorDashboardQueryPortImpl implements ProfessorDashboardQueryP
 
         return em.createQuery(
                         "SELECT s.grade FROM " + SUBMISSION_ENTITY + " s " +
-                                "WHERE s.taskId = :taskId AND s.deletedAt IS NULL AND s.status = 'EVALUATED'",
+                                "WHERE s.taskId = :taskId AND s.deletedAt IS NULL AND s.status = 'EVALUATED' " +
+                                "AND s.grade IS NOT NULL",
                         BigDecimal.class)
                 .setParameter("taskId", lastTaskId)
                 .getResultList();
@@ -106,6 +107,7 @@ public class ProfessorDashboardQueryPortImpl implements ProfessorDashboardQueryP
         List<Tuple> rows = em.createQuery(
                         "SELECT s.studentId, u.fullName, AVG(s.grade) FROM " + SUBMISSION_ENTITY + " s, " + USER_ENTITY + " u " +
                                 "WHERE s.studentId = u.id AND s.deletedAt IS NULL AND s.status = 'EVALUATED' " +
+                                "AND s.grade IS NOT NULL " +
                                 "AND s.taskId IN (" +
                                 "  SELECT t.id FROM " + TASK_ENTITY + " t " +
                                 "  WHERE t.deletedAt IS NULL AND t.subjectId = :subjectId" +
