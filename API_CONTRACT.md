@@ -879,8 +879,17 @@ Métricas: próximas tarefas por urgência, tarefas entregues vs pendentes, últ
 **`GET /files/{fileKey}`** · `ADMIN_ORG` · `GESTOR` · `PROFESSOR` · `ALUNO`
 
 Serve o arquivo guardado no storage. O `fileKey` vem dos anexos de tarefa,
-submissão e conteúdo de disciplina (`attachments[].fileKey`, `content.fileKey`) e
-tem barras, que fazem parte do caminho.
+submissão, aviso e conteúdo de disciplina (`attachments[].fileKey`,
+`content.fileKey`) e tem barras, que fazem parte do caminho.
+
+Só serve a quem enxerga o recurso dono do arquivo, na organização do JWT:
+
+| Arquivo | Quem baixa |
+|---|---|
+| Conteúdo de disciplina | qualquer papel da org; `ALUNO` só se membro de turma da disciplina |
+| Anexo de tarefa | qualquer papel da org; `ALUNO` só se a tarefa está `PUBLISHED`/`CLOSED` |
+| Anexo de submissão | o aluno autor e o professor que criou a tarefa |
+| Anexo de aviso | membros da turma do aviso |
 
 Resposta `200` com o corpo do arquivo e os cabeçalhos:
 
@@ -895,10 +904,7 @@ navegador esconde o cabeçalho do JavaScript.
 | Código | Quando |
 |---|---|
 | `401` | sem JWT válido |
-| `404` | `fileKey` não existe no storage (`FILE_NOT_FOUND`) |
-
-> O endpoint **não** valida que o arquivo pertence à organização de quem pede —
-> o `fileKey` não carrega `organization_id`. Gap conhecido, card próprio.
+| `404` | `fileKey` não existe, não pertence a um recurso da organização ou quem pede não tem acesso a ele (`FILE_NOT_FOUND`) — mesma resposta nos três casos para não confirmar que a chave existe |
 
 ---
 

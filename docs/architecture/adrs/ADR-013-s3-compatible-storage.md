@@ -26,4 +26,4 @@ Chave do objeto: `{contexto}/{ano}/{mes}/{uuid}-{nome-sanitizado}`; o nome origi
 - Desenvolvimento local depende do container MinIO
 - Troca de provedor = variáveis `STORAGE_ENDPOINT`, `STORAGE_BUCKET`, `STORAGE_REGION` e credenciais
 - `STG-02` (armazenamento em disco) deixa de valer
-- O `GET /files/{fileKey}` hoje exige apenas usuário autenticado (`@RolesAllowed` com os quatro papéis); não verifica a organização nem o vínculo com o recurso dono do arquivo. A proteção atual é a chave conter um UUID aleatório. A checagem prevista em `STG-03` ainda é pendência
+- Antes de servir, o `ServeFileUseCase` lê o contexto pelo prefixo da chave e consulta o `FileAccessPort` do módulo dono (curriculum, assessment, communication), que aplica a mesma regra da tela que lista o recurso na organização do JWT. Negado, sem dono ou sem regra → `404`, para não confirmar que a chave existe (#419)
