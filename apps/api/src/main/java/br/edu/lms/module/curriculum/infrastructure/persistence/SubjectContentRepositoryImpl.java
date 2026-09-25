@@ -80,4 +80,17 @@ public class SubjectContentRepositoryImpl implements ContentRepository {
                 .setParameter("orgId", organizationId)
                 .executeUpdate();
     }
+
+    @Override
+    public Optional<String> findSubjectIdByFileKey(String fileKey, String organizationId) {
+        return em.createQuery(
+                        "SELECT t.subjectId FROM SubjectContentJpaEntity c JOIN TopicJpaEntity t ON c.topicId = t.id " +
+                        "WHERE c.fileKey = :key AND c.organizationId = :orgId AND c.deletedAt IS NULL AND t.deletedAt IS NULL",
+                        String.class)
+                .setParameter("key", fileKey)
+                .setParameter("orgId", organizationId)
+                .setMaxResults(1)
+                .getResultStream()
+                .findFirst();
+    }
 }

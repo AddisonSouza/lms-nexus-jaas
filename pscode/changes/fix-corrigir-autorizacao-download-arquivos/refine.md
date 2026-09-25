@@ -26,7 +26,7 @@ Hoje qualquer pessoa logada consegue baixar qualquer arquivo do sistema, inclusi
 
 ## Subtasks
 - [x] storage: `FileAccessPort` + dispatch por contexto no `ServeFileUseCase` + JWT no `FileResource` (nega tudo sem adapter)
-- [ ] curriculum: adapter `LESSON_MATERIAL` + IT
+- [x] curriculum: adapter `LESSON_MATERIAL` + IT
 - [ ] assessment: adapter `TASK_ATTACHMENT` + IT
 - [ ] assessment: adapter `SUBMISSION_ATTACHMENT` + IT
 - [ ] communication: adapter `ANNOUNCEMENT_ATTACHMENT` + IT
