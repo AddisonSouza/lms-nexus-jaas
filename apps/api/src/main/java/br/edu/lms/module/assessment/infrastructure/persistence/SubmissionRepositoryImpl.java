@@ -47,6 +47,21 @@ public class SubmissionRepositoryImpl implements SubmissionRepository {
 
     @Override
     @Transactional
+    public Optional<TaskSubmission> findByAttachmentFileKey(String fileKey, String organizationId) {
+        return em.createQuery(
+                        "SELECT a.submission FROM SubmissionAttachmentJpaEntity a " +
+                        "WHERE a.fileKey = :key AND a.submission.organizationId = :orgId AND a.submission.deletedAt IS NULL",
+                        TaskSubmissionJpaEntity.class)
+                .setParameter("key", fileKey)
+                .setParameter("orgId", organizationId)
+                .setMaxResults(1)
+                .getResultStream()
+                .findFirst()
+                .map(submissionMapper::toDomain);
+    }
+
+    @Override
+    @Transactional
     public Optional<TaskSubmission> findByTaskAndStudent(String taskId, String studentId) {
         TypedQuery<TaskSubmissionJpaEntity> q = em.createQuery(
                 "SELECT s FROM TaskSubmissionJpaEntity s WHERE s.taskId = :taskId AND s.studentId = :studentId AND s.deletedAt IS NULL",

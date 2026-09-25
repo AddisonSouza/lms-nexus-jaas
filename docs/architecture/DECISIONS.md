@@ -300,7 +300,7 @@ public interface StoragePort {
 |---|---|
 | **STG-01** | `StoragePort` definido em `domain/port/out/` — nenhuma referência a S3/disco no domínio. |
 | **STG-02** | Chave do objeto: `{contexto}/{ano}/{mes}/{uuid}-{nome-sanitizado}`; nome original em metadado. |
-| **STG-03** | Arquivos servidos via endpoint `/api/files/{fileKey}` com validação de permissão. |
+| **STG-03** | Arquivos servidos via endpoint `/api/files/{fileKey}` com validação de permissão: o módulo dono do contexto implementa `FileAccessPort` com a mesma regra da tela que lista o recurso. Sem acesso → `404`. |
 | **STG-04** | Tamanho máximo de upload: 50MB (configurável via `application.properties`). |
 | **STG-05** | Tipos aceitos: `task_attachment` (pdf, doc, docx, zip, jpg, png), `lesson_material` (pdf, mp4, webm). |
 

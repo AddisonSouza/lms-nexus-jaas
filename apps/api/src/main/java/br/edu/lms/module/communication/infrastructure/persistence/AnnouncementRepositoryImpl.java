@@ -40,6 +40,20 @@ public class AnnouncementRepositoryImpl implements AnnouncementRepository {
 
     @Override
     @Transactional
+    public Optional<String> findClassroomIdByAttachmentFileKey(String fileKey, String organizationId) {
+        return em.createQuery(
+                        "SELECT a.announcement.classroomId FROM AnnouncementAttachmentJpaEntity a " +
+                        "WHERE a.fileKey = :key AND a.announcement.organizationId = :orgId AND a.announcement.deletedAt IS NULL",
+                        String.class)
+                .setParameter("key", fileKey)
+                .setParameter("orgId", organizationId)
+                .setMaxResults(1)
+                .getResultStream()
+                .findFirst();
+    }
+
+    @Override
+    @Transactional
     public List<Announcement> findByClassroomOrderByCreatedAtDesc(String classroomId, String organizationId) {
         TypedQuery<AnnouncementJpaEntity> q = em.createQuery(
                 "SELECT a FROM AnnouncementJpaEntity a WHERE a.classroomId = :classroomId " +

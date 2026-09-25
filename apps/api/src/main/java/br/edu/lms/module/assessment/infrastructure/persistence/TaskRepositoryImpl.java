@@ -70,6 +70,21 @@ public class TaskRepositoryImpl implements TaskRepository {
         return q.getResultList().stream().map(taskMapper::toDomain).toList();
     }
 
+    @Override
+    @Transactional
+    public Optional<Task> findByAttachmentFileKey(String fileKey, String organizationId) {
+        return em.createQuery(
+                        "SELECT a.task FROM TaskAttachmentJpaEntity a " +
+                        "WHERE a.fileKey = :key AND a.task.organizationId = :orgId AND a.task.deletedAt IS NULL",
+                        TaskJpaEntity.class)
+                .setParameter("key", fileKey)
+                .setParameter("orgId", organizationId)
+                .setMaxResults(1)
+                .getResultStream()
+                .findFirst()
+                .map(taskMapper::toDomain);
+    }
+
     /**
      * Uses TaskMapper for main fields but handles attachments manually
      * because of the bi-directional JPA back-reference (ae.setTask(entity)).

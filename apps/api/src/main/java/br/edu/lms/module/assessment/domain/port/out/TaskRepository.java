@@ -12,4 +12,6 @@ public interface TaskRepository {
     Optional<Task> findByIdAndOrganization(TaskId id, String organizationId);
     List<Task> findByOrganizationAndCreatedBy(String organizationId, String createdBy);
     List<Task> findPublishedByOrganization(String organizationId);
+    /** Tarefa ativa da organização que tem este arquivo entre os anexos. */
+    Optional<Task> findByAttachmentFileKey(String fileKey, String organizationId);
 }

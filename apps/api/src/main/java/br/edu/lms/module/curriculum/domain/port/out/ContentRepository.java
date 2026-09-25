@@ -12,4 +12,6 @@ public interface ContentRepository {
     List<SubjectContent> findBySubjectId(String subjectId, String organizationId);
     int maxPositionByTopicId(String topicId, String organizationId);
     void softDeleteByTopicId(String topicId, String organizationId);
+    /** Disciplina do conteúdo ativo que guarda este arquivo, na organização dada. */
+    Optional<String> findSubjectIdByFileKey(String fileKey, String organizationId);
 }
