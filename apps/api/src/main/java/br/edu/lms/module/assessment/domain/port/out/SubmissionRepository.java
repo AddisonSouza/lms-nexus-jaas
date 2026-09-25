@@ -21,4 +21,6 @@ public interface SubmissionRepository {
      * não aparece no mapa — quem chama decide o que fazer com a ausência.
      */
     Map<String, SubmissionCounts> countByTasks(List<String> taskIds, String organizationId);
+    /** Submissão ativa da organização que tem este arquivo entre os anexos. */
+    Optional<TaskSubmission> findByAttachmentFileKey(String fileKey, String organizationId);
 }

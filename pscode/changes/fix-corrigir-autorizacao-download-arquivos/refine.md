@@ -28,6 +28,6 @@ Hoje qualquer pessoa logada consegue baixar qualquer arquivo do sistema, inclusi
 - [x] storage: `FileAccessPort` + dispatch por contexto no `ServeFileUseCase` + JWT no `FileResource` (nega tudo sem adapter)
 - [x] curriculum: adapter `LESSON_MATERIAL` + IT
 - [x] assessment: adapter `TASK_ATTACHMENT` + IT
-- [ ] assessment: adapter `SUBMISSION_ATTACHMENT` + IT
+- [x] assessment: adapter `SUBMISSION_ATTACHMENT` + IT
 - [ ] communication: adapter `ANNOUNCEMENT_ATTACHMENT` + IT
 - [ ] docs: STG-03 e ADR-013 sem a pendência
