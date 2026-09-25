@@ -39,4 +39,21 @@ Decisões arquiteturais formais ficam em [ADRs](../architecture/adrs/).
 
 ---
 
+## Setembro 2026 — Revisão das ADRs contra o código
+
+### ADRs revisadas
+- `ADR-002` escopo do Redis ampliado (tokens de confirmação/reset, sessão obsoleta) e prefixos de chave documentados
+- `ADR-003` `packages/shared-types` não foi criado — contrato via `API_CONTRACT.md` + Zod
+- `ADR-004` `LocalStorageAdapter` não implementado — ver ADR-013
+- `ADR-005` localização real dos mappers
+- `ADR-006` shadcn migrado para o style `base-nova` (Base UI)
+
+### Novas ADRs
+- `ADR-011` Sessão com JWT em memória e refresh token em cookie
+- `ADR-012` Deploy em VM única na OCI com Docker Compose
+- `ADR-013` Object storage via API S3-compatible em todos os ambientes
+- `ADR-014` Notificações por polling em vez de push
+
+---
+
 *Novas decisões devem ser registradas aqui com data e contexto.*
