@@ -1,5 +1,6 @@
 package br.edu.lms.module.reporting.infrastructure.persistence;
 
+import br.edu.lms.module.curriculum.domain.port.in.SubjectDirectoryPort;
 import br.edu.lms.module.reporting.domain.model.StudentAverageGrade;
 import br.edu.lms.module.reporting.domain.model.StudentSummary;
 import br.edu.lms.module.reporting.domain.port.out.ProfessorDashboardQueryPort;
@@ -18,12 +19,6 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class ProfessorDashboardQueryPortImpl implements ProfessorDashboardQueryPort {
 
-    private static final String SUBJECT_TEACHER_ENTITY =
-            "br.edu.lms.module.curriculum.infrastructure.persistence.SubjectTeacherJpaEntity";
-    private static final String ORGANIZATION_MEMBER_ENTITY =
-            "br.edu.lms.module.organization.infrastructure.persistence.OrganizationMemberJpaEntity";
-    private static final String SUBJECT_CLASSROOM_ENTITY =
-            "br.edu.lms.module.curriculum.infrastructure.persistence.SubjectClassroomJpaEntity";
     private static final String CLASSROOM_MEMBER_ENTITY =
             "br.edu.lms.module.classroom.infrastructure.persistence.ClassroomMemberJpaEntity";
     private static final String TASK_ENTITY =
@@ -34,18 +29,11 @@ public class ProfessorDashboardQueryPortImpl implements ProfessorDashboardQueryP
             "br.edu.lms.module.identity.infrastructure.persistence.UserJpaEntity";
 
     private final EntityManager em;
+    private final SubjectDirectoryPort subjectDirectory;
 
     @Override
     public boolean isProfessorAssignedToSubject(String subjectId, String professorId) {
-        long count = em.createQuery(
-                        "SELECT COUNT(st) FROM " + SUBJECT_TEACHER_ENTITY + " st, " + ORGANIZATION_MEMBER_ENTITY + " m " +
-                                "WHERE st.id.subjectId = :subjectId AND st.id.memberId = m.id " +
-                                "AND m.userId = :userId AND m.deletedAt IS NULL",
-                        Long.class)
-                .setParameter("subjectId", subjectId)
-                .setParameter("userId", professorId)
-                .getSingleResult();
-        return count > 0;
+        return subjectDirectory.isTeacherOfSubject(subjectId, professorId);
     }
 
     @Override
@@ -70,7 +58,8 @@ public class ProfessorDashboardQueryPortImpl implements ProfessorDashboardQueryP
 
         return em.createQuery(
                         "SELECT s.grade FROM " + SUBMISSION_ENTITY + " s " +
-                                "WHERE s.taskId = :taskId AND s.deletedAt IS NULL AND s.status = 'EVALUATED'",
+                                "WHERE s.taskId = :taskId AND s.deletedAt IS NULL AND s.status = 'EVALUATED' " +
+                                "AND s.grade IS NOT NULL",
                         BigDecimal.class)
                 .setParameter("taskId", lastTaskId)
                 .getResultList();
@@ -83,15 +72,17 @@ public class ProfessorDashboardQueryPortImpl implements ProfessorDashboardQueryP
             return List.of();
         }
 
+        List<String> classroomIds = subjectDirectory.findClassroomIdsBySubject(subjectId);
+        if (classroomIds.isEmpty()) {
+            return List.of();
+        }
+
         List<Tuple> eligibleStudents = em.createQuery(
                         "SELECT cm.userId, u.fullName FROM " + CLASSROOM_MEMBER_ENTITY + " cm, " + USER_ENTITY + " u " +
                                 "WHERE cm.userId = u.id AND cm.role = 'ALUNO' AND cm.deletedAt IS NULL " +
-                                "AND cm.classroomId IN (" +
-                                "  SELECT sc.id.classroomId FROM " + SUBJECT_CLASSROOM_ENTITY + " sc " +
-                                "  WHERE sc.id.subjectId = :subjectId" +
-                                ")",
+                                "AND cm.classroomId IN :classroomIds",
                         Tuple.class)
-                .setParameter("subjectId", subjectId)
+                .setParameter("classroomIds", classroomIds)
                 .getResultList();
 
         if (eligibleStudents.isEmpty()) {
@@ -116,6 +107,7 @@ public class ProfessorDashboardQueryPortImpl implements ProfessorDashboardQueryP
         List<Tuple> rows = em.createQuery(
                         "SELECT s.studentId, u.fullName, AVG(s.grade) FROM " + SUBMISSION_ENTITY + " s, " + USER_ENTITY + " u " +
                                 "WHERE s.studentId = u.id AND s.deletedAt IS NULL AND s.status = 'EVALUATED' " +
+                                "AND s.grade IS NOT NULL " +
                                 "AND s.taskId IN (" +
                                 "  SELECT t.id FROM " + TASK_ENTITY + " t " +
                                 "  WHERE t.deletedAt IS NULL AND t.subjectId = :subjectId" +

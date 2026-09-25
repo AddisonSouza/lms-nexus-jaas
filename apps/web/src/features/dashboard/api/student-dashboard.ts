@@ -12,7 +12,7 @@ const recentGradeSchema = z.object({
   taskId: z.string(),
   title: z.string(),
   subjectName: z.string(),
-  grade: z.number(),
+  grade: z.number().nullable(),
   feedback: z.string().nullable(),
 })
 

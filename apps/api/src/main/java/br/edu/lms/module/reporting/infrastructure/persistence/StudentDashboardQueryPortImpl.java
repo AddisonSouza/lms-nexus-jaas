@@ -1,5 +1,6 @@
 package br.edu.lms.module.reporting.infrastructure.persistence;
 
+import br.edu.lms.module.curriculum.domain.port.in.SubjectDirectoryPort;
 import br.edu.lms.module.reporting.domain.model.RecentGrade;
 import br.edu.lms.module.reporting.domain.model.SubjectAverageGrade;
 import br.edu.lms.module.reporting.domain.model.UpcomingTask;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Map;
 
 @ApplicationScoped
 @RequiredArgsConstructor
@@ -21,70 +23,83 @@ public class StudentDashboardQueryPortImpl implements StudentDashboardQueryPort 
             "br.edu.lms.module.assessment.infrastructure.persistence.TaskJpaEntity";
     private static final String SUBMISSION_ENTITY =
             "br.edu.lms.module.assessment.infrastructure.persistence.TaskSubmissionJpaEntity";
-    private static final String SUBJECT_ENTITY =
-            "br.edu.lms.module.curriculum.infrastructure.persistence.SubjectJpaEntity";
-    private static final String SUBJECT_CLASSROOM_ENTITY =
-            "br.edu.lms.module.curriculum.infrastructure.persistence.SubjectClassroomJpaEntity";
     private static final String CLASSROOM_MEMBER_ENTITY =
             "br.edu.lms.module.classroom.infrastructure.persistence.ClassroomMemberJpaEntity";
 
     private final EntityManager em;
+    private final SubjectDirectoryPort subjectDirectory;
 
     @Override
     public List<UpcomingTask> getUpcomingPendingTasks(String studentId, String organizationId) {
+        List<String> eligibleSubjectIds = eligibleSubjectIds(studentId, organizationId);
+        if (eligibleSubjectIds.isEmpty()) {
+            return List.of();
+        }
         List<Tuple> rows = em.createQuery(
-                        "SELECT t.id, t.title, sub.name, t.deadline FROM " + TASK_ENTITY + " t, " + SUBJECT_ENTITY + " sub " +
-                                "WHERE t.subjectId = sub.id AND t.deletedAt IS NULL AND t.status = 'PUBLISHED' " +
+                        "SELECT t.id, t.title, t.subjectId, t.deadline FROM " + TASK_ENTITY + " t " +
+                                "WHERE t.deletedAt IS NULL AND t.status = 'PUBLISHED' " +
                                 "AND t.organizationId = :organizationId " +
-                                "AND t.subjectId IN (" + eligibleSubjectIdsSubquery() + ") " +
+                                "AND t.subjectId IN :subjectIds " +
                                 "AND t.id NOT IN (" + studentSubmittedTaskIdsSubquery() + ") " +
                                 "ORDER BY t.deadline ASC",
                         Tuple.class)
                 .setParameter("studentId", studentId)
                 .setParameter("organizationId", organizationId)
+                .setParameter("subjectIds", eligibleSubjectIds)
                 .getResultList();
 
+        Map<String, String> subjectNames = subjectNames(rows, 2);
         return rows.stream()
                 .map(row -> new UpcomingTask(
                         row.get(0, String.class),
                         row.get(1, String.class),
-                        row.get(2, String.class),
+                        subjectNames.get(row.get(2, String.class)),
                         row.get(3, java.time.LocalDateTime.class)))
                 .toList();
     }
 
     @Override
     public long countPendingTasks(String studentId, String organizationId) {
+        List<String> eligibleSubjectIds = eligibleSubjectIds(studentId, organizationId);
+        if (eligibleSubjectIds.isEmpty()) {
+            return 0;
+        }
         return em.createQuery(
                         "SELECT COUNT(t) FROM " + TASK_ENTITY + " t " +
                                 "WHERE t.deletedAt IS NULL AND t.status = 'PUBLISHED' AND t.organizationId = :organizationId " +
-                                "AND t.subjectId IN (" + eligibleSubjectIdsSubquery() + ") " +
+                                "AND t.subjectId IN :subjectIds " +
                                 "AND t.id NOT IN (" + studentSubmittedTaskIdsSubquery() + ")",
                         Long.class)
                 .setParameter("studentId", studentId)
                 .setParameter("organizationId", organizationId)
+                .setParameter("subjectIds", eligibleSubjectIds)
                 .getSingleResult();
     }
 
     @Override
     public long countSubmittedTasks(String studentId, String organizationId) {
+        List<String> eligibleSubjectIds = eligibleSubjectIds(studentId, organizationId);
+        if (eligibleSubjectIds.isEmpty()) {
+            return 0;
+        }
         return em.createQuery(
                         "SELECT COUNT(t) FROM " + TASK_ENTITY + " t " +
                                 "WHERE t.deletedAt IS NULL AND t.status = 'PUBLISHED' AND t.organizationId = :organizationId " +
-                                "AND t.subjectId IN (" + eligibleSubjectIdsSubquery() + ") " +
+                                "AND t.subjectId IN :subjectIds " +
                                 "AND t.id IN (" + studentSubmittedTaskIdsSubquery() + ")",
                         Long.class)
                 .setParameter("studentId", studentId)
                 .setParameter("organizationId", organizationId)
+                .setParameter("subjectIds", eligibleSubjectIds)
                 .getSingleResult();
     }
 
     @Override
     public List<RecentGrade> getRecentGrades(String studentId, String organizationId) {
         List<Tuple> rows = em.createQuery(
-                        "SELECT s.taskId, t.title, sub.name, s.grade, s.feedback " +
-                                "FROM " + SUBMISSION_ENTITY + " s, " + TASK_ENTITY + " t, " + SUBJECT_ENTITY + " sub " +
-                                "WHERE s.taskId = t.id AND t.subjectId = sub.id AND t.deletedAt IS NULL " +
+                        "SELECT s.taskId, t.title, t.subjectId, s.grade, s.feedback " +
+                                "FROM " + SUBMISSION_ENTITY + " s, " + TASK_ENTITY + " t " +
+                                "WHERE s.taskId = t.id AND t.deletedAt IS NULL " +
                                 "AND s.studentId = :studentId AND s.organizationId = :organizationId " +
                                 "AND s.deletedAt IS NULL AND s.status = 'EVALUATED' " +
                                 "ORDER BY s.updatedAt DESC",
@@ -94,11 +109,12 @@ public class StudentDashboardQueryPortImpl implements StudentDashboardQueryPort 
                 .setMaxResults(5)
                 .getResultList();
 
+        Map<String, String> subjectNames = subjectNames(rows, 2);
         return rows.stream()
                 .map(row -> new RecentGrade(
                         row.get(0, String.class),
                         row.get(1, String.class),
-                        row.get(2, String.class),
+                        subjectNames.get(row.get(2, String.class)),
                         row.get(3, BigDecimal.class),
                         row.get(4, String.class)))
                 .toList();
@@ -107,32 +123,41 @@ public class StudentDashboardQueryPortImpl implements StudentDashboardQueryPort 
     @Override
     public List<SubjectAverageGrade> getAverageGradePerSubject(String studentId, String organizationId) {
         List<Tuple> rows = em.createQuery(
-                        "SELECT t.subjectId, sub.name, AVG(s.grade) " +
-                                "FROM " + SUBMISSION_ENTITY + " s, " + TASK_ENTITY + " t, " + SUBJECT_ENTITY + " sub " +
-                                "WHERE s.taskId = t.id AND t.subjectId = sub.id AND t.deletedAt IS NULL " +
+                        "SELECT t.subjectId, AVG(s.grade) " +
+                                "FROM " + SUBMISSION_ENTITY + " s, " + TASK_ENTITY + " t " +
+                                "WHERE s.taskId = t.id AND t.deletedAt IS NULL " +
                                 "AND s.studentId = :studentId AND s.organizationId = :organizationId " +
-                                "AND s.deletedAt IS NULL AND s.status = 'EVALUATED' " +
-                                "GROUP BY t.subjectId, sub.name",
+                                "AND s.deletedAt IS NULL AND s.status = 'EVALUATED' AND s.grade IS NOT NULL " +
+                                "GROUP BY t.subjectId",
                         Tuple.class)
                 .setParameter("studentId", studentId)
                 .setParameter("organizationId", organizationId)
                 .getResultList();
 
+        Map<String, String> subjectNames = subjectNames(rows, 0);
         return rows.stream()
                 .map(row -> new SubjectAverageGrade(
                         row.get(0, String.class),
-                        row.get(1, String.class),
-                        BigDecimal.valueOf(row.get(2, Double.class)).setScale(2, RoundingMode.HALF_UP)))
+                        subjectNames.get(row.get(0, String.class)),
+                        BigDecimal.valueOf(row.get(1, Double.class)).setScale(2, RoundingMode.HALF_UP)))
                 .toList();
     }
 
-    private String eligibleSubjectIdsSubquery() {
-        return "SELECT sc.id.subjectId FROM " + SUBJECT_CLASSROOM_ENTITY + " sc " +
-                "WHERE sc.id.classroomId IN (" +
-                "  SELECT cm.classroomId FROM " + CLASSROOM_MEMBER_ENTITY + " cm " +
-                "  WHERE cm.userId = :studentId AND cm.role = 'ALUNO' AND cm.deletedAt IS NULL " +
-                "  AND cm.organizationId = :organizationId" +
-                ")";
+    private List<String> eligibleSubjectIds(String studentId, String organizationId) {
+        List<String> classroomIds = em.createQuery(
+                        "SELECT cm.classroomId FROM " + CLASSROOM_MEMBER_ENTITY + " cm " +
+                                "WHERE cm.userId = :studentId AND cm.role = 'ALUNO' AND cm.deletedAt IS NULL " +
+                                "AND cm.organizationId = :organizationId",
+                        String.class)
+                .setParameter("studentId", studentId)
+                .setParameter("organizationId", organizationId)
+                .getResultList();
+        return subjectDirectory.findSubjectIdsByClassrooms(classroomIds);
+    }
+
+    private Map<String, String> subjectNames(List<Tuple> rows, int subjectIdColumn) {
+        return subjectDirectory.findSubjectNamesByIds(
+                rows.stream().map(row -> row.get(subjectIdColumn, String.class)).distinct().toList());
     }
 
     private String studentSubmittedTaskIdsSubquery() {

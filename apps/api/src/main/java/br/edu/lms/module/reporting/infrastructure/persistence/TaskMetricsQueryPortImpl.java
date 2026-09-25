@@ -1,5 +1,6 @@
 package br.edu.lms.module.reporting.infrastructure.persistence;
 
+import br.edu.lms.module.curriculum.domain.port.in.SubjectDirectoryPort;
 import br.edu.lms.module.reporting.domain.model.ActivityItem;
 import br.edu.lms.module.reporting.domain.model.ActivityType;
 import br.edu.lms.module.reporting.domain.model.DashboardPeriod;
@@ -23,12 +24,11 @@ public class TaskMetricsQueryPortImpl implements TaskMetricsQueryPort {
             "br.edu.lms.module.assessment.infrastructure.persistence.TaskJpaEntity";
     private static final String SUBMISSION_ENTITY =
             "br.edu.lms.module.assessment.infrastructure.persistence.TaskSubmissionJpaEntity";
-    private static final String SUBJECT_CLASSROOM_ENTITY =
-            "br.edu.lms.module.curriculum.infrastructure.persistence.SubjectClassroomJpaEntity";
     private static final String CLASSROOM_MEMBER_ENTITY =
             "br.edu.lms.module.classroom.infrastructure.persistence.ClassroomMemberJpaEntity";
 
     private final EntityManager em;
+    private final SubjectDirectoryPort subjectDirectory;
 
     @Override
     public long countCreated(String organizationId, DashboardPeriod period) {
@@ -90,15 +90,16 @@ public class TaskMetricsQueryPortImpl implements TaskMetricsQueryPort {
     }
 
     private long countEligibleStudents(String subjectId) {
+        List<String> classroomIds = subjectDirectory.findClassroomIdsBySubject(subjectId);
+        if (classroomIds.isEmpty()) {
+            return 0;
+        }
         return em.createQuery(
                         "SELECT COUNT(cm) FROM " + CLASSROOM_MEMBER_ENTITY + " cm " +
                                 "WHERE cm.role = 'ALUNO' AND cm.deletedAt IS NULL " +
-                                "AND cm.classroomId IN (" +
-                                "  SELECT sc.id.classroomId FROM " + SUBJECT_CLASSROOM_ENTITY + " sc " +
-                                "  WHERE sc.id.subjectId = :subjectId" +
-                                ")",
+                                "AND cm.classroomId IN :classroomIds",
                         Long.class)
-                .setParameter("subjectId", subjectId)
+                .setParameter("classroomIds", classroomIds)
                 .getSingleResult();
     }
 

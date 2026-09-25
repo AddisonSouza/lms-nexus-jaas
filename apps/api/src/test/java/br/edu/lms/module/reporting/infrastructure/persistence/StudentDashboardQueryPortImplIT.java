@@ -219,4 +219,17 @@ class StudentDashboardQueryPortImplIT {
 
         assertThat(result).isEmpty();
     }
+
+    @Test
+    void getAverageGradePerSubject_subjectWithOnlyUngradedEvaluations_isLeftOut() throws Exception {
+        // Avaliação só com feedback: disciplina sem nenhuma nota não tem média.
+        tx.begin();
+        em.createNativeQuery("UPDATE task_submissions SET grade = NULL WHERE task_id = ?")
+                .setParameter(1, taskEvaluatedBId).executeUpdate();
+        tx.commit();
+
+        var result = sut.getAverageGradePerSubject(STUDENT_ID, ORG_ID);
+
+        assertThat(result).extracting("subjectId").containsExactly(subjectAId);
+    }
 }

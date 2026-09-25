@@ -1,5 +1,6 @@
 package br.edu.lms.module.reporting.infrastructure.persistence;
 
+import br.edu.lms.module.curriculum.domain.port.in.SubjectDirectoryPort;
 import br.edu.lms.module.reporting.domain.model.AtRiskStudent;
 import br.edu.lms.module.reporting.domain.model.ClassroomHealth;
 import br.edu.lms.module.reporting.domain.port.out.GestorDashboardQueryPort;
@@ -24,8 +25,6 @@ public class GestorDashboardQueryPortImpl implements GestorDashboardQueryPort {
             "br.edu.lms.module.classroom.infrastructure.persistence.ClassroomJpaEntity";
     private static final String CLASSROOM_MEMBER_ENTITY =
             "br.edu.lms.module.classroom.infrastructure.persistence.ClassroomMemberJpaEntity";
-    private static final String SUBJECT_CLASSROOM_ENTITY =
-            "br.edu.lms.module.curriculum.infrastructure.persistence.SubjectClassroomJpaEntity";
     private static final String TASK_ENTITY =
             "br.edu.lms.module.assessment.infrastructure.persistence.TaskJpaEntity";
     private static final String SUBMISSION_ENTITY =
@@ -34,6 +33,7 @@ public class GestorDashboardQueryPortImpl implements GestorDashboardQueryPort {
             "br.edu.lms.module.identity.infrastructure.persistence.UserJpaEntity";
 
     private final EntityManager em;
+    private final SubjectDirectoryPort subjectDirectory;
 
     @Override
     public List<ClassroomHealth> getClassroomsHealth(String organizationId) {
@@ -62,14 +62,15 @@ public class GestorDashboardQueryPortImpl implements GestorDashboardQueryPort {
     }
 
     private List<String> taskIdsForClassroom(String classroomId) {
+        List<String> subjectIds = subjectDirectory.findSubjectIdsByClassrooms(List.of(classroomId));
+        if (subjectIds.isEmpty()) {
+            return List.of();
+        }
         return em.createQuery(
                         "SELECT t.id FROM " + TASK_ENTITY + " t " +
-                                "WHERE t.deletedAt IS NULL AND t.subjectId IN (" +
-                                "  SELECT sc.id.subjectId FROM " + SUBJECT_CLASSROOM_ENTITY + " sc " +
-                                "  WHERE sc.id.classroomId = :classroomId" +
-                                ")",
+                                "WHERE t.deletedAt IS NULL AND t.subjectId IN :subjectIds",
                         String.class)
-                .setParameter("classroomId", classroomId)
+                .setParameter("subjectIds", subjectIds)
                 .getResultList();
     }
 
@@ -109,7 +110,8 @@ public class GestorDashboardQueryPortImpl implements GestorDashboardQueryPort {
 
         List<BigDecimal> grades = em.createQuery(
                         "SELECT s.grade FROM " + SUBMISSION_ENTITY + " s " +
-                                "WHERE s.taskId IN :taskIds AND s.deletedAt IS NULL AND s.status = 'EVALUATED'",
+                                "WHERE s.taskId IN :taskIds AND s.deletedAt IS NULL AND s.status = 'EVALUATED' " +
+                                "AND s.grade IS NOT NULL",
                         BigDecimal.class)
                 .setParameter("taskIds", taskIds)
                 .getResultList();
@@ -123,14 +125,15 @@ public class GestorDashboardQueryPortImpl implements GestorDashboardQueryPort {
 
     @Override
     public List<AtRiskStudent> listAtRiskStudents(String classroomId, int limit) {
+        List<String> subjectIds = subjectDirectory.findSubjectIdsByClassrooms(List.of(classroomId));
+        if (subjectIds.isEmpty()) {
+            return List.of();
+        }
         List<Tuple> overdueTasks = em.createQuery(
                         "SELECT t.id, t.deadline FROM " + TASK_ENTITY + " t " +
-                                "WHERE t.deletedAt IS NULL AND t.deadline < :now AND t.subjectId IN (" +
-                                "  SELECT sc.id.subjectId FROM " + SUBJECT_CLASSROOM_ENTITY + " sc " +
-                                "  WHERE sc.id.classroomId = :classroomId" +
-                                ")",
+                                "WHERE t.deletedAt IS NULL AND t.deadline < :now AND t.subjectId IN :subjectIds",
                         Tuple.class)
-                .setParameter("classroomId", classroomId)
+                .setParameter("subjectIds", subjectIds)
                 .setParameter("now", LocalDateTime.now())
                 .getResultList();
 

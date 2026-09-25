@@ -15,7 +15,7 @@ function RecentGradesList({ grades }: Props) {
       {grades.map((grade) => (
         <Card key={grade.taskId} elevation="sm" className="flex-row items-start gap-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent-2-100 font-heading text-lg text-accent-2-800">
-            {grade.grade}
+            {grade.grade ?? <span aria-label="Sem nota">—</span>}
           </div>
           <div className="min-w-0 flex-1">
             <div className="text-sm font-semibold">{grade.title}</div>

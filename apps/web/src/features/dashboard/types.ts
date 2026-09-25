@@ -76,7 +76,8 @@ export interface RecentGrade {
   taskId: string
   title: string
   subjectName: string
-  grade: number
+  /** Nulo quando a avaliação trouxe só feedback. */
+  grade: number | null
   feedback: string | null
 }
 
