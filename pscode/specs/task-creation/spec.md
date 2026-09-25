@@ -18,8 +18,12 @@ O sistema SHALL permitir que um usuário com papel `PROFESSOR` crie uma tarefa (
 - **THEN** sistema rejeita com `422 Unprocessable Entity` indicando o tipo inválido
 
 #### Scenario: Professor não vinculado ao Subject
-- **WHEN** professor tenta criar tarefa para um Subject ao qual não está atribuído
-- **THEN** sistema rejeita com `403 Forbidden`
+- **WHEN** professor, gestor ou admin tenta criar tarefa para um Subject ao qual não está atribuído
+- **THEN** sistema rejeita com `403 Forbidden` e `{"error":"TASK_FORBIDDEN"}`; o diálogo "Nova Tarefa" permanece aberto, com os campos preenchidos, e exibe "Você não leciona esta disciplina, então não pode criar tarefas nela."
+
+#### Scenario: Recusa exibida no formulário
+- **WHEN** `POST /tasks` é recusado por qualquer outro motivo (prazo, tipo de arquivo, validação)
+- **THEN** o diálogo exibe a mensagem traduzida por `apiErrorMessage` (`role="alert"`), sem fechar nem limpar o formulário; ao reabrir o diálogo, a recusa anterior não aparece
 
 #### Scenario: Aluno tenta criar tarefa
 - **WHEN** usuário com papel `ALUNO` envia `POST /tasks`

@@ -160,4 +160,53 @@ describe('TaskListPage', () => {
       expect(vi.mocked(tasksApi.listTasks).mock.calls.length).toBeGreaterThan(1)
     })
   })
+
+  describe('criação recusada', () => {
+    async function tryToCreate() {
+      const user = userEvent.setup()
+      vi.mocked(useSubjectListModule.useSubjectList).mockReturnValue(
+        { data: [{ id: 'sub-1', name: 'Matemática' }] } as unknown as ReturnType<typeof useSubjectListModule.useSubjectList>,
+      )
+      vi.mocked(tasksApi.listTasks).mockResolvedValue([])
+
+      renderPage()
+      await user.selectOptions(screen.getByRole('combobox'), 'sub-1')
+      await user.click(screen.getByRole('button', { name: /nova tarefa/i }))
+      await user.type(screen.getByPlaceholderText(/lista de exercícios/i), 'Lista 02')
+      await user.type(screen.getByPlaceholderText(/markdown/i), 'Enunciado')
+      await user.type(screen.getByLabelText(/data do prazo/i), '2030-01-01')
+      await user.clear(screen.getByLabelText(/hora do prazo/i))
+      await user.type(screen.getByLabelText(/hora do prazo/i), '10:00')
+      await user.click(screen.getByRole('button', { name: /criar tarefa/i }))
+      return user
+    }
+
+    it('explica a falta de vínculo e mantém o formulário preenchido', async () => {
+      vi.mocked(tasksApi.createTask).mockRejectedValue({ response: { status: 403, data: { error: 'TASK_FORBIDDEN' } } })
+
+      await tryToCreate()
+
+      expect((await screen.findByRole('alert')).textContent).toMatch(/não leciona esta disciplina/i)
+      expect((screen.getByPlaceholderText(/lista de exercícios/i) as HTMLInputElement).value).toBe('Lista 02')
+    })
+
+    it('mostra as demais recusas com a mensagem da API', async () => {
+      vi.mocked(tasksApi.createTask).mockRejectedValue({ response: { status: 422, data: { error: 'DEADLINE_NOT_IN_FUTURE' } } })
+
+      await tryToCreate()
+
+      expect((await screen.findByRole('alert')).textContent).toMatch(/data futura/i)
+    })
+
+    it('não herda a recusa anterior ao reabrir o diálogo', async () => {
+      vi.mocked(tasksApi.createTask).mockRejectedValue({ response: { status: 403, data: { error: 'TASK_FORBIDDEN' } } })
+
+      const user = await tryToCreate()
+      await screen.findByRole('alert')
+      await user.click(screen.getByRole('button', { name: /cancelar/i }))
+      await user.click(screen.getByRole('button', { name: /nova tarefa/i }))
+
+      expect(screen.queryByRole('alert')).toBeNull()
+    })
+  })
 })

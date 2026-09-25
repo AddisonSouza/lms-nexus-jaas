@@ -51,4 +51,14 @@ describe('TaskFormDialog', () => {
     render(<TaskFormDialog {...BASE_PROPS} isPending />)
     expect(screen.getByRole('button', { name: /criar tarefa/i }).hasAttribute('disabled')).toBe(true)
   })
+
+  it('shows the API refusal passed in error', () => {
+    render(<TaskFormDialog {...BASE_PROPS} error="Você não leciona esta disciplina, então não pode criar tarefas nela." />)
+    expect(screen.getByRole('alert').textContent).toMatch(/não leciona esta disciplina/i)
+  })
+
+  it('shows no alert without an error', () => {
+    render(<TaskFormDialog {...BASE_PROPS} />)
+    expect(screen.queryByRole('alert')).toBeNull()
+  })
 })
