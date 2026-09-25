@@ -29,5 +29,5 @@ Hoje qualquer pessoa logada consegue baixar qualquer arquivo do sistema, inclusi
 - [x] curriculum: adapter `LESSON_MATERIAL` + IT
 - [x] assessment: adapter `TASK_ATTACHMENT` + IT
 - [x] assessment: adapter `SUBMISSION_ATTACHMENT` + IT
-- [ ] communication: adapter `ANNOUNCEMENT_ATTACHMENT` + IT
+- [x] communication: adapter `ANNOUNCEMENT_ATTACHMENT` + IT
 - [ ] docs: STG-03 e ADR-013 sem a pendência
