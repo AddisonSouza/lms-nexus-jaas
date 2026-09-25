@@ -44,3 +44,7 @@ sem mudar nada do que o usuário vê.
 - [x] Migrar `reporting` Student e TaskMetrics QueryPortImpl para o port
 - [x] Migrar `reporting` Gestor e Professor QueryPortImpl para o port
 - [x] Garantir por grep que nenhuma entidade JPA do curriculum é citada fora do módulo e rodar a suíte completa
+
+## Found in test (added with approval)
+- [x] Gestor dashboard: EVALUATED submission with null grade crashed the classroom average (NPE) — `158c061`
+- [x] Student dashboard (web): Zod schema rejected `grade: null` — `c640437`
