@@ -41,6 +41,6 @@ sem mudar nada do que o usuário vê.
 - [x] Criar `SubjectDirectoryPort` no curriculum, com implementação e IT (Testcontainers)
 - [x] Migrar `assessment/SubjectQueryAdapter` para o port
 - [x] Migrar `communication/SubjectQueryPortImpl` para o port
-- [ ] Migrar `reporting` Student e TaskMetrics QueryPortImpl para o port
+- [x] Migrar `reporting` Student e TaskMetrics QueryPortImpl para o port
 - [ ] Migrar `reporting` Gestor e Professor QueryPortImpl para o port
 - [ ] Garantir por grep que nenhuma entidade JPA do curriculum é citada fora do módulo e rodar a suíte completa
