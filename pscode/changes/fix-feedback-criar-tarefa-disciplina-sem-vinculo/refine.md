@@ -21,4 +21,4 @@ Hoje, quando a criação de uma tarefa é recusada (por exemplo, por quem não l
 
 ## Subtasks
 - [x] `TaskFormDialog`: prop `error` exibida no formulário + teste
-- [ ] `TaskListPage`: repassar `apiErrorMessage` com override de `TASK_FORBIDDEN` e limpar o erro ao abrir + teste (403 mostra a mensagem e mantém o diálogo aberto)
+- [x] `TaskListPage`: repassar `apiErrorMessage` com override de `TASK_FORBIDDEN` e limpar o erro ao abrir + teste (403 mostra a mensagem e mantém o diálogo aberto)
