@@ -15,7 +15,7 @@ Uma única implementação, `S3StorageAdapter` (`module/storage/infrastructure/`
 | test | LocalStack via Quarkus Dev Services |
 | prod | OCI Object Storage (endpoint S3-compatible, Customer Secret Key, `path-style-access`) |
 
-Chave do objeto: `{contexto}/{ano}/{mes}/{uuid}-{nome-sanitizado}`; o nome original vai em metadado para o `Content-Disposition`. Arquivos são servidos pela API (`GET /files/{fileKey}`), que valida permissão antes de fazer o stream.
+Chave do objeto: `{contexto}/{ano}/{mes}/{uuid}-{nome-sanitizado}`; o nome original vai em metadado para o `Content-Disposition`. Arquivos são servidos pela API (`GET /files/{fileKey}`), que faz o stream do bucket — o bucket não é público.
 
 ## Justificativa
 - Um só caminho de código testado em todos os ambientes — o que roda no teste é o que roda em produção
@@ -26,3 +26,4 @@ Chave do objeto: `{contexto}/{ano}/{mes}/{uuid}-{nome-sanitizado}`; o nome origi
 - Desenvolvimento local depende do container MinIO
 - Troca de provedor = variáveis `STORAGE_ENDPOINT`, `STORAGE_BUCKET`, `STORAGE_REGION` e credenciais
 - `STG-02` (armazenamento em disco) deixa de valer
+- O `GET /files/{fileKey}` hoje exige apenas usuário autenticado (`@RolesAllowed` com os quatro papéis); não verifica a organização nem o vínculo com o recurso dono do arquivo. A proteção atual é a chave conter um UUID aleatório. A checagem prevista em `STG-03` ainda é pendência
