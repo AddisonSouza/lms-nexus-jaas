@@ -1,6 +1,7 @@
 package br.edu.lms.module.storage.interfaces.rest;
 
 import br.edu.lms.module.storage.application.usecase.ServeFileUseCase;
+import br.edu.lms.module.storage.domain.model.FileRequester;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.GET;
@@ -9,6 +10,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
@@ -23,15 +25,20 @@ import java.nio.charset.StandardCharsets;
 public class FileResource {
 
     private final ServeFileUseCase serveFileUseCase;
+    private final JsonWebToken jwt;
 
     @GET
     @Path("/{fileKey:.+}")
     @RolesAllowed({"ADMIN_ORG", "GESTOR", "PROFESSOR", "ALUNO"})
     @Operation(summary = "Serve stored file by key")
     @APIResponse(responseCode = "200", description = "Arquivo, com o tipo e o nome originais")
-    @APIResponse(responseCode = "404", description = "Chave inexistente")
+    @APIResponse(responseCode = "404", description = "Chave inexistente ou sem acesso ao recurso dono do arquivo")
     public Response getFile(@PathParam("fileKey") String fileKey) {
-        var file = serveFileUseCase.execute(fileKey);
+        var requester = new FileRequester(
+                jwt.getSubject(),
+                jwt.getClaim("org"),
+                jwt.getGroups().stream().findFirst().orElse(null));
+        var file = serveFileUseCase.execute(fileKey, requester);
         var metadata = file.getMetadata();
 
         var mimeType = metadata.getMimeType() != null

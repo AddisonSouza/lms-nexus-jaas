@@ -25,7 +25,7 @@ Hoje qualquer pessoa logada consegue baixar qualquer arquivo do sistema, inclusi
 - Mudar endpoint, `API_CONTRACT.md` ou front
 
 ## Subtasks
-- [ ] storage: `FileAccessPort` + dispatch por contexto no `ServeFileUseCase` + JWT no `FileResource` (nega tudo sem adapter)
+- [x] storage: `FileAccessPort` + dispatch por contexto no `ServeFileUseCase` + JWT no `FileResource` (nega tudo sem adapter)
 - [ ] curriculum: adapter `LESSON_MATERIAL` + IT
 - [ ] assessment: adapter `TASK_ATTACHMENT` + IT
 - [ ] assessment: adapter `SUBMISSION_ATTACHMENT` + IT

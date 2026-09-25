@@ -17,8 +17,8 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
 /**
- * O arquivo volta com o tipo e o nome originais: sem eles o navegador salva um
- * `application/octet-stream` batizado com a chave, que é um UUID sem extensão.
+ * Autenticação e chaves sem dono. O download permitido — com tipo e nome
+ * originais — é coberto pelos ITs de cada módulo dono do arquivo.
  */
 @QuarkusTest
 class FileResourceIT {
@@ -48,32 +48,18 @@ class FileResourceIT {
                 .then().statusCode(401);
     }
 
-    @Test
-    @TestSecurity(user = USER_ID, roles = {"ALUNO"})
-    @JwtSecurity(claims = { @Claim(key = "sub", value = USER_ID), @Claim(key = "org", value = ORG_ID) })
-    void getFile_servesItWithTheRealTypeAndName() {
-        given()
-                .when().get("/files/{key}", fileKey)
-                .then()
-                .statusCode(200)
-                .contentType("application/pdf")
-                // `filename*` carrega o nome real; o `filename` só-ASCII é o fallback.
-                .header("Content-Disposition", allOf(
-                        startsWith("attachment;"),
-                        containsString("filename=\"prova_final.pdf\""),
-                        containsString("filename*=UTF-8''prova%20final.pdf")));
-    }
-
+    // O arquivo existe no bucket, mas nenhuma tarefa da organização o referencia:
+    // quem só conhece a chave não leva o conteúdo, e a resposta não confirma que
+    // ele existe.
     @Test
     @TestSecurity(user = USER_ID, roles = {"PROFESSOR"})
     @JwtSecurity(claims = { @Claim(key = "sub", value = USER_ID), @Claim(key = "org", value = ORG_ID) })
-    void getFile_returnsTheStoredBytes() {
-        var body = given()
+    void getFile_withAKeyNoResourceOwns_returns404() {
+        given()
                 .when().get("/files/{key}", fileKey)
-                .then().statusCode(200)
-                .extract().asByteArray();
-
-        org.assertj.core.api.Assertions.assertThat(body).isEqualTo(CONTENT);
+                .then()
+                .statusCode(404)
+                .body("error", equalTo("FILE_NOT_FOUND"));
     }
 
     // Antes o `NoSuchKeyException` do SDK subia cru e virava 500: um anexo
