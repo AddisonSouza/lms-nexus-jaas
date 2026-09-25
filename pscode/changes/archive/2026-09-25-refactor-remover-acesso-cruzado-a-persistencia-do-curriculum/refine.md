@@ -48,3 +48,4 @@ sem mudar nada do que o usuário vê.
 ## Found in test (added with approval)
 - [x] Gestor dashboard: EVALUATED submission with null grade crashed the classroom average (NPE) — `158c061`
 - [x] Student dashboard (web): Zod schema rejected `grade: null` — `c640437`
+- [x] Professor/student averages and last-task distribution with null grade (found in review) — `fdf66b8`

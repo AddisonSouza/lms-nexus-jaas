@@ -11,6 +11,10 @@ O sistema SHALL retornar, para todas as turmas da organização do `GESTOR` aute
 - **WHEN** uma turma da organização não possui nenhuma submissão com status `EVALUATED`
 - **THEN** a média de notas dessa turma é retornada como ausente (`null`), sem erro
 
+#### Scenario: Avaliação sem nota
+- **WHEN** a turma possui submissão `EVALUATED` com nota nula (avaliação só com feedback)
+- **THEN** essa submissão fica fora da média de notas da turma, e o dashboard é retornado sem erro
+
 #### Scenario: Organização sem turmas
 - **WHEN** a organização do `GESTOR` não possui nenhuma turma cadastrada
 - **THEN** sistema retorna 200 com lista de turmas vazia, sem erro
