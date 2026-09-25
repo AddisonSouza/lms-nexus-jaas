@@ -53,6 +53,9 @@ public class SubjectDirectoryService implements SubjectDirectoryPort {
 
     @Override
     public boolean existsSubject(String subjectId, String organizationId) {
+        if (subjectId == null || subjectId.isBlank()) {
+            return false;
+        }
         return subjectRepository.findById(SubjectId.of(subjectId), organizationId).isPresent();
     }
 
